@@ -1,0 +1,163 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Resultados - CalculusApp">
+  <div class="container">
+    <header style="padding: 24px 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <h1 style="font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+          Resultados del cálculo
+        </h1>
+        <p style="color: var(--text-secondary); font-size: 16px;">Análisis detallado de la integral y metodología</p>
+      </div>
+      <a href="/" class="btn btn-secondary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Volver al Home
+      </a>
+    </header>
+
+    <div id="resultsContent">
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Resultados numéricos</h2>
+        </div>
+        <div class="card-body">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 14px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Integral definida</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: var(--text-primary);">∫ f(x) dx</div>
+          </div>
+          
+          <div class="result-grid">
+            <div class="result-card">
+              <div class="result-label">Integral firmada</div>
+              <div class="result-value" id="signedIntegral">0.0000</div>
+            </div>
+            <div class="result-card total">
+              <div class="result-label">Área geométrica total</div>
+              <div class="result-value" id="totalArea">0.0000</div>
+            </div>
+            <div class="result-card positive">
+              <div class="result-label">Área positiva</div>
+              <div class="result-value" id="positiveArea">0.0000</div>
+            </div>
+            <div class="result-card negative">
+              <div class="result-label">Área negativa</div>
+              <div class="result-value" id="negativeArea">0.0000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Detalles del cálculo</h2>
+        </div>
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <div style="background: var(--background); padding: 16px; border-radius: var(--radius-sm);">
+              <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Puntos originales</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; color: var(--text-primary);" id="originalPoints">0</div>
+            </div>
+            <div style="background: var(--background); padding: 16px; border-radius: var(--radius-sm);">
+              <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Puntos procesados</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; color: var(--text-primary);" id="processedPoints">0</div>
+            </div>
+            <div style="background: var(--background); padding: 16px; border-radius: var(--radius-sm);">
+              <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Intersecciones con eje X</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; color: var(--text-primary);" id="intersections">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Fórmulas utilizadas</h2>
+        </div>
+        <div class="card-body">
+          <div class="formula-card">
+            <div class="formula-title">Regla del trapecio</div>
+            <div class="formula-expression">Aᵢ = (yᵢ + yᵢ₊₁) / 2 × (xᵢ₊₁ - xᵢ)</div>
+            <div class="formula-explanation">El área de cada trapecio se calcula promediando las alturas (valores Y) de dos puntos consecutivos y multiplicando por la base (diferencia en X).</div>
+          </div>
+          
+          <div class="formula-card">
+            <div class="formula-title">Integral aproximada</div>
+            <div class="formula-expression">∫ f(x) dx ≈ Σ Aᵢ  (suma de todos los trapecios)</div>
+            <div class="formula-explanation">La integral definida se aproxima sumando las áreas de todos los trapecios formados por segmentos consecutivos de la curva. Las áreas bajo el eje X contribuyen negativamente.</div>
+          </div>
+          
+          <div class="formula-card">
+            <div class="formula-title">Área geométrica total</div>
+            <div class="formula-expression">Área total = Σ |Aᵢ|  (suma de valores absolutos)</div>
+            <div class="formula-explanation">El área geométrica considera todas las regiones como positivas, sumando el valor absoluto de cada trapecio. Esto representa el área física total entre la curva y el eje X.</div>
+          </div>
+          
+          <div class="formula-card">
+            <div class="formula-title">Intersección con eje X</div>
+            <div class="formula-expression">x = x₁ - y₁ × (x₂ - x₁) / (y₂ - y₁)</div>
+            <div class="formula-explanation">Cuando la curva cruza el eje X (cambio de signo en Y), se interpola linealmente para encontrar el punto exacto de intersección y dividir correctamente las regiones de integración.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background: var(--primary-light); border-left: 4px solid var(--primary);">
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--primary);">Explicación educativa</h2>
+        </div>
+        <div class="card-body">
+          <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px;">
+            La aplicación aproxima el área bajo la curva dividiendo la curva dibujada en pequeños segmentos y calculando el área de cada trapecio. 
+            Cada trapecio se forma entre dos puntos consecutivos de la curva y el eje X. La suma de estas áreas da la integral aproximada.
+          </p>
+          <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px; margin-top: 12px;">
+            Las regiones por encima del eje X aportan área <strong style="color: var(--success);">positiva</strong>, 
+            y las regiones por debajo aportan área <strong style="color: var(--error);">negativa</strong>. 
+            El <strong>área geométrica total</strong> es la suma de los valores absolutos, representando el área física total sin considerar signos.
+          </p>
+          <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px; margin-top: 12px;">
+            La <strong>regla del trapecio</strong> es un método de integración numérica de primer orden. Su error es proporcional al cuadrado del ancho de los subintervalos, 
+            por lo que aumentar la cantidad de puntos (dibujar más suavemente) mejora la precisión del resultado.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div id="noResults" style="display: none; text-align: center; padding: 60px 20px;">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom: 16px;">
+        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <h2 style="font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">No hay resultados</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 24px;">Dibuja una curva en la pantalla principal y calcula su área.</p>
+      <a href="/" class="btn btn-primary">Ir al Home</a>
+    </div>
+  </div>
+
+  <script>
+    // Load results from sessionStorage or localStorage
+    const resultsData = sessionStorage.getItem('calculusResult');
+    
+    if (resultsData) {
+      try {
+        const data = JSON.parse(resultsData);
+        document.getElementById('signedIntegral').textContent = data.signed_integral.toFixed(4);
+        document.getElementById('totalArea').textContent = data.total_geometric_area.toFixed(4);
+        document.getElementById('positiveArea').textContent = data.positive_area.toFixed(4);
+        document.getElementById('negativeArea').textContent = data.negative_area.toFixed(4);
+        document.getElementById('originalPoints').textContent = data.original_points || 0;
+        document.getElementById('processedPoints').textContent = data.processed_points?.length || 0;
+        document.getElementById('intersections').textContent = data.x_axis_intersections?.length || 0;
+      } catch (e) {
+        console.error('Error parsing results:', e);
+        document.getElementById('resultsContent').style.display = 'none';
+        document.getElementById('noResults').style.display = 'block';
+      }
+    } else {
+      document.getElementById('resultsContent').style.display = 'none';
+      document.getElementById('noResults').style.display = 'block';
+    }
+  </script>
+</Layout>

@@ -1,0 +1,299 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Fórmulas - CalculusApp">
+  <div class="container">
+    <header style="padding: 24px 0; text-align: center;">
+      <h1 style="font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+        Fórmulas y metodología
+      </h1>
+      <p style="color: var(--text-secondary); font-size: 16px;">Referencia completa de las fórmulas y el proceso paso a paso para el cálculo de áreas bajo la curva</p>
+    </header>
+
+    <div id="noDataMessage" style="display: none; text-align: center; padding: 60px 20px;">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" style="margin-bottom: 16px;">
+        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+      <h2 style="font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">No hay datos de cálculo</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 24px;">Dibuja una curva en la pantalla principal y calcula su área para ver el proceso detallado.</p>
+      <a href="/" class="btn btn-primary">Ir al Home</a>
+    </div>
+
+    <div id="formulaContent">
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header" style="background: var(--primary-light); border-left: 4px solid var(--primary);">
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--primary);">Proceso paso a paso</h2>
+        </div>
+        <div class="card-body">
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">1. Entrada de puntos</h3>
+            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 15px; margin-bottom: 8px;">
+              El usuario dibuja puntos en un plano cartesiano. Cada punto P<sub>i</sub> tiene coordenadas (x<sub>i</sub>, y<sub>i</sub>).
+              Se capturan las coordenadas del mouse/touch y se convierten al sistema matemático.
+            </p>
+            <div class="formula-expression">P<sub>i</sub> = (x<sub>i</sub>, y<sub>i</sub>)</div>
+            <div style="margin-top: 12px; color: var(--text-secondary); font-size: 14px;" id="originalPointsList">
+              Puntos dibujados: <span id="originalPointsCount" style="color: var(--text-primary); font-weight: 600;">0</span>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">2. Limpieza de datos</h3>
+            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 15px; margin-bottom: 8px;">
+              Se eliminan puntos duplicados y puntos demasiado cercanos para evitar singularidades numéricas.
+            </p>
+            <div class="formula-card">
+              <div class="formula-title">Eliminación de duplicados</div>
+              <div class="formula-expression">Si |x<sub>i</sub> - x<sub>i-1</sub>| &lt; &#123091; y |y<sub>i</sub> - y<sub>i-1</sub>| &lt; &#123091;, descartar P<sub>i</sub></div>
+              <div class="formula-explanation">&#123091; = 1×10<sup>-6</sup>. Se conserva la primera ocurrencia de cada punto único.</div>
+            </div>
+            <div class="formula-card">
+              <div class="formula-title">Eliminación de puntos cercanos</div>
+              <div class="formula-expression">Si (x<sub>i</sub> - x<sub>i-1</sub>)<sup>2</sup> + (y<sub>i</sub> - y<sub>i-1</sub>)<sup>2</sup> &lt; 1×10<sup>-12</sup>, descartar P<sub>i</sub></div>
+              <div class="formula-explanation">Previerte problemas de división entre puntos idénticos.</div>
+            </div>
+            <div style="margin-top: 12px; color: var(--text-secondary); font-size: 14px;" id="pointsAfterCleaning">
+              Puntos después de limpieza: <span id="processedPointsCount" style="color: var(--text-primary); font-weight: 600;">0</span>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">3. Ordenamiento por coordenada X</h3>
+            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 15px; margin-bottom: 8px;">
+              Se ordenan los puntos por su valor de X para garantizar que x<sub>i</sub> &lt; x<sub>i+1</sub>, lo cual es
+              necesario para aplicar la regla del trapecio de forma correcta.
+            </p>
+            <div class="formula-expression">Puntos ordenados: x<sub>0</sub> ≤ x<sub>1</sub> ≤ x<sub>2</sub> ≤ ... ≤ x<sub>n-1</sub></div>
+          </div>
+
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">4. Detección de intersecciones con el eje X</h3>
+            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 15px; margin-bottom: 8px;">
+              Para dividir correctamente las áreas positivas y negativas, se detectan los puntos donde
+              la curva cruza el eje X (cambio de signo en Y).
+            </p>
+            <div class="formula-card">
+              <div class="formula-title">Condición de intersección</div>
+              <div class="formula-expression">y<sub>i</sub> × y<sub>i+1</sub> &lt; 0  &#8658;  hay intersección entre P<sub>i</sub> y P<sub>i+1</sub></div>
+              <div class="formula-explanation">Un cambio de signo en los valores Y indica que la curva cruza el eje X.</div>
+            </div>
+            <div class="formula-card">
+              <div class="formula-title">Interpolación lineal para la intersección</div>
+              <div class="formula-expression">x<sub>int</sub> = x<sub>i</sub> - y<sub>i</sub> × (x<sub>i+1</sub> - x<sub>i</sub>) / (y<sub>i+1</sub> - y<sub>i</sub>)</div>
+              <div class="formula-explanation">
+                Se usa interpolación lineal para estimar el punto exacto donde y = 0.
+              </div>
+            </div>
+            <div style="margin-top: 12px; color: var(--text-secondary); font-size: 14px;" id="intersectionsInfo">
+              Intersecciones detectadas: <span id="intersectionsCount" style="color: var(--text-primary); font-weight: 600;">0</span>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">5. Cálculo del área de cada trapecio</h3>
+            <p style="color: var(--text-secondary); line-height: 1.6; font-size: 15px; margin-bottom: 8px;">
+              Para cada par de puntos consecutivos P<sub>i</sub>, P<sub>i+1</sub>, se forma un trapecio con el eje X.
+              El área de cada trapecio se calcula con la regla del trapecio.
+            </p>
+
+            <div class="formula-card">
+              <div class="formula-title">Fórmula de cada trapecio</div>
+              <div class="formula-expression">A<sub>i</sub> = (y<sub>i</sub> + y<sub>i+1</sub>) / 2 × (x<sub>i+1</sub> - x<sub>i</sub>)</div>
+              <div class="formula-explanation">
+                El área de cada trapecio se calcula promediando las alturas (valores Y) de dos puntos
+                consecutivos y multiplicando por la base (diferencia en X). Si A<sub>i</sub> &gt; 0, el trapecio
+                está por encima del eje X; si A<sub>i</sub> &lt; 0, está por debajo.
+              </div>
+            </div>
+            <div style="margin-top: 12px; color: var(--text-secondary); font-size: 14px;">
+              Total de trapecios: <span id="trapezoidTotalCount" style="color: var(--text-primary); font-weight: 600;">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Resultado integral</h2>
+        </div>
+        <div class="card-body">
+          <div class="formula-card">
+            <div class="formula-title">Integral aproximada (suma de trapecios)</div>
+            <div class="formula-expression">∫ f(x) dx ≈ Σ A<sub>i</sub>  (i = 0 a n-1)</div>
+            <div class="formula-explanation">
+              La integral definida se aproxima sumando las áreas de todos los trapecios formados por
+              segmentos consecutivos de la curva. Las áreas bajo el eje X contribuyen negativamente.
+              Esta suma algebraica se conoce como la <strong>integral firmada</strong>.
+            </div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-title">Expansión de la integral firmada</div>
+            <div class="formula-expression"><pre style="font-size: 14px; line-height: 1.6;">∫ f(x) dx ≈ Σ [(y<sub>i</sub> + y<sub>i+1</sub>)/2 × (x<sub>i+1</sub> - x<sub>i</sub>)]
+         (i = 0 a n-1)</pre></div>
+            <div class="formula-explanation">
+              Cada término representa el área de un trapecio individual. La suma de todos los términos
+              da la integral firmada.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Áreas totales y parciales</h2>
+        </div>
+        <div class="card-body">
+          <div class="formula-card">
+            <div class="formula-title">Área geométrica total</div>
+            <div class="formula-expression">Área<sub>total</sub> = Σ |A<sub>i</sub>|  (i = 0 a n-1)</div>
+            <div class="formula-explanation">
+              El área geométrica considera todas las regiones como positivas, sumando el valor absoluto
+              de cada trapecio. Representa el área física total entre la curva y el eje X.
+            </div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-title">Área positiva</div>
+            <div class="formula-expression">Área<sub>positiva</sub> = Σ max(A<sub>i</sub>, 0)</div>
+            <div class="formula-explanation">
+              Suma solo de los trapecios que están por encima del eje X (A<sub>i</sub> ≥ 0).
+            </div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-title">Área negativa</div>
+            <div class="formula-expression">Área<sub>negativa</sub> = Σ min(A<sub>i</sub>, 0)</div>
+            <div class="formula-explanation">
+              Suma solo de los trapecios que están por debajo del eje X (A<sub>i</sub> &lt; 0). El valor es negativo.
+            </div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-title">Relación entre áreas</div>
+            <div class="formula-expression"><pre style="font-size: 14px; line-height: 1.6;">Área<sub>total</sub> = Área<sub>positiva</sub> + |Área<sub>negativa</sub>|
+Integral<sub>firmada</sub> = Área<sub>positiva</sub> + Área<sub>negativa</sub></pre></div>
+            <div class="formula-explanation">
+              La integral firmada puede ser menor que el área total si hay regiones negativas.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Resultados del cálculo</h2>
+        </div>
+        <div class="card-body">
+          <div class="result-grid">
+            <div class="result-card">
+              <div class="result-label">Integral firmada</div>
+              <div class="result-value" id="resultSignedIntegral">0.0000</div>
+            </div>
+            <div class="result-card total">
+              <div class="result-label">Área geométrica total</div>
+              <div class="result-value" id="resultTotalArea">0.0000</div>
+            </div>
+            <div class="result-card positive">
+              <div class="result-label">Área positiva</div>
+              <div class="result-value" id="resultPositiveArea">0.0000</div>
+            </div>
+            <div class="result-card negative">
+              <div class="result-label">Área negativa</div>
+              <div class="result-value" id="resultNegativeArea">0.0000</div>
+            </div>
+          </div>
+
+          <div id="trapezoidBreakdown" style="margin-top: 24px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">Desglose de trapecios</h3>
+            <div id="trapezoidList" style="max-height: 400px; overflow-y: auto;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="actionButtons" style="margin-top: 24px; text-align: center; display: none;">
+      <a href="/calculo/" class="btn btn-primary" style="margin-right: 12px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10.958"></path>
+          <path d="M12 5v14M5 12h14"></path>
+        </svg>
+        Ver visualización 3D
+      </a>
+      <a href="/" class="btn btn-secondary">Dibujar nueva curva</a>
+    </div>
+  </div>
+
+  <style>
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .trapezoid-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--background);
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      border-left: 4px solid var(--secondary);
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .trapezoid-item.positive { border-left-color: var(--success); }
+    .trapezoid-item.negative { border-left-color: var(--error); }
+  </style>
+
+  <script>
+    const resultsData = sessionStorage.getItem('calculusResult');
+    const noDataMessage = document.getElementById('noDataMessage');
+    const formulaContent = document.getElementById('formulaContent');
+    const actionButtons = document.getElementById('actionButtons');
+
+    if (!resultsData) {
+      noDataMessage.style.display = 'block';
+    } else {
+      try {
+        const data = JSON.parse(resultsData);
+
+        document.getElementById('originalPointsCount').textContent = data.original_points || 0;
+        document.getElementById('processedPointsCount').textContent = data.processed_points?.length || 0;
+        document.getElementById('intersectionsCount').textContent = data.x_axis_intersections?.length || 0;
+        document.getElementById('trapezoidTotalCount').textContent = (data.processed_points?.length || 0) - 1;
+
+        document.getElementById('resultSignedIntegral').textContent = data.signed_integral.toFixed(4);
+        document.getElementById('resultTotalArea').textContent = data.total_geometric_area.toFixed(4);
+        document.getElementById('resultPositiveArea').textContent = data.positive_area.toFixed(4);
+        document.getElementById('resultNegativeArea').textContent = data.negative_area.toFixed(4);
+
+        const points = data.processed_points || [];
+        const trapezoidList = document.getElementById('trapezoidList');
+
+        for (let i = 0; i < points.length - 1; i++) {
+          const p1 = points[i];
+          const p2 = points[i + 1];
+          const area = ((p1.y + p2.y) / 2) * (p2.x - p1.x);
+          const isPositive = area >= 0;
+          const signClass = isPositive ? 'positive' : 'negative';
+          const signText = isPositive ? '+' : '-';
+
+          const div = document.createElement('div');
+          div.className = `trapezoid-item ${signClass}`;
+          div.innerHTML = `
+            <span>A<sub>${i}</sub> = (y<sub>${i}</sub>+y<sub>${i + 1}</sub>)/2 × (x<sub>${i + 1}</sub>-x<sub>${i}</sub>) = (${p1.y.toFixed(2)}+${p2.y.toFixed(2)})/2 × (${p2.x.toFixed(2)}-${p1.x.toFixed(2)}) = <strong>${area.toFixed(4)}</strong> ${signText}</span>
+          `;
+          trapezoidList.appendChild(div);
+        }
+
+        actionButtons.style.display = 'block';
+      } catch (e) {
+        console.error('Error parsing results:', e);
+        noDataMessage.style.display = 'block';
+      }
+    }
+  </script>
+</Layout>

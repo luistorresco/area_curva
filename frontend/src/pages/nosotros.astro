@@ -1,0 +1,107 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Nosotros - CalculusApp">
+  <div class="container">
+    <header style="padding: 24px 0; text-align: center;">
+      <h1 style="font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+        Nosotros
+      </h1>
+      <p style="color: var(--text-secondary); font-size: 16px;">Conoce al equipo detrás de CalculusWeb</p>
+    </header>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Descripción del proyecto</h2>
+      </div>
+      <div class="card-body">
+        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px; margin-bottom: 12px;">
+          CalculusWeb es una aplicación web educativa que permite dibujar curvas de forma interactativa
+          y calcular el área bajo la curva mediante integración numérica utilizando la regla del trapecio.
+        </p>
+        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px;">
+          La aplicación está construida con una arquitectura de frontend y backend separados: Astro.js para
+          el frontend (con Canvas API para el dibujo interactivo) y FastAPI para el backend (con NumPy y
+          Pydantic para cálculos numéricos y validación de datos).
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Justificación</h2>
+      </div>
+      <div class="card-body">
+        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px; margin-bottom: 12px;">
+          El cálculo integral es uno de los conceptos más fundamentales y complejos en matemáticas.
+          Esta aplicación busca hacer accesible el aprendizaje de la integración numérica mediante una
+          interfaz intuitiva que permite a los estudiantes dibujar funciones y visualizar el área bajo
+          la curva de manera interactiva.
+        </p>
+        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px;">
+          Al combinar visualización gráfica y cálculo automático, los estudiantes pueden experimentar
+          con diferentes curvas y observar cómo cambian los resultados, facilitando la comprensión
+          de conceptos como la integral firmada, el área positiva y negativa, y la detección de
+          intersecciones con los ejes coordenados.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Profesor guía</h2>
+      </div>
+      <div class="card-body" style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <img src="https://placehold.co/150x150/6366f1/ffffff?text=Prof" alt="Profesor" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; flex-shrink: 0;" />
+        <div>
+          <h3 style="font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+            Dr. María Fernández
+          </h3>
+          <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 8px;">
+            Departamento de Matemáticas Aplicadas
+          </p>
+          <p style="color: var(--text-secondary); font-size: 13px;">
+            Especialista en análisis matemático y educación superior.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Integrantes del equipo</h2>
+      </div>
+      <div class="card-body">
+        <div class="result-grid">
+          <div style="text-align: center;">
+            <img src="https://placehold.co/100x100/10b981/ffffff?text=Juan" alt="Integrante 1" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px;" />
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Juan Pérez</h3>
+            <p style="color: var(--text-secondary); font-size: 13px;">Desarrollo backend (FastAPI)</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="https://placehold.co/100x100/3b82f6/ffffff?text=Ana" alt="Integrante 2" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px;" />
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Ana Gómez</h3>
+            <p style="color: var(--text-secondary); font-size: 13px;">Desarrollo frontend (Astro)</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="https://placehold.co/100x100/8b5cf6/ffffff?text=Luis" alt="Integrante 3" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px;" />
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Luis Martínez</h3>
+            <p style="color: var(--text-secondary); font-size: 13px;">Algoritmos numéricos</p>
+          </div>
+          <div style="text-align: center;">
+            <img src="https://placehold.co/100x100/ef4444/ffffff?text=Sofia" alt="Integrante 4" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px;" />
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Sofía López</h3>
+            <p style="color: var(--text-secondary); font-size: 13px;">UI/UX y diseño</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 20px;">
+      <img src="https://placehold.co/150x150/ef4444/ffffff?text=Escudo" alt="Escudo de la Universidad" style="width: 150px; height: 150px; object-fit: contain; margin: 0 auto;" />
+      <p style="color: var(--text-muted); font-size: 12px; margin-top: 8px;">
+        Universidad de Ciencias y Tecnología
+      </p>
+    </div>
+  </div>
+</Layout>

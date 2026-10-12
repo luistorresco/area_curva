@@ -1,0 +1,359 @@
+---
+export interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary: #6366f1;
+        --primary-hover: #4f46e5;
+        --primary-light: #eef2ff;
+        --secondary: #64748b;
+        --success: #10b981;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --background: #f8fafc;
+        --surface: #ffffff;
+        --surface-hover: #f1f5f9;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        --border: #e2e8f0;
+        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --radius: 12px;
+        --radius-sm: 8px;
+      }
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--background);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+      
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 500;
+        border-radius: var(--radius-sm);
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+      }
+      
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+      
+      .btn-primary:hover:not(:disabled) {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+      }
+      
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+      }
+      
+      .btn-secondary:hover:not(:disabled) {
+        background: var(--surface-hover);
+        border-color: var(--text-muted);
+      }
+      
+      .btn-secondary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      .card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        overflow: hidden;
+      }
+      
+      .card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        background: var(--background);
+      }
+      
+      .card-body {
+        padding: 24px;
+      }
+      
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+      
+      .result-card {
+        background: var(--background);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        border-left: 4px solid var(--primary);
+      }
+      
+      .result-card.positive { border-left-color: var(--success); }
+      .result-card.negative { border-left-color: var(--error); }
+      .result-card.total { border-left-color: var(--warning); }
+      
+      .result-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+      
+      .result-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+      
+      .formula-card {
+        background: var(--background);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        margin-bottom: 16px;
+        border-left: 4px solid var(--secondary);
+      }
+      
+      .formula-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+      
+      .formula-expression {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        color: var(--primary);
+        background: var(--primary-light);
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-bottom: 8px;
+      }
+      
+      .formula-explanation {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+      
+      .progress-bar {
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      
+      .progress-bar-fill {
+        height: 100%;
+        background: var(--primary);
+        transition: width 0.3s ease;
+      }
+      
+      .error-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: var(--error);
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .toolbar {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+      
+      .info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: var(--background);
+        border: 1px solid var(--border);
+        border-radius: 9999px;
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+      
+      @media (max-width: 768px) {
+        .container { padding: 0 16px; }
+        .result-grid { grid-template-columns: 1fr; }
+        .toolbar {
+          flex-direction: column;
+          align-items: stretch;
+          margin-bottom: 70px;
+        }
+        .btn { width: 100%; }
+        .main-content { padding-bottom: 90px; }
+      }
+
+      @media (min-width: 769px) {
+        .bottom-nav { display: none; }
+      }
+
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px 0 12px;
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+        z-index: 1000;
+        height: auto;
+      }
+
+      .bottom-nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-size: 10px;
+        font-weight: 500;
+        padding: 6px 8px;
+        border-radius: var(--radius-sm);
+        transition: all 0.2s ease;
+      }
+
+      .bottom-nav a:hover {
+        background: var(--surface-hover);
+        color: var(--primary);
+      }
+
+      .bottom-nav a.active {
+        color: var(--primary);
+      }
+
+      .bottom-nav a.active svg {
+        fill: var(--primary);
+      }
+
+      .bottom-nav svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: var(--text-secondary);
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .bottom-nav a:hover svg {
+        stroke: var(--primary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main-content">
+      <slot />
+    </div>
+
+    <nav class="bottom-nav" role="navigation" aria-label="Navegación principal">
+      <a href="/" class="nav-home">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <path d="M9 22V12h6v10"></path>
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="/calculo/" class="nav-calculo">
+        <svg viewBox="0 0 24 24">
+          <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958"></path>
+          <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z"></path>
+          <path d="M9 8h6"></path>
+          <path d="M9 12h6"></path>
+        </svg>
+        <span>Cálculo 3D</span>
+      </a>
+      <a href="/formula/" class="nav-formula">
+        <svg viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2"></path>
+        </svg>
+        <span>Fórmula</span>
+      </a>
+      <a href="/nosotros/" class="nav-nosotros">
+        <svg viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Nosotros</span>
+      </a>
+    </nav>
+
+    <script type="module">
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.bottom-nav a');
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (currentPath === href) {
+          link.classList.add('active');
+        }
+      });
+    </script>
+  </body>
+</html>
