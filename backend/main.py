@@ -2,6 +2,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
+import ast
+import math
+import operator
 import numpy as np
 from math import isfinite
 
@@ -205,6 +208,131 @@ async def calculate_area(request: CurveRequest):
 @app.get("/api/health")
 async def health():
     return {"status": "ok"}
+
+
+# ---------- Safe math expression evaluator (AST whitelist) ----------
+
+ALLOWED_FUNCTIONS = {
+    'sin': math.sin, 'cos': math.cos, 'tan': math.tan,
+    'asin': math.asin, 'acos': math.acos, 'atan': math.atan,
+    'atan2': math.atan2,
+    'sqrt': math.sqrt, 'abs': abs, 'exp': math.exp,
+    'log': math.log, 'log10': math.log10, 'log2': math.log2,
+    'sinh': math.sinh, 'cosh': math.cosh, 'tanh': math.tanh,
+    'floor': math.floor, 'ceil': math.ceil,
+    'radians': math.radians, 'degrees': math.degrees,
+    'pow': pow, 'hypot': math.hypot,
+}
+
+TWO_ARG_FUNCTIONS = {'atan2', 'hypot', 'pow'}
+
+ALLOWED_CONSTANTS = {'pi': math.pi, 'e': math.e, 'tau': math.tau}
+
+AST_OPERATORS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.Pow: operator.pow,
+    ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
+}
+
+MAX_EXPRESSION_LENGTH = 200
+
+
+def _eval_node(node, x: float) -> float:
+    if isinstance(node, ast.Expression):
+        return _eval_node(node.body, x)
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        return float(node.value)
+    if isinstance(node, ast.Name):
+        name = node.id.lower()
+        if name == 'x':
+            return x
+        if name in ALLOWED_CONSTANTS:
+            return ALLOWED_CONSTANTS[name]
+        raise ValueError(f"Nombre no permitido: '{node.id}'")
+    if isinstance(node, ast.BinOp):
+        op_type = type(node.op)
+        if op_type not in AST_OPERATORS:
+            raise ValueError("Operador no permitido")
+        left = _eval_node(node.left, x)
+        right = _eval_node(node.right, x)
+        return AST_OPERATORS[op_type](left, right)
+    if isinstance(node, ast.UnaryOp):
+        op_type = type(node.op)
+        if op_type not in AST_OPERATORS:
+            raise ValueError("Operador no permitido")
+        return AST_OPERATORS[op_type](_eval_node(node.operand, x))
+    if isinstance(node, ast.Call):
+        if not isinstance(node.func, ast.Name) or node.keywords:
+            raise ValueError("Solo se permiten llamadas directas a funciones")
+        name = node.func.id.lower()
+        if name not in ALLOWED_FUNCTIONS:
+            raise ValueError(f"Función no permitida: '{node.func.id}'")
+        expected = 2 if name in TWO_ARG_FUNCTIONS else 1
+        if len(node.args) != expected:
+            raise ValueError(f"'{node.func.id}' recibe {expected} argumento(s)")
+        args = [_eval_node(arg, x) for arg in node.args]
+        return ALLOWED_FUNCTIONS[name](*args)
+    raise ValueError(f"Expresión no válida: '{type(node).__name__}'")
+
+
+def evaluate_expression(expression: str, x: float) -> float:
+    cleaned = expression.replace('^', '**')
+    tree = ast.parse(cleaned, mode='eval')
+    return _eval_node(tree, x)
+
+
+class FunctionRequest(BaseModel):
+    expression: str
+    start: float
+    end: float
+    samples: int = 240
+
+
+@app.post("/api/evaluate-function")
+async def evaluate_function(request: FunctionRequest):
+    expr = (request.expression or '').strip()
+    if not expr:
+        raise HTTPException(status_code=400, detail="La expresión está vacía.")
+    if len(expr) > MAX_EXPRESSION_LENGTH:
+        raise HTTPException(status_code=400, detail=f"La expresión es demasiado larga (máximo {MAX_EXPRESSION_LENGTH} caracteres).")
+    if not isfinite(request.start) or not isfinite(request.end):
+        raise HTTPException(status_code=400, detail="Los límites del intervalo deben ser números finitos.")
+    if request.start >= request.end:
+        raise HTTPException(status_code=400, detail="El inicio del intervalo debe ser menor que el fin.")
+    if request.end - request.start > 1e6:
+        raise HTTPException(status_code=400, detail="El intervalo es demasiado amplio.")
+    if not 2 <= request.samples <= 2000:
+        raise HTTPException(status_code=400, detail="El número de muestras debe estar entre 2 y 2000.")
+
+    try:
+        evaluate_expression(expr, 0.0)
+    except SyntaxError:
+        raise HTTPException(status_code=400, detail="La sintaxis de la función no es válida.")
+    except (ValueError, TypeError, KeyError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    points = []
+    n = request.samples
+    for i in range(n + 1):
+        x = request.start + (request.end - request.start) * i / n
+        try:
+            y = evaluate_expression(expr, x)
+        except (ZeroDivisionError, OverflowError, ValueError, TypeError) as e:
+            raise HTTPException(status_code=400, detail=f"No se pudo evaluar la función en x = {x:.4g}: {e}")
+        if not isfinite(y):
+            raise HTTPException(status_code=400, detail=f"La función produce un valor inválido en x = {x:.4g}.")
+        points.append(Point(x=x, y=y))
+
+    return {
+        "expression": expr,
+        "start": request.start,
+        "end": request.end,
+        "points": points,
+    }
 
 
 if __name__ == "__main__":

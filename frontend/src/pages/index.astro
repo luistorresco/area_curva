@@ -14,7 +14,8 @@ import Layout from '../layouts/Layout.astro';
       </div>
       <h1 class="hero-title">Dibuja la curva.<br />Mide el área.</h1>
       <p class="hero-lede">
-        Traza una función con el mouse, el dedo o el trackpad. CalculusWeb la convierte
+        Traza una función con el mouse, el dedo o el trackpad, o escribe
+        f(x) directamente y la graficamos por ti. CalculusWeb la convierte
         en una integral definida: calcula el área firmada, las áreas positiva y negativa,
         y el área geométrica total — y la exhibe en tres dimensiones.
       </p>
@@ -33,6 +34,52 @@ import Layout from '../layouts/Layout.astro';
     <div class="section-head">
       <h2 class="section-title">Plano cartesiano</h2>
       <div class="badge"><span class="dot"></span><span id="pointCount">Puntos: 0</span></div>
+    </div>
+
+    <div class="mode-toggle" role="tablist" aria-label="Modo de entrada">
+      <button class="mode-btn active" id="modeDraw" role="tab" aria-selected="true">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+        Dibujar a mano
+      </button>
+      <button class="mode-btn" id="modeFunc" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        Función f(x)
+      </button>
+    </div>
+
+    <div id="functionPanel" style="display: none;">
+      <div class="panel" style="margin-bottom: 18px;">
+        <div class="panel-body">
+          <label class="field-label" for="funcInput">Función a graficar</label>
+          <div class="func-input-row">
+            <span class="func-prefix mono">f(x) =</span>
+            <input id="funcInput" class="func-input mono" type="text" placeholder="sin(x) * exp(-0.2 * x)" spellcheck="false" autocomplete="off" autocapitalize="off" />
+          </div>
+          <div class="func-range-row">
+            <div class="func-field">
+              <label class="field-label" for="rangeStart">Intervalo desde</label>
+              <input id="rangeStart" class="func-input mono" type="number" step="any" value="-5" />
+            </div>
+            <div class="func-field">
+              <label class="field-label" for="rangeEnd">hasta</label>
+              <input id="rangeEnd" class="func-input mono" type="number" step="any" value="5" />
+            </div>
+            <button id="plotFuncBtn" class="btn btn-primary">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+              Graficar y calcular
+            </button>
+          </div>
+          <div class="func-hints">
+            <span class="hint-label">Ejemplos:</span>
+            <button class="hint-chip mono" data-expr="x**2 - 4">x² − 4</button>
+            <button class="hint-chip mono" data-expr="sin(x)">sin(x)</button>
+            <button class="hint-chip mono" data-expr="exp(-0.3*x) * cos(3*x)">e^−0.3x·cos(3x)</button>
+            <button class="hint-chip mono" data-expr="sqrt(abs(x))">√|x|</button>
+            <button class="hint-chip mono" data-expr="1 / (1 + exp(-x))">sigmoide</button>
+          </div>
+          <p class="func-note mono">+ − * / ** ^ · sin cos tan asin acos atan atan2 sqrt abs exp log log2 sinh cosh tanh floor ceil · constantes pi e tau</p>
+        </div>
+      </div>
     </div>
 
     <div class="panel">
@@ -228,6 +275,157 @@ import Layout from '../layouts/Layout.astro';
     @media (max-width: 768px) {
       .hero { display: none; }
       .section-head { margin-top: 36px; }
+    }
+
+    /* ---------- Mode toggle ---------- */
+
+    .mode-toggle {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--ink-900);
+      border: 1px solid var(--hairline);
+      border-radius: 12px;
+      margin-bottom: 18px;
+    }
+
+    .mode-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      font-family: var(--font-ui);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-2);
+      background: transparent;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .mode-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .mode-btn:hover {
+      color: var(--text-1);
+    }
+
+    .mode-btn.active {
+      color: #04222b;
+      background: var(--curve);
+      box-shadow: 0 4px 16px -4px rgba(45, 212, 238, 0.4);
+    }
+
+    /* ---------- Function panel ---------- */
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 8px;
+    }
+
+    .func-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .func-prefix {
+      font-size: 14px;
+      color: var(--curve);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .func-input {
+      flex: 1;
+      min-width: 0;
+      width: 100%;
+      padding: 11px 14px;
+      font-size: 14.5px;
+      color: var(--text-1);
+      background: var(--ink-950);
+      border: 1px solid var(--hairline-strong);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .func-input:focus {
+      border-color: var(--curve);
+      box-shadow: 0 0 0 3px rgba(45, 212, 238, 0.15);
+    }
+
+    .func-range-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .func-field {
+      flex: 1;
+      min-width: 110px;
+    }
+
+    .func-hints {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .hint-label {
+      font-size: 12.5px;
+      color: var(--text-3);
+    }
+
+    .hint-chip {
+      padding: 5px 11px;
+      font-size: 12px;
+      color: var(--text-2);
+      background: var(--ink-850);
+      border: 1px solid var(--hairline);
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .hint-chip:hover {
+      color: var(--curve);
+      border-color: var(--hairline-strong);
+      background: var(--ink-800);
+    }
+
+    .func-note {
+      font-size: 11.5px;
+      color: var(--text-3);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    @media (max-width: 560px) {
+      .mode-toggle { display: flex; width: 100%; }
+      .mode-btn { flex: 1; justify-content: center; }
+      .func-input-row { flex-wrap: wrap; }
+      .func-prefix { width: 100%; }
+      .plot-func-btn { width: 100%; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -540,16 +738,48 @@ import Layout from '../layouts/Layout.astro';
         canvasWidth: width,
         canvasHeight: height,
         screenToMath: (screenX, screenY) => ({
-          x: (screenX - width / 2) / (width / 12),
-          y: (height / 2 - screenY) / (height / 12)
+          x: (screenX - coordinateSystem.originX) / coordinateSystem.scaleX,
+          y: (coordinateSystem.originY - screenY) / coordinateSystem.scaleY
         }),
         mathToScreen: (mathX, mathY) => ({
-          x: width / 2 + mathX * (width / 12),
-          y: height / 2 - mathY * (height / 12)
+          x: coordinateSystem.originX + mathX * coordinateSystem.scaleX,
+          y: coordinateSystem.originY - mathY * coordinateSystem.scaleY
         })
       };
 
+      if (inputMode === 'function' && points.length >= 2) {
+        fitViewToPoints();
+      }
+
       draw();
+    }
+
+    function resetView() {
+      const { canvasWidth, canvasHeight } = coordinateSystem;
+      coordinateSystem.originX = canvasWidth / 2;
+      coordinateSystem.originY = canvasHeight / 2;
+      coordinateSystem.scaleX = canvasWidth / 12;
+      coordinateSystem.scaleY = canvasHeight / 12;
+    }
+
+    function fitViewToPoints() {
+      if (points.length < 2) return;
+      let minX = Infinity, maxX = -Infinity, minY = 0, maxY = 0;
+      for (const p of points) {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      }
+      const padX = Math.max((maxX - minX) * 0.08, 1e-4);
+      const padY = Math.max((maxY - minY) * 0.18, 1e-4);
+      const viewW = Math.max(maxX - minX + 2 * padX, 1e-6);
+      const viewH = Math.max(maxY - minY + 2 * padY, 1e-6);
+      const { canvasWidth, canvasHeight } = coordinateSystem;
+      coordinateSystem.scaleX = canvasWidth / viewW;
+      coordinateSystem.scaleY = canvasHeight / viewH;
+      coordinateSystem.originX = (padX - minX) * coordinateSystem.scaleX;
+      coordinateSystem.originY = (maxY + padY) * coordinateSystem.scaleY;
     }
 
     function drawGrid() {
@@ -700,6 +930,7 @@ import Layout from '../layouts/Layout.astro';
       const pt = getCanvasPoint(e);
       const mathPt = coordinateSystem.screenToMath(pt.x, pt.y);
       points.push({ x: mathPt.x, y: mathPt.y });
+      sessionStorage.removeItem('functionSpec');
       updateUI();
       savePoints();
       draw();
@@ -803,8 +1034,129 @@ import Layout from '../layouts/Layout.astro';
       hideError();
       resultsSummary.style.display = 'none';
       sessionStorage.removeItem('drawnPoints');
+      sessionStorage.removeItem('functionSpec');
+      if (inputMode === 'function') setMode('draw');
+      resetView();
       draw();
     }
+
+    // ---------- Mode toggle: freehand vs. function ----------
+
+    const modeDraw = document.getElementById('modeDraw');
+    const modeFunc = document.getElementById('modeFunc');
+    const functionPanel = document.getElementById('functionPanel');
+    const funcInput = document.getElementById('funcInput');
+    const rangeStart = document.getElementById('rangeStart');
+    const rangeEnd = document.getElementById('rangeEnd');
+    const plotFuncBtn = document.getElementById('plotFuncBtn');
+    const loadingNote = loadingIndicator.querySelector('.loading-note');
+
+    let inputMode = 'draw';
+
+    function setMode(mode) {
+      inputMode = mode;
+      const isFunc = mode === 'function';
+      modeDraw.classList.toggle('active', !isFunc);
+      modeFunc.classList.toggle('active', isFunc);
+      modeDraw.setAttribute('aria-selected', String(!isFunc));
+      modeFunc.setAttribute('aria-selected', String(isFunc));
+      functionPanel.style.display = isFunc ? 'block' : 'none';
+      canvas.style.pointerEvents = isFunc ? 'none' : 'auto';
+      coordReadout.classList.remove('visible');
+      if (!isFunc) {
+        resetView();
+      } else if (points.length >= 2) {
+        fitViewToPoints();
+      }
+      draw();
+    }
+
+    modeDraw.addEventListener('click', () => setMode('draw'));
+    modeFunc.addEventListener('click', () => setMode('function'));
+
+    document.querySelectorAll('.hint-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        funcInput.value = chip.dataset.expr || '';
+        funcInput.focus();
+      });
+    });
+
+    funcInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        plotFunction();
+      }
+    });
+
+    function saveFunctionSpec() {
+      sessionStorage.setItem('functionSpec', JSON.stringify({
+        expression: funcInput.value.trim(),
+        start: rangeStart.value,
+        end: rangeEnd.value
+      }));
+    }
+
+    async function plotFunction() {
+      const expression = funcInput.value.trim();
+      const start = parseFloat(rangeStart.value);
+      const end = parseFloat(rangeEnd.value);
+
+      hideError();
+
+      if (!expression) {
+        showError('Escribe una función f(x) para graficar.');
+        funcInput.focus();
+        return;
+      }
+      if (!isFinite(start) || !isFinite(end)) {
+        showError('Los límites del intervalo deben ser números.');
+        return;
+      }
+      if (start >= end) {
+        showError('El inicio del intervalo debe ser menor que el fin.');
+        return;
+      }
+
+      plotFuncBtn.disabled = true;
+      calculateBtn.disabled = true;
+      clearBtn.disabled = true;
+      loadingNote.textContent = 'Muestreando la función…';
+      loadingIndicator.style.display = 'block';
+      resultsSummary.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/evaluate-function', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ expression, start, end, samples: 240 })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.detail || 'No se pudo graficar la función.');
+        }
+
+        points = data.points;
+        updateUI();
+        savePoints();
+        saveFunctionSpec();
+        fitViewToPoints();
+        draw();
+
+        await calculateArea();
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        plotFuncBtn.disabled = false;
+        loadingIndicator.style.display = 'none';
+        loadingNote.textContent = 'Calculando la integral…';
+        calculateBtn.disabled = points.length < 2;
+        clearBtn.disabled = points.length === 0;
+      }
+    }
+
+    plotFuncBtn.addEventListener('click', plotFunction);
 
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', drawPoint);
@@ -831,6 +1183,18 @@ import Layout from '../layouts/Layout.astro';
       try {
         points = JSON.parse(saved);
         if (Array.isArray(points) && points.length) updateUI();
+      } catch (e) { /* ignore */ }
+    }
+
+    // Restore a previously plotted function after navigation
+    const savedSpec = sessionStorage.getItem('functionSpec');
+    if (savedSpec && points.length >= 2) {
+      try {
+        const spec = JSON.parse(savedSpec);
+        funcInput.value = spec.expression || '';
+        if (spec.start !== undefined) rangeStart.value = spec.start;
+        if (spec.end !== undefined) rangeEnd.value = spec.end;
+        setMode('function');
       } catch (e) { /* ignore */ }
     }
   </script>
