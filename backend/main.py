@@ -309,11 +309,9 @@ async def evaluate_function(request: FunctionRequest):
         raise HTTPException(status_code=400, detail="El número de muestras debe estar entre 2 y 2000.")
 
     try:
-        evaluate_expression(expr, 0.0)
+        ast.parse(expr.replace('^', '**'), mode='eval')
     except SyntaxError:
         raise HTTPException(status_code=400, detail="La sintaxis de la función no es válida.")
-    except (ValueError, TypeError, KeyError) as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
     points = []
     n = request.samples
