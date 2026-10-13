@@ -18,6 +18,8 @@ COPY --from=backend-build /usr/local/lib/python3.11/site-packages /usr/local/lib
 COPY --from=backend-build /usr/local/bin/uvicorn /usr/local/bin/uvicorn
 COPY backend/main.py /app/main.py
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 WORKDIR /app
 EXPOSE 80
-CMD ["sh", "-c", "sed -i \"s|__BACKEND_URL__|http://127.0.0.1:8000|g; s|__PORT__|${PORT:-80}|g\" /etc/nginx/conf.d/default.conf && uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]
+CMD ["/docker-entrypoint.sh"]
