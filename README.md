@@ -85,8 +85,8 @@ entorno `PORT` define el puerto de escucha de nginx (por defecto 80).
 1. Conecta el repositorio en Render y selecciona **Docker** como runtime.
 2. Render inyecta `PORT` automáticamente; la imagen lo usa para exponer nginx
    (no hay que configurar nada más).
-3. Imagen publicada en Docker Hub: `yeos/calculus-web:latest`
-   (también etiquetada como `yeos/area-curva:latest`).
+3. Imagen publicada en Docker Hub: `yoes/calculus-web:latest`
+   (también etiquetada como `yoes/area-curva:latest`).
 
 ## API Endpoints
 
