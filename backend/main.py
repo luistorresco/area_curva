@@ -216,10 +216,12 @@ ALLOWED_FUNCTIONS = {
     'sin': math.sin, 'cos': math.cos, 'tan': math.tan,
     'asin': math.asin, 'acos': math.acos, 'atan': math.atan,
     'atan2': math.atan2,
-    'sqrt': math.sqrt, 'abs': abs, 'exp': math.exp,
+    'sqrt': math.sqrt, 'cbrt': lambda v: math.copysign(abs(v) ** (1/3), v),
+    'abs': abs, 'exp': math.exp,
     'log': math.log, 'log10': math.log10, 'log2': math.log2,
     'sinh': math.sinh, 'cosh': math.cosh, 'tanh': math.tanh,
     'floor': math.floor, 'ceil': math.ceil,
+    'factorial': lambda v: math.factorial(int(round(v))),
     'radians': math.radians, 'degrees': math.degrees,
     'pow': pow, 'hypot': math.hypot,
 }
