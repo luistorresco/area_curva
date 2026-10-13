@@ -1,20 +1,10 @@
 services:
-  backend:
+  calculus-web:
     build:
       context: .
-      dockerfile: backend/Dockerfile
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8080:80"
     environment:
-      - BACKEND_URL=http://backend:8000
-    depends_on:
-      - backend
+      - PORT=80
     restart: unless-stopped

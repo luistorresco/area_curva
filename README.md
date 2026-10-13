@@ -67,6 +67,27 @@ npm run dev
 
 El frontend estará en `http://localhost:4321` (con proxy a `/api` hacia el backend)
 
+### Docker (imagen única: frontend + backend)
+
+```bash
+docker build -t calculus-web .
+docker run -p 8080:80 calculus-web
+# o con compose:
+docker compose up --build
+```
+
+Un solo contenedor sirve el frontend estático con nginx y levanta la API FastAPI
+en `127.0.0.1:8000`; nginx redirige `/api/` al backend interno. La variable de
+entorno `PORT` define el puerto de escucha de nginx (por defecto 80).
+
+### Despliegue en Render
+
+1. Conecta el repositorio en Render y selecciona **Docker** como runtime.
+2. Render inyecta `PORT` automáticamente; la imagen lo usa para exponer nginx
+   (no hay que configurar nada más).
+3. Imagen publicada en Docker Hub: `yeos/calculus-web:latest`
+   (también etiquetada como `yeos/area-curva:latest`).
+
 ## API Endpoints
 
 - `POST /api/calculate` - Calcula el área bajo la curva
