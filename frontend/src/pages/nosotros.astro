@@ -1,107 +1,207 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout title="Nosotros - CalculusApp">
+<Layout title="Nosotros — CalculusWeb">
   <div class="container">
-    <header style="padding: 24px 0; text-align: center;">
-      <h1 style="font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
-        Nosotros
-      </h1>
-      <p style="color: var(--text-secondary); font-size: 16px;">Conoce al equipo detrás de CalculusWeb</p>
+    <header class="page-head">
+      <div>
+        <h1 class="page-title">Nosotros</h1>
+        <p class="page-lede" style="margin-top: 12px;">
+          El equipo y la idea detrás de esta herramienta
+          para aprender integración numérica dibujando.
+        </p>
+      </div>
     </header>
 
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Descripción del proyecto</h2>
+    <div class="panel" style="margin-bottom: 24px;">
+      <div class="panel-header">
+        <h2 class="section-title">El proyecto</h2>
       </div>
-      <div class="card-body">
-        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px; margin-bottom: 12px;">
-          CalculusWeb es una aplicación web educativa que permite dibujar curvas de forma interactativa
-          y calcular el área bajo la curva mediante integración numérica utilizando la regla del trapecio.
-        </p>
-        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px;">
-          La aplicación está construida con una arquitectura de frontend y backend separados: Astro.js para
-          el frontend (con Canvas API para el dibujo interactivo) y FastAPI para el backend (con NumPy y
-          Pydantic para cálculos numéricos y validación de datos).
-        </p>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Justificación</h2>
-      </div>
-      <div class="card-body">
-        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px; margin-bottom: 12px;">
-          El cálculo integral es uno de los conceptos más fundamentales y complejos en matemáticas.
-          Esta aplicación busca hacer accesible el aprendizaje de la integración numérica mediante una
-          interfaz intuitiva que permite a los estudiantes dibujar funciones y visualizar el área bajo
-          la curva de manera interactiva.
-        </p>
-        <p style="color: var(--text-secondary); line-height: 1.8; font-size: 15px;">
-          Al combinar visualización gráfica y cálculo automático, los estudiantes pueden experimentar
-          con diferentes curvas y observar cómo cambian los resultados, facilitando la comprensión
-          de conceptos como la integral firmada, el área positiva y negativa, y la detección de
-          intersecciones con los ejes coordenados.
-        </p>
-      </div>
-    </div>
-
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Profesor guía</h2>
-      </div>
-      <div class="card-body" style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-        <img src="https://placehold.co/150x150/6366f1/ffffff?text=Prof" alt="Profesor" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; flex-shrink: 0;" />
-        <div>
-          <h3 style="font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
-            Dr. María Fernández
-          </h3>
-          <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 8px;">
-            Departamento de Matemáticas Aplicadas
+      <div class="panel-body">
+        <div class="prose">
+          <p>
+            CalculusWeb es una aplicación web educativa que permite dibujar curvas
+            de forma interactiva y calcular el área bajo la curva mediante
+            integración numérica con la regla del trapecio.
           </p>
-          <p style="color: var(--text-secondary); font-size: 13px;">
-            Especialista en análisis matemático y educación superior.
+          <p>
+            La arquitectura separa frontend y backend: Astro.js en el navegador
+            —con Canvas API para el dibujo y Three.js para la visualización en
+            tres dimensiones— y FastAPI con NumPy y Pydantic para los cálculos
+            numéricos y la validación de datos.
           </p>
         </div>
       </div>
     </div>
 
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Integrantes del equipo</h2>
+    <div class="panel" style="margin-bottom: 24px;">
+      <div class="panel-header">
+        <h2 class="section-title">Justificación</h2>
       </div>
-      <div class="card-body">
-        <div class="result-grid">
-          <div style="text-align: center;">
-            <img src="https://placehold.co/100x100/10b981/ffffff?text=Juan" alt="Integrante 1" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px;" />
-            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Juan Pérez</h3>
-            <p style="color: var(--text-secondary); font-size: 13px;">Desarrollo backend (FastAPI)</p>
-          </div>
-          <div style="text-align: center;">
-            <img src="https://placehold.co/100x100/3b82f6/ffffff?text=Ana" alt="Integrante 2" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px;" />
-            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Ana Gómez</h3>
-            <p style="color: var(--text-secondary); font-size: 13px;">Desarrollo frontend (Astro)</p>
-          </div>
-          <div style="text-align: center;">
-            <img src="https://placehold.co/100x100/8b5cf6/ffffff?text=Luis" alt="Integrante 3" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px;" />
-            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Luis Martínez</h3>
-            <p style="color: var(--text-secondary); font-size: 13px;">Algoritmos numéricos</p>
-          </div>
-          <div style="text-align: center;">
-            <img src="https://placehold.co/100x100/ef4444/ffffff?text=Sofia" alt="Integrante 4" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px;" />
-            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">Sofía López</h3>
-            <p style="color: var(--text-secondary); font-size: 13px;">UI/UX y diseño</p>
+      <div class="panel-body">
+        <div class="prose">
+          <p>
+            El cálculo integral es uno de los conceptos más fundamentales —y más
+            abstractos— de las matemáticas. Esta aplicación busca hacerlo accesible:
+            una interfaz donde el estudiante traza una función y ve el área bajo
+            la curva materializarse, tanto en el plano como en volumen.
+          </p>
+          <p>
+            Al combinar dibujo libre, cálculo automático y visualización 3D, se
+            puede experimentar con distintas curvas y observar cómo cambian los
+            resultados: la integral firmada, las áreas positiva y negativa, y las
+            intersecciones con los ejes coordenados.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom: 24px;">
+      <div class="panel-header">
+        <h2 class="section-title">Profesora guía</h2>
+      </div>
+      <div class="panel-body">
+        <div class="person-row">
+          <div class="avatar" style="--a1: #2dd4ee; --a2: #9d7bff;">MF</div>
+          <div>
+            <h3 class="person-name">Dra. María Fernández</h3>
+            <p class="person-role">Departamento de Matemáticas Aplicadas</p>
+            <p class="person-bio">Especialista en análisis matemático y educación superior.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div style="text-align: center; padding: 20px;">
-      <img src="https://placehold.co/150x150/ef4444/ffffff?text=Escudo" alt="Escudo de la Universidad" style="width: 150px; height: 150px; object-fit: contain; margin: 0 auto;" />
-      <p style="color: var(--text-muted); font-size: 12px; margin-top: 8px;">
+    <div class="panel" style="margin-bottom: 24px;">
+      <div class="panel-header">
+        <h2 class="section-title">Integrantes del equipo</h2>
+      </div>
+      <div class="panel-body">
+        <div class="team-grid">
+          <div class="team-member">
+            <div class="avatar" style="--a1: #3ddc97; --a2: #2dd4ee;">JP</div>
+            <h3 class="person-name">Juan Pérez</h3>
+            <p class="person-role">Desarrollo backend (FastAPI)</p>
+          </div>
+          <div class="team-member">
+            <div class="avatar" style="--a1: #2dd4ee; --a2: #9d7bff;">AG</div>
+            <h3 class="person-name">Ana Gómez</h3>
+            <p class="person-role">Desarrollo frontend (Astro)</p>
+          </div>
+          <div class="team-member">
+            <div class="avatar" style="--a1: #9d7bff; --a2: #ff6b8b;">LM</div>
+            <h3 class="person-name">Luis Martínez</h3>
+            <p class="person-role">Algoritmos numéricos</p>
+          </div>
+          <div class="team-member">
+            <div class="avatar" style="--a1: #ff6b8b; --a2: #f59e0b;">SL</div>
+            <h3 class="person-name">Sofía López</h3>
+            <p class="person-role">UI/UX y diseño</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; padding: 28px 0 8px;">
+      <div class="avatar" style="--a1: #1b2547; --a2: #2b3a66; width: 92px; height: 92px; font-size: 22px; margin: 0 auto;">UC</div>
+      <p class="mono" style="color: var(--text-3); font-size: 12px; margin-top: 12px;">
         Universidad de Ciencias y Tecnología
       </p>
     </div>
   </div>
+
+  <style>
+    .page-head {
+      padding: 56px 0 30px;
+    }
+
+    .prose {
+      max-width: 72ch;
+    }
+
+    .prose p {
+      color: var(--text-2);
+      line-height: 1.85;
+      font-size: 15px;
+      margin-bottom: 14px;
+    }
+
+    .prose p:last-child {
+      margin-bottom: 0;
+    }
+
+    .person-row {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+      padding: 6px 0;
+    }
+
+    .avatar {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--text-1);
+      background:
+        radial-gradient(120% 120% at 20% 15%, var(--a1) 0%, transparent 55%),
+        radial-gradient(120% 120% at 85% 90%, var(--a2) 0%, transparent 55%),
+        var(--ink-800);
+      border: 1px solid var(--hairline-strong);
+      box-shadow: inset 0 0 24px rgba(6, 9, 19, 0.5);
+    }
+
+    .person-name {
+      font-family: var(--font-display);
+      font-size: 21px;
+      font-weight: 500;
+      color: var(--text-1);
+      margin-bottom: 3px;
+    }
+
+    .person-role {
+      color: var(--curve);
+      font-size: 13.5px;
+      margin-bottom: 6px;
+    }
+
+    .person-bio {
+      color: var(--text-2);
+      font-size: 14px;
+      max-width: 52ch;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 20px;
+    }
+
+    .team-member {
+      text-align: center;
+      padding: 26px 16px 22px;
+      background: var(--ink-900);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+    }
+
+    .team-member .avatar {
+      margin: 0 auto 18px;
+    }
+
+    .team-member .person-role {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+      .page-head { padding: 36px 0 24px; }
+    }
+  </style>
 </Layout>

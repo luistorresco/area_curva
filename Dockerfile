@@ -20,4 +20,4 @@ COPY backend/main.py /app/main.py
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 WORKDIR /app
 EXPOSE 80
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "sed -i \"s|__BACKEND_URL__|http://127.0.0.1:8000|g\" /etc/nginx/conf.d/default.conf && uvicorn main:app --host 0.0.0.0 --port 8000 & nginx -g 'daemon off;'"]

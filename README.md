@@ -4,7 +4,7 @@ Aplicación web educativa para dibujar curvas y calcular el área bajo la curva 
 
 ## Arquitectura
 
-- **Frontend**: Astro.js + Vanilla JS (Canvas API)
+- **Frontend**: Astro.js + Vanilla JS (Canvas API) + Three.js
 - **Backend**: FastAPI (Python)
 - **Comunicación**: REST API con CORS habilitado
 
@@ -30,14 +30,17 @@ calculus-web/
 
 1. **Dibujo interactivo**: Mouse, touch, trackpad
 2. **Plano cartesiano**: Ejes, cuadrícula, etiquetas numéricas
-3. **Integración numérica**: Regla del trapecio
-4. **Detección de intersecciones**: Cruces con eje X
-5. **Cálculo de áreas**:
+3. **Relleno de trapecios en vivo**: Cada segmento se sombrea según su signo mientras dibujas
+4. **Integración numérica**: Regla del trapecio
+5. **Detección de intersecciones**: Cruces con eje X
+6. **Cálculo de áreas**:
    - Integral firmada
    - Área positiva
    - Área negativa
    - Área geométrica total
-6. **Pantalla de resultados**: Fórmulas y explicación educativa
+7. **Pantalla de resultados**: Fórmulas y explicación educativa
+8. **Visualización 3D (Three.js)**: Curva y trapecios en volumen con animaciones progresivas
+9. **Hero animado (Three.js)**: Plano cartesiano vivo con curva luminosa, trapecios y partículas
 
 ## Cómo ejecutar
 
@@ -85,5 +88,7 @@ El frontend estará en `http://localhost:4321` (con proxy a `/api` hacia el back
 
 - FastAPI 0.109 + Uvicorn
 - Astro 4.16
+- Three.js 0.160 (CDN, escenas del hero y de la visualización 3D)
+- Fraunces + Inter + JetBrains Mono (tipografía)
 - NumPy para validaciones numéricas
 - Pydantic para validación de schemas

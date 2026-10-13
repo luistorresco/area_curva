@@ -1,38 +1,58 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout title="CalculusApp - Cálculo bajo la curva">
-  <div class="container">
-    <header style="padding: 24px 0; text-align: center;">
-      <h1 style="font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
-        Cálculo bajo la curva
-      </h1>
-      <p style="color: var(--text-secondary); font-size: 16px;">Dibuja una función y calcula su área mediante integración numérica</p>
-    </header>
-
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Plano Cartesiano</h2>
-          <div class="info-badge" id="pointCount">Puntos: 0</div>
-        </div>
+<Layout title="CalculusWeb — Cálculo bajo la curva">
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div id="heroScene" class="hero-scene" aria-hidden="true"></div>
+    <div class="hero-veil" aria-hidden="true"></div>
+    <div class="container hero-inner">
+      <div class="hero-rule">
+        <span class="mono">∫ f(x) dx</span>
+        <span class="rule-line"></span>
+        <span class="mono">regla del trapecio</span>
       </div>
-      <div class="card-body" style="padding: 0;">
-        <canvas id="canvas" width="800" height="600" style="display: block; width: 100%; height: auto; touch-action: none;"></canvas>
+      <h1 class="hero-title">Dibuja la curva.<br />Mide el área.</h1>
+      <p class="hero-lede">
+        Traza una función con el mouse, el dedo o el trackpad. CalculusWeb la convierte
+        en una integral definida: calcula el área firmada, las áreas positiva y negativa,
+        y el área geométrica total — y la exhibe en tres dimensiones.
+      </p>
+      <div class="hero-actions">
+        <a href="#instrumento" class="btn btn-primary">
+          Empezar a dibujar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+        </a>
+        <a href="/calculo/" class="btn btn-ghost">Ver en tres dimensiones</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ INSTRUMENTO ============ -->
+  <div class="container" id="instrumento">
+    <div class="section-head">
+      <h2 class="section-title">Plano cartesiano</h2>
+      <div class="badge"><span class="dot"></span><span id="pointCount">Puntos: 0</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="canvas-frame">
+        <canvas id="canvas" style="display: block; width: 100%; touch-action: none;"></canvas>
+        <div class="coord-readout mono" id="coordReadout" aria-hidden="true">x: 0.00&nbsp;&nbsp;y: 0.00</div>
       </div>
     </div>
 
-    <div id="errorMessage" style="display: none; margin-bottom: 16px;"></div>
+    <div id="errorMessage" style="display: none; margin-top: 16px;"></div>
 
     <div class="toolbar" role="toolbar" aria-label="Controles de cálculo">
       <button id="calculateBtn" class="btn btn-primary" disabled>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
         </svg>
         Calcular área
       </button>
-      <button id="clearBtn" class="btn btn-secondary" disabled>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button id="clearBtn" class="btn btn-ghost" disabled>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"></polyline>
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
         </svg>
@@ -40,54 +60,451 @@ import Layout from '../layouts/Layout.astro';
       </button>
     </div>
 
-    <div id="loadingIndicator" style="display: none; margin-top: 16px;">
-      <div class="progress-bar">
-        <div class="progress-bar-fill" style="width: 100%; animation: pulse 1.5s infinite;"></div>
-      </div>
-      <p style="text-align: center; margin-top: 12px; color: var(--text-secondary);">Calculando...</p>
+    <div id="loadingIndicator" style="display: none; margin-top: 18px;">
+      <div class="progress-bar"><div class="progress-bar-fill"></div></div>
+      <p class="loading-note">Calculando la integral…</p>
     </div>
 
-    <div id="resultsSummary" style="display: none; margin-top: 24px;">
-      <div class="card">
-        <div class="card-header">
-          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Resultados</h2>
+    <div id="resultsSummary" style="display: none; margin-top: 28px;">
+      <div class="readout" role="region" aria-label="Resultados del cálculo">
+        <div class="readout-cell">
+          <div class="readout-bar"></div>
+          <div class="readout-label">Integral firmada</div>
+          <div class="readout-value" id="signedIntegral">0.0000</div>
         </div>
-        <div class="card-body">
-          <div class="result-grid">
-            <div class="result-card">
-              <div class="result-label">Integral firmada</div>
-              <div class="result-value" id="signedIntegral">0.0000</div>
-            </div>
-            <div class="result-card total">
-              <div class="result-label">Área geométrica total</div>
-              <div class="result-value" id="totalArea">0.0000</div>
-            </div>
-            <div class="result-card positive">
-              <div class="result-label">Área positiva</div>
-              <div class="result-value" id="positiveArea">0.0000</div>
-            </div>
-            <div class="result-card negative">
-              <div class="result-label">Área negativa</div>
-              <div class="result-value" id="negativeArea">0.0000</div>
-            </div>
-          </div>
-          <div style="margin-top: 16px; text-align: center;">
-            <a href="/results/" class="btn btn-primary">Ver detalles y fórmulas</a>
-          </div>
+        <div class="readout-cell total">
+          <div class="readout-bar"></div>
+          <div class="readout-label">Área geométrica total</div>
+          <div class="readout-value" id="totalArea">0.0000</div>
         </div>
+        <div class="readout-cell positive">
+          <div class="readout-bar"></div>
+          <div class="readout-label">Área positiva</div>
+          <div class="readout-value" id="positiveArea">0.0000</div>
+        </div>
+        <div class="readout-cell negative">
+          <div class="readout-bar"></div>
+          <div class="readout-label">Área negativa</div>
+          <div class="readout-value" id="negativeArea">0.0000</div>
+        </div>
+      </div>
+      <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="/results/" class="btn btn-ghost">Ver detalles y fórmulas</a>
+        <a href="/calculo/" class="btn btn-ghost">Explorar en 3D</a>
       </div>
     </div>
   </div>
 
   <style>
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+    /* ---------- Hero ---------- */
+
+    .hero {
+      position: relative;
+      min-height: 88vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .hero-scene {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .hero-scene canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-veil {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(6, 9, 19, 0.55) 0%, rgba(6, 9, 19, 0.12) 34%, rgba(6, 9, 19, 0.12) 62%, var(--ink-950) 100%),
+        radial-gradient(58% 62% at 38% 46%, rgba(6, 9, 19, 0.72) 0%, rgba(6, 9, 19, 0.25) 55%, rgba(6, 9, 19, 0.05) 100%);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      padding-top: 72px;
+      padding-bottom: 96px;
+    }
+
+    .hero-rule {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 26px;
+      font-size: 12.5px;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+    }
+
+    .rule-line {
+      height: 1px;
+      width: 64px;
+      background: var(--hairline-strong);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(42px, 7.2vw, 76px);
+      font-weight: 400;
+      line-height: 1.04;
+      letter-spacing: -0.015em;
+      color: var(--text-1);
+      margin-bottom: 26px;
+      max-width: 14ch;
+    }
+
+    .hero-lede {
+      font-size: 16.5px;
+      line-height: 1.75;
+      color: var(--text-2);
+      max-width: 52ch;
+      margin-bottom: 36px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* ---------- Section head ---------- */
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin: 56px 0 20px;
+    }
+
+    /* ---------- Canvas frame ---------- */
+
+    .canvas-frame {
+      position: relative;
+      background:
+        radial-gradient(120% 90% at 50% 0%, rgba(18, 26, 51, 0.5) 0%, transparent 60%),
+        var(--ink-950);
+    }
+
+    .coord-readout {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-size: 12px;
+      color: var(--text-3);
+      background: rgba(6, 9, 19, 0.72);
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      padding: 5px 11px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.18s ease;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .coord-readout.visible {
+      opacity: 1;
+    }
+
+    .loading-note {
+      text-align: center;
+      margin-top: 12px;
+      color: var(--text-3);
+      font-size: 13.5px;
+      font-family: var(--font-mono);
+    }
+
+    @media (max-width: 768px) {
+      .hero { display: none; }
+      .section-head { margin-top: 36px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .brand-mark .mark-curve {
+        animation: none;
+        stroke-dashoffset: 0;
+      }
     }
   </style>
 
+  <!-- ============ HERO THREE.JS SCENE ============ -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+
+  <script type="module">
+    const heroEl = document.getElementById('heroScene');
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let THREE;
+
+    function curveFn(x) {
+      return 2.1 * Math.sin(x * 0.55) + 0.75 * Math.sin(x * 1.35 + 1.7) + 0.35 * Math.cos(x * 2.1);
+    }
+
+    const CURVE_RANGE = 15;
+    const SAMPLES = 140;
+
+    function buildCurvePoints() {
+      const pts = [];
+      for (let i = 0; i <= SAMPLES; i++) {
+        const x = -CURVE_RANGE + (2 * CURVE_RANGE * i) / SAMPLES;
+        pts.push(new THREE.Vector3(x, curveFn(x), 0));
+      }
+      return pts;
+    }
+
+    function buildRibbon(pts, width) {
+      const verts = new Float32Array((pts.length) * 2 * 3);
+      const idx = [];
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        verts[i * 6 + 0] = p.x; verts[i * 6 + 1] = p.y; verts[i * 6 + 2] = -width / 2;
+        verts[i * 6 + 3] = p.x; verts[i * 6 + 4] = p.y; verts[i * 6 + 5] = width / 2;
+        if (i < pts.length - 1) {
+          const a = i * 2;
+          idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+        }
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+      geo.setIndex(idx);
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    function buildSlab(p1, p2, depth) {
+      const vertices = new Float32Array([
+        p1.x, p1.y, -depth / 2,
+        p2.x, p2.y, -depth / 2,
+        p2.x, p2.y, depth / 2,
+        p1.x, p1.y, depth / 2,
+        p1.x, 0, -depth / 2,
+        p2.x, 0, -depth / 2,
+        p2.x, 0, depth / 2,
+        p1.x, 0, depth / 2
+      ]);
+      const indices = new Uint32Array([
+        0, 1, 2, 0, 2, 3,
+        4, 5, 6, 4, 6, 7,
+        0, 3, 7, 0, 7, 4,
+        1, 5, 6, 1, 6, 2,
+        3, 2, 6, 3, 6, 7,
+        0, 4, 5, 0, 5, 1
+      ]);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+      geo.setIndex(new THREE.BufferAttribute(indices, 1));
+      geo.computeVertexNormals();
+      return geo;
+    }
+
+    function makeGlowTexture() {
+      const c = document.createElement('canvas');
+      c.width = c.height = 64;
+      const g = c.getContext('2d');
+      const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, 'rgba(45,212,238,1)');
+      grad.addColorStop(0.35, 'rgba(45,212,238,0.4)');
+      grad.addColorStop(1, 'rgba(45,212,238,0)');
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(c);
+    }
+
+    let renderer, scene, camera;
+    let slabs = [];
+    let particles = null;
+    let rafId = null;
+    let inView = true;
+    const mouse = { x: 0, y: 0 };
+    let camTarget;
+    let clock;
+
+    function init() {
+      const w = heroEl.clientWidth;
+      const h = heroEl.clientHeight;
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(w, h);
+      heroEl.appendChild(renderer.domElement);
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x060913);
+      scene.fog = new THREE.Fog(0x060913, 20, 52);
+
+      camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 200);
+      camera.position.set(0, 6.4, 24);
+      camera.lookAt(camTarget);
+
+      scene.add(new THREE.AmbientLight(0x8fa3d9, 0.55));
+      const dir = new THREE.DirectionalLight(0xffffff, 0.7);
+      dir.position.set(6, 14, 10);
+      scene.add(dir);
+
+      const grid = new THREE.GridHelper(90, 90, 0x2b3a66, 0x141d3a);
+      grid.material.transparent = true;
+      grid.material.opacity = 0.5;
+      scene.add(grid);
+
+      const pts = buildCurvePoints();
+
+      // luminous curve ribbon + halo
+      const ribbon = new THREE.Mesh(
+        buildRibbon(pts, 0.14),
+        new THREE.MeshBasicMaterial({ color: 0x2dd4ee, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false })
+      );
+      scene.add(ribbon);
+
+      const halo = new THREE.Mesh(
+        buildRibbon(pts, 1.1),
+        new THREE.MeshBasicMaterial({ color: 0x2dd4ee, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })
+      );
+      scene.add(halo);
+
+      // area slabs rising from the plane
+      const slabGroup = new THREE.Group();
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const isPos = (p1.y + p2.y) / 2 >= 0;
+        const slab = new THREE.Mesh(
+          buildSlab(p1, p2, 1.4),
+          new THREE.MeshBasicMaterial({
+            color: isPos ? 0x9d7bff : 0xff6b8b,
+            transparent: true,
+            opacity: 0.13,
+            side: THREE.DoubleSide,
+            depthWrite: false
+          })
+        );
+        slab.userData = { delay: 0.35 + i * 0.028, baseY: 1, phase: i * 0.32 };
+        slab.scale.y = 0;
+        slabGroup.add(slab);
+        slabs.push(slab);
+      }
+      scene.add(slabGroup);
+
+      // drifting dust
+      const count = 240;
+      const positions = new Float32Array(count * 3);
+      const speeds = new Float32Array(count);
+      for (let i = 0; i < count; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 46;
+        positions[i * 3 + 1] = Math.random() * 16 - 2;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 26;
+        speeds[i] = 0.12 + Math.random() * 0.3;
+      }
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particles = new THREE.Points(
+        pGeo,
+        new THREE.PointsMaterial({
+          size: 0.09,
+          map: makeGlowTexture(),
+          color: 0x2dd4ee,
+          transparent: true,
+          opacity: 0.45,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        })
+      );
+      particles.userData = { speeds };
+      scene.add(particles);
+
+      window.addEventListener('pointermove', (e) => {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
+      }, { passive: true });
+
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((entries) => {
+          inView = entries[0].isIntersecting;
+        }, { threshold: 0.02 }).observe(heroEl);
+      }
+
+      if (reducedMotion) {
+        slabs.forEach((s) => { s.scale.y = 1; });
+        renderer.render(scene, camera);
+      } else {
+        loop();
+      }
+    }
+
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+    function loop() {
+      rafId = requestAnimationFrame(loop);
+      if (!inView) return;
+
+      const t = clock.getElapsedTime();
+
+      for (const slab of slabs) {
+        const local = Math.min(Math.max((t - slab.userData.delay) / 0.9, 0), 1);
+        const grown = easeOutCubic(local);
+        const breathe = 1 + 0.018 * Math.sin(t * 0.9 + slab.userData.phase);
+        slab.scale.y = grown * breathe;
+      }
+
+      if (particles) {
+        const pos = particles.geometry.attributes.position;
+        const speeds = particles.userData.speeds;
+        for (let i = 0; i < speeds.length; i++) {
+          let y = pos.getY(i) + speeds[i] * 0.016;
+          if (y > 15) y = -2;
+          pos.setY(i, y);
+        }
+        pos.needsUpdate = true;
+      }
+
+      const px = mouse.x * 1.6;
+      const py = -mouse.y * 0.9;
+      camera.position.x += (px - camera.position.x) * 0.03;
+      camera.position.y += (6.4 + py - camera.position.y) * 0.03;
+      camera.lookAt(camTarget);
+
+      renderer.render(scene, camera);
+    }
+
+    function onResize() {
+      if (!renderer || !camera) return;
+      const w = heroEl.clientWidth;
+      const h = heroEl.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+
+    if (!isMobile && heroEl) {
+      (async () => {
+        THREE = await import('three');
+        camTarget = new THREE.Vector3(0, 1.6, 0);
+        clock = new THREE.Clock();
+        window.addEventListener('resize', onResize, { passive: true });
+        init();
+      })();
+    }
+  </script>
+
+  <!-- ============ DRAWING INSTRUMENT (2D canvas) ============ -->
   <script>
-    // Canvas drawing logic
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const calculateBtn = document.getElementById('calculateBtn');
@@ -96,180 +513,176 @@ import Layout from '../layouts/Layout.astro';
     const loadingIndicator = document.getElementById('loadingIndicator');
     const resultsSummary = document.getElementById('resultsSummary');
     const pointCount = document.getElementById('pointCount');
+    const coordReadout = document.getElementById('coordReadout');
 
     let points = [];
     let isDrawing = false;
     let coordinateSystem = null;
-    let lastResult = null;
 
     function resizeCanvas() {
       const rect = canvas.parentElement.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
+      const cssHeight = Math.max(320, Math.min(560, rect.width * 0.62));
       canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      canvas.height = cssHeight * dpr;
       canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
-      ctx.scale(dpr, dpr);
-      
+      canvas.style.height = cssHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
       const width = rect.width;
-      const height = rect.height;
-      
+      const height = cssHeight;
+
       coordinateSystem = {
         originX: width / 2,
         originY: height / 2,
-        scaleX: width / 10,
-        scaleY: height / 10,
+        scaleX: width / 12,
+        scaleY: height / 12,
         canvasWidth: width,
         canvasHeight: height,
         screenToMath: (screenX, screenY) => ({
-          x: (screenX - width / 2) / (width / 10),
-          y: (height / 2 - screenY) / (height / 10)
+          x: (screenX - width / 2) / (width / 12),
+          y: (height / 2 - screenY) / (height / 12)
         }),
         mathToScreen: (mathX, mathY) => ({
-          x: width / 2 + mathX * (width / 10),
-          y: height / 2 - mathY * (height / 10)
-        }),
-        xAxisScreenY: height / 2,
-        yAxisScreenX: width / 2
+          x: width / 2 + mathX * (width / 12),
+          y: height / 2 - mathY * (height / 12)
+        })
       };
-      
+
       draw();
     }
 
     function drawGrid() {
       const { originX, originY, scaleX, scaleY, canvasWidth, canvasHeight } = coordinateSystem;
-      
-      ctx.strokeStyle = 'rgba(100, 116, 139, 0.15)';
+
+      ctx.strokeStyle = 'rgba(148, 163, 216, 0.08)';
       ctx.lineWidth = 0.5;
-      
-      // Vertical lines
+
       for (let x = originX % scaleX; x < canvasWidth; x += scaleX) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvasHeight);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvasHeight); ctx.stroke();
       }
       for (let x = originX - scaleX; x > 0; x -= scaleX) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvasHeight);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvasHeight); ctx.stroke();
       }
-      
-      // Horizontal lines
       for (let y = originY % scaleY; y < canvasHeight; y += scaleY) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvasWidth, y);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvasWidth, y); ctx.stroke();
       }
       for (let y = originY - scaleY; y > 0; y -= scaleY) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvasWidth, y);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvasWidth, y); ctx.stroke();
       }
     }
 
     function drawAxes() {
-      const { originX, originY, xAxisScreenY, yAxisScreenX, canvasWidth, canvasHeight } = coordinateSystem;
-      
-      ctx.strokeStyle = 'rgba(100, 116, 139, 0.5)';
+      const { xAxisScreenY, yAxisScreenX, canvasWidth, canvasHeight } = coordinateSystem;
+
+      ctx.strokeStyle = 'rgba(148, 163, 216, 0.45)';
       ctx.lineWidth = 1;
-      
-      // X axis
-      ctx.beginPath();
-      ctx.moveTo(0, xAxisScreenY);
-      ctx.lineTo(canvasWidth, xAxisScreenY);
-      ctx.stroke();
-      
-      // Y axis
-      ctx.beginPath();
-      ctx.moveTo(yAxisScreenX, 0);
-      ctx.lineTo(yAxisScreenX, canvasHeight);
-      ctx.stroke();
+
+      ctx.beginPath(); ctx.moveTo(0, xAxisScreenY); ctx.lineTo(canvasWidth, xAxisScreenY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(yAxisScreenX, 0); ctx.lineTo(yAxisScreenX, canvasHeight); ctx.stroke();
     }
 
     function drawAxisLabels() {
       const { originX, originY, scaleX, scaleY, canvasWidth, canvasHeight, mathToScreen } = coordinateSystem;
-      
-      ctx.fillStyle = 'rgba(100, 116, 139, 0.7)';
-      ctx.font = '10px Inter, sans-serif';
+
+      ctx.fillStyle = 'rgba(102, 112, 143, 0.85)';
+      ctx.font = '10px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      
-      // X-axis labels
-      for (let x = originX, val = 0; x < canvasWidth; x += scaleX, val++) {
-        if (val !== 0) {
-          const screen = mathToScreen(val, 0);
-          if (screen.x >= 0 && screen.x <= canvasWidth) {
-            ctx.fillText(val.toString(), screen.x, originY + 4);
-          }
-        }
+
+      for (let x = originX + scaleX, val = 1; x < canvasWidth; x += scaleX, val++) {
+        const screen = mathToScreen(val, 0);
+        ctx.fillText(val.toString(), screen.x, originY + 5);
       }
       for (let x = originX - scaleX, val = -1; x > 0; x -= scaleX, val--) {
         const screen = mathToScreen(val, 0);
-        if (screen.x >= 0 && screen.x <= canvasWidth) {
-          ctx.fillText(val.toString(), screen.x, originY + 4);
-        }
+        ctx.fillText(val.toString(), screen.x, originY + 5);
       }
-      
-      // Y-axis labels
-      for (let y = originY, val = 0; y < canvasHeight; y += scaleY, val--) {
-        if (val !== 0) {
-          const screen = mathToScreen(0, val);
-          if (screen.y >= 0 && screen.y <= canvasHeight) {
-            ctx.fillText((-val).toString(), originX + 4, screen.y - 6);
-          }
-        }
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      for (let y = originY + scaleY, val = -1; y < canvasHeight; y += scaleY, val--) {
+        const screen = mathToScreen(0, val);
+        ctx.fillText(val.toString(), originX + 6, screen.y);
       }
       for (let y = originY - scaleY, val = 1; y > 0; y -= scaleY, val++) {
         const screen = mathToScreen(0, val);
-        if (screen.y >= 0 && screen.y <= canvasHeight) {
-          ctx.fillText((-val).toString(), originX + 4, screen.y - 6);
-        }
+        ctx.fillText(val.toString(), originX + 6, screen.y);
       }
-      
-      // Origin
-      ctx.fillText('0', originX + 4, originY + 4);
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('0', originX + 6, originY + 5);
+    }
+
+    // Trapezoid fills under the curve — each segment tinted by its sign,
+    // mirroring the numerical rule that will be applied.
+    function drawTrapezoidFills() {
+      if (points.length < 2) return;
+      const { mathToScreen } = coordinateSystem;
+      const axisY = coordinateSystem.originY;
+
+      for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const s1 = mathToScreen(p1.x, p1.y);
+        const s2 = mathToScreen(p2.x, p2.y);
+        const avgY = (p1.y + p2.y) / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(s1.x, s1.y);
+        ctx.lineTo(s2.x, s2.y);
+        ctx.lineTo(s2.x, axisY);
+        ctx.lineTo(s1.x, axisY);
+        ctx.closePath();
+        ctx.fillStyle = avgY >= 0 ? 'rgba(157, 123, 255, 0.13)' : 'rgba(255, 107, 139, 0.13)';
+        ctx.fill();
+      }
     }
 
     function drawCurve() {
-      if (points.length < 2) return;
-      
-      ctx.strokeStyle = '#6366f1';
-      ctx.lineWidth = 3;
+      if (points.length < 2) {
+        if (points.length === 1) {
+          const s = coordinateSystem.mathToScreen(points[0].x, points[0].y);
+          ctx.fillStyle = '#2dd4ee';
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        return;
+      }
+
+      ctx.strokeStyle = '#2dd4ee';
+      ctx.lineWidth = 2.5;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      
+      ctx.shadowColor = 'rgba(45, 212, 238, 0.55)';
+      ctx.shadowBlur = 12;
+
       ctx.beginPath();
       for (let i = 0; i < points.length; i++) {
         const screen = coordinateSystem.mathToScreen(points[i].x, points[i].y);
-        if (i === 0) {
-          ctx.moveTo(screen.x, screen.y);
-        } else {
-          ctx.lineTo(screen.x, screen.y);
-        }
+        if (i === 0) ctx.moveTo(screen.x, screen.y);
+        else ctx.lineTo(screen.x, screen.y);
       }
       ctx.stroke();
-      
-      // Draw points
-      ctx.fillStyle = '#6366f1';
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#2dd4ee';
       for (const p of points) {
         const screen = coordinateSystem.mathToScreen(p.x, p.y);
         ctx.beginPath();
-        ctx.arc(screen.x, screen.y, 4, 0, Math.PI * 2);
+        ctx.arc(screen.x, screen.y, 2.6, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
     function draw() {
       if (!coordinateSystem) return;
-      
       const { canvasWidth, canvasHeight } = coordinateSystem;
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-      
       drawGrid();
+      drawTrapezoidFills();
       drawAxes();
       drawAxisLabels();
       drawCurve();
@@ -279,10 +692,7 @@ import Layout from '../layouts/Layout.astro';
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top
-      };
+      return { x: clientX - rect.left, y: clientY - rect.top };
     }
 
     function startDrawing(e) {
@@ -297,9 +707,11 @@ import Layout from '../layouts/Layout.astro';
     }
 
     function drawPoint(e) {
-      if (!isDrawing) return;
       const pt = getCanvasPoint(e);
       const mathPt = coordinateSystem.screenToMath(pt.x, pt.y);
+      coordReadout.innerHTML = `x: ${mathPt.x.toFixed(2)}&nbsp;&nbsp;y: ${mathPt.y.toFixed(2)}`;
+      coordReadout.classList.add('visible');
+      if (!isDrawing) return;
       points.push({ x: mathPt.x, y: mathPt.y });
       updateUI();
       savePoints();
@@ -326,12 +738,12 @@ import Layout from '../layouts/Layout.astro';
     function showError(msg) {
       errorMessage.style.display = 'flex';
       errorMessage.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="12" y1="8" x2="12" y2="12"></line>
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
-        ${msg}
+        <span>${msg}</span>
       `;
     }
 
@@ -341,40 +753,37 @@ import Layout from '../layouts/Layout.astro';
 
     async function calculateArea() {
       if (points.length < 2) return;
-      
+
       hideError();
       calculateBtn.disabled = true;
       clearBtn.disabled = true;
       loadingIndicator.style.display = 'block';
-      
+      resultsSummary.style.display = 'none';
+
       try {
         const response = await fetch('/api/calculate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ points })
         });
-        
+
         const data = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(data.detail || 'Error en el cálculo');
         }
-        
-        // Add original points count to data
+
         data.original_points = points.length;
-        
-        lastResult = data;
-        
-        // Save to sessionStorage for results page
         sessionStorage.setItem('calculusResult', JSON.stringify(data));
-        
+
         document.getElementById('signedIntegral').textContent = data.signed_integral.toFixed(4);
         document.getElementById('totalArea').textContent = data.total_geometric_area.toFixed(4);
         document.getElementById('positiveArea').textContent = data.positive_area.toFixed(4);
         document.getElementById('negativeArea').textContent = data.negative_area.toFixed(4);
-        
+
         resultsSummary.style.display = 'block';
-        
+        resultsSummary.scrollIntoView({ behavior: reducedMotionCheck() ? 'auto' : 'smooth', block: 'nearest' });
+
       } catch (err) {
         showError(err.message);
       } finally {
@@ -384,9 +793,12 @@ import Layout from '../layouts/Layout.astro';
       }
     }
 
+    function reducedMotionCheck() {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
     function clearCurve() {
       points = [];
-      lastResult = null;
       updateUI();
       hideError();
       resultsSummary.style.display = 'none';
@@ -394,22 +806,32 @@ import Layout from '../layouts/Layout.astro';
       draw();
     }
 
-    // Event listeners
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', drawPoint);
     canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
-    
+    canvas.addEventListener('mouseleave', () => {
+      stopDrawing();
+      coordReadout.classList.remove('visible');
+    });
+
     canvas.addEventListener('touchstart', startDrawing, { passive: false });
     canvas.addEventListener('touchmove', drawPoint, { passive: false });
     canvas.addEventListener('touchend', stopDrawing);
-    
+
     calculateBtn.addEventListener('click', calculateArea);
     clearBtn.addEventListener('click', clearCurve);
-    
+
     window.addEventListener('resize', resizeCanvas);
-    
-    // Initialize
+
     resizeCanvas();
+
+    // Restore a previously drawn curve after navigation
+    const saved = sessionStorage.getItem('drawnPoints');
+    if (saved) {
+      try {
+        points = JSON.parse(saved);
+        if (Array.isArray(points) && points.length) updateUI();
+      } catch (e) { /* ignore */ }
+    }
   </script>
 </Layout>
