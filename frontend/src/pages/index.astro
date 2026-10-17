@@ -58,14 +58,17 @@ import Layout from '../layouts/Layout.astro';
             <input id="funcInput" class="func-input mono" type="text" placeholder="sin(x) * exp(-0.2 * x)" spellcheck="false" autocomplete="off" autocapitalize="off" />
           </div>
           <div class="func-range-row">
-            <div class="func-field">
-              <label class="field-label" for="rangeStart">Intervalo desde</label>
-              <input id="rangeStart" class="func-input mono" type="number" step="any" value="-5" />
+            <div class="func-field-span">
+              <div class="func-field">
+                <label class="field-label" for="rangeStart">Intervalo desde</label>
+                <input id="rangeStart" class="func-input mono" type="number" step="any" value="-5" />
+              </div>
+              <div class="func-field">
+                <label class="field-label" for="rangeEnd">hasta</label>
+                <input id="rangeEnd" class="func-input mono" type="number" step="any" value="5" />
+              </div>
             </div>
-            <div class="func-field">
-              <label class="field-label" for="rangeEnd">hasta</label>
-              <input id="rangeEnd" class="func-input mono" type="number" step="any" value="5" />
-            </div>
+            
             <button id="plotFuncBtn" class="btn btn-primary">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
               Graficar y calcular
@@ -338,6 +341,10 @@ import Layout from '../layouts/Layout.astro';
 
     /* ---------- Function panel ---------- */
 
+    .panel-body{
+      padding: 0 24px;
+    }
+
     .field-label {
       display: block;
       font-size: 12px;
@@ -363,10 +370,11 @@ import Layout from '../layouts/Layout.astro';
     }
 
     .func-input {
-      flex: 1;
-      min-width: 0;
+      /* flex: 1; */
+      /* min-width: 0; */
       width: 100%;
-      padding: 11px 14px;
+      /* padding: 11px 14px; */
+      padding: 10px 12px;
       font-size: 14.5px;
       color: var(--text-1);
       background: var(--ink-950);
@@ -388,10 +396,23 @@ import Layout from '../layouts/Layout.astro';
       flex-wrap: wrap;
       margin-bottom: 14px;
     }
+    .func-field-span{
+      display: flex;
+      /* gap: 12px; */
+      flex-wrap: wrap;
+      flex-direction: row;
+      width:100%;
+      margin-bottom: 10px;
+    }
 
     .func-field {
-      flex: 1;
-      min-width: 110px;
+      display: flex;
+      flex-direction: column;
+      width: 50%;
+    }
+
+    .func-field .func-input{
+      width: 50%;
     }
 
     .func-hints {
@@ -1178,7 +1199,7 @@ import Layout from '../layouts/Layout.astro';
       resultsSummary.style.display = 'none';
 
       try {
-        const response = await fetch('/api/evaluate-function', {
+        const response = await fetch('http://localhost:8000/api/evaluate-function', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ expression, start, end, samples: 240 })
