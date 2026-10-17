@@ -88,7 +88,7 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <div class="panel">
-      <div class="canvas-frame">
+      <div class="canvas-frame" style=" width: 90%; margin: 12px auto; border-radius: 12px; overflow: hidden;     box-shadow: 0px 0px 20px 1px #1b92a517;">
         <canvas id="canvas" style="display: block; width: 100%; touch-action: none;"></canvas>
         <div class="coord-readout mono" id="coordReadout" aria-hidden="true">x: 0.00&nbsp;&nbsp;y: 0.00</div>
       </div>
@@ -140,7 +140,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="readout-value" id="negativeArea">0.0000</div>
         </div>
       </div>
-      <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
         <a href="/results/" class="btn btn-ghost">Ver detalles y fórmulas</a>
         <a href="/calculo/" class="btn btn-ghost">Explorar en 3D</a>
       </div>
@@ -237,6 +237,7 @@ import Layout from '../layouts/Layout.astro';
       flex-wrap: wrap;
       gap: 14px;
       margin: 56px 0 20px;
+      padding: 0 48px;
     }
 
     /* ---------- Canvas frame ---------- */
@@ -283,29 +284,34 @@ import Layout from '../layouts/Layout.astro';
       }
       .section-head { 
         margin-top: 16px; 
-        padding: 0 24px
+        padding: 0 24px;
       }
       
       .hero-inner{
         padding: 62px 24px 82px 24px;
       }
+
+      
     }
 
     /* ---------- Mode toggle ---------- */
 
     .mode-toggle {
-      display: inline-flex;
+      display: flex;
       gap: 4px;
       padding: 4px;
       background: var(--ink-900);
       border: 1px solid var(--hairline);
       border-radius: 12px;
-      width: 80%;
+      width: 50%;
+      margin: 0 auto 16px;
     }
 
     .mode-btn {
       display: inline-flex;
+      flex: 1; 
       align-items: center;
+      justify-content: center;
       gap: 8px;
       padding: 9px 16px;
       font-family: var(--font-ui);
@@ -342,7 +348,7 @@ import Layout from '../layouts/Layout.astro';
     /* ---------- Function panel ---------- */
 
     .panel-body{
-      padding: 0 24px;
+      padding: 0 48px;
     }
 
     .field-label {
@@ -391,7 +397,6 @@ import Layout from '../layouts/Layout.astro';
 
     .func-range-row {
       display: flex;
-      align-items: flex-end;
       gap: 12px;
       flex-wrap: wrap;
       margin-bottom: 14px;
@@ -446,33 +451,50 @@ import Layout from '../layouts/Layout.astro';
     }
 
     .func-note {
-      font-size: 11.5px;
+      font-size: 14px;
       color: var(--text-3);
       line-height: 1.7;
       margin: 0;
     }
 
     @media (max-width: 560px) {
-      .mode-toggle { 
-        display: flex; 
-        /* width: 100%;  */
-        margin: 0 auto 16px;
-      }
-      .mode-btn { 
-        flex: 1; 
-        justify-content: center; 
-        font-size: 12px;
-        padding: 8px 12px;
-        
-      }
-      .mode-toggle-container{
-        width: 100%;
-      }
-
       .func-input-row { flex-wrap: wrap; }
       .func-prefix { width: 100%; }
       .plot-func-btn { width: 100%; }
     }
+
+
+    @media (max-width: 768px){
+
+      .mode-btn { 
+        font-size: 12px;
+        padding: 8px 12px;
+        
+      }
+
+      .func-field{
+        align-items: center;
+      }
+
+      .func-range-row{
+        justify-content:center;
+        margin-bottom: 24px;
+      }
+
+      .mode-toggle {
+        width: 80%;
+      }
+
+      .panelbody{
+        padding: 0 24px;
+      }
+
+      .func-note{
+        font-size: 11.5px;
+      }
+    }
+
+   
 
     @media (prefers-reduced-motion: reduce) {
       .brand-mark .mark-curve {
@@ -485,15 +507,28 @@ import Layout from '../layouts/Layout.astro';
     .toolbar{
       display: flex;
       flex-direction: row;
-      justify-content: space-around;
       align-items: center;
-      margin: 16px 0
+      justify-content: space-evenly;
+      margin: 30px 0;
+    }
+
+    @media (max-width: 768px){
+      .toolbar{
+        justify-content: space-around;
+        margin: 20px 0;
+      }
     }
     
     /* -------Result summary ------- */
     #resultsSummary {
       margin-top: 28px;
-      padding: 0 24px;
+      padding: 0 48px;
+    }
+
+    @media (max-width: 768px){
+      #resultsSummary {
+        padding: 0 24px;
+      }
     }
 
     /* --------readout cell -------- */
