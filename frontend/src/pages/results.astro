@@ -3,10 +3,10 @@ import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Resultados — CalculusWeb">
   <div class="container">
-    <header class="page-head">
+    <header class="page-head page-head-row">
       <div>
         <h1 class="page-title">Resultados del cálculo</h1>
-        <p class="page-lede" style="margin-top: 12px;">
+        <p class="page-lede mt-3">
           El análisis numérico completo de la curva dibujada,
           con cada área descompuesta según su signo.
         </p>
@@ -21,15 +21,15 @@ import Layout from '../layouts/Layout.astro';
     </header>
 
     <div id="resultsContent">
-      <div class="panel" style="margin-bottom: 20px;">
-        <div class="panel-body" style="text-align: center; padding: 44px 24px 36px;">
-          <div class="mono" style="font-size: 13px; color: var(--text-3); letter-spacing: 0.05em; margin-bottom: 14px;">INTEGRAL DEFINIDA APROXIMADA</div>
-          <div class="mono" style="font-family: var(--font-display); font-size: 34px; color: var(--curve); margin-bottom: 6px;">∫ f(x) dx</div>
+      <div class="panel mb-5">
+        <div class="panel-body px-6 pt-11 pb-9 text-center">
+          <div class="mono mb-3.5 text-[13px] tracking-wider text-subtle">INTEGRAL DEFINIDA APROXIMADA</div>
+          <div class="mono mb-1.5 font-display text-[34px] text-primary">∫ f(x) dx</div>
           <div class="mono readout-hero" id="signedIntegralHero">0.0000</div>
         </div>
       </div>
 
-      <div class="readout" style="margin-bottom: 20px;">
+      <div class="readout mb-5">
         <div class="readout-cell">
           <div class="readout-bar"></div>
           <div class="readout-label">Integral firmada</div>
@@ -52,7 +52,7 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
 
-      <div class="panel" style="margin-bottom: 20px;">
+      <div class="panel mb-5">
         <div class="panel-header">
           <h2 class="section-title">Detalles del cálculo</h2>
         </div>
@@ -78,7 +78,7 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
 
-      <div class="panel" style="margin-bottom: 20px;">
+      <div class="panel mb-5">
         <div class="panel-header">
           <h2 class="section-title">Fórmulas utilizadas</h2>
         </div>
@@ -122,7 +122,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <div class="panel">
-        <div class="panel-header" style="border-left: 3px solid var(--curve);">
+        <div class="panel-header border-l-[3px] border-primary">
           <h2 class="section-title">Explicación educativa</h2>
         </div>
         <div class="panel-body">
@@ -135,8 +135,8 @@ import Layout from '../layouts/Layout.astro';
             </p>
             <p>
               Las regiones por encima del eje X aportan área
-              <strong style="color: var(--pos);">positiva</strong>, y las regiones por debajo
-              aportan área <strong style="color: var(--neg);">negativa</strong>. El
+              <strong class="text-positive">positiva</strong>, y las regiones por debajo
+              aportan área <strong class="text-negative">negativa</strong>. El
               <strong>área geométrica total</strong> es la suma de los valores absolutos:
               el área física total, sin considerar signos.
             </p>
@@ -146,7 +146,7 @@ import Layout from '../layouts/Layout.astro';
               por lo que dibujar con más puntos —un trazo más fluido— mejora la precisión del resultado.
             </p>
           </div>
-          <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px;">
+          <div class="mt-7 flex flex-wrap gap-3">
             <a href="/calculo/" class="btn btn-primary">
               Ver la visualización 3D
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
@@ -157,87 +157,16 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-    <div id="noResults" style="display: none; text-align: center; padding: 80px 20px;">
-      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.4" style="margin-bottom: 20px;">
+    <div id="noResults" class="hidden px-5 py-20 text-center">
+      <svg class="mb-5 text-subtle" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
         <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
-      <h2 class="page-title" style="font-size: 26px; margin-bottom: 10px;">No hay resultados</h2>
-      <p class="page-lede" style="margin: 0 auto 28px;">Dibuja una curva en la pantalla principal y calcula su área.</p>
+      <h2 class="page-title mb-2.5 text-2xl">No hay resultados</h2>
+      <p class="page-lede mx-auto mb-7">Dibuja una curva en la pantalla principal y calcula su área.</p>
       <a href="/" class="btn btn-primary">Ir al plano cartesiano</a>
     </div>
   </div>
 
-  <style>
-    .page-head {
-      padding: 56px 0 30px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-
-    .readout-hero {
-      font-size: clamp(34px, 5vw, 52px);
-      font-weight: 600;
-      color: var(--text-1);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .detail-rows {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .detail-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 14px 4px;
-      border-bottom: 1px solid var(--hairline);
-    }
-
-    .detail-row:last-child {
-      border-bottom: none;
-    }
-
-    .detail-label {
-      font-size: 14.5px;
-      color: var(--text-2);
-    }
-
-    .detail-value {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--text-1);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .prose {
-      max-width: 72ch;
-    }
-
-    .prose p {
-      color: var(--text-2);
-      line-height: 1.85;
-      font-size: 15px;
-      margin-bottom: 14px;
-    }
-
-    .prose p:last-child {
-      margin-bottom: 0;
-    }
-
-    .prose strong {
-      color: var(--text-1);
-      font-weight: 600;
-    }
-
-    @media (max-width: 768px) {
-      .page-head { padding: 36px 0 24px; align-items: flex-start; flex-direction: column; }
-    }
-  </style>
 
   <script>
     const resultsData = sessionStorage.getItem('calculusResult');

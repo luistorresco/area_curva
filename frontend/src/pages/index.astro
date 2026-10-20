@@ -31,7 +31,7 @@ import Layout from '../layouts/Layout.astro';
 
   <!-- ============ INSTRUMENTO ============ -->
   <div class="container" id="instrumento">
-    <div class="section-head">
+    <div class="instrument-head">
       <h2 class="section-title">Plano cartesiano</h2>
       <div class="badge"><span class="dot"></span><span id="pointCount">Puntos: 0</span></div>
     </div>
@@ -47,8 +47,8 @@ import Layout from '../layouts/Layout.astro';
       </button>
     </div>
 
-    <div id="functionPanel" style="display: none;">
-      <div class="panel" style="margin-bottom: 18px;">
+    <div id="functionPanel" class="hidden">
+      <div class="panel mb-4">
         <div class="panel-body">
           <label class="field-label" for="funcInput">Función a graficar</label>
           <div class="func-input-row">
@@ -84,12 +84,12 @@ import Layout from '../layouts/Layout.astro';
 
     <div class="panel">
       <div class="canvas-frame">
-        <canvas id="canvas" style="display: block; width: 100%; touch-action: none;"></canvas>
+        <canvas id="canvas" class="block w-full touch-none"></canvas>
         <div class="coord-readout mono" id="coordReadout" aria-hidden="true">x: 0.00&nbsp;&nbsp;y: 0.00</div>
       </div>
     </div>
 
-    <div id="errorMessage" style="display: none; margin-top: 16px;"></div>
+    <div id="errorMessage" class="hidden mt-4"></div>
 
     <div class="toolbar" role="toolbar" aria-label="Controles de cálculo">
       <button id="calculateBtn" class="btn btn-primary" disabled>
@@ -107,12 +107,12 @@ import Layout from '../layouts/Layout.astro';
       </button>
     </div>
 
-    <div id="loadingIndicator" style="display: none; margin-top: 18px;">
+    <div id="loadingIndicator" class="hidden mt-5">
       <div class="progress-bar"><div class="progress-bar-fill"></div></div>
       <p class="loading-note">Calculando la integral…</p>
     </div>
 
-    <div id="resultsSummary" style="display: none; margin-top: 28px;">
+    <div id="resultsSummary" class="hidden mt-7">
       <div class="readout" role="region" aria-label="Resultados del cálculo">
         <div class="readout-cell">
           <div class="readout-bar"></div>
@@ -135,306 +135,13 @@ import Layout from '../layouts/Layout.astro';
           <div class="readout-value" id="negativeArea">0.0000</div>
         </div>
       </div>
-      <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <div class="mt-5 flex flex-wrap gap-3">
         <a href="/results/" class="btn btn-ghost">Ver detalles y fórmulas</a>
         <a href="/calculo/" class="btn btn-ghost">Explorar en 3D</a>
       </div>
     </div>
   </div>
 
-  <style>
-    /* ---------- Hero ---------- */
-
-    .hero {
-      position: relative;
-      min-height: 88vh;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-      border-bottom: 1px solid var(--hairline);
-    }
-
-    .hero-scene {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-    }
-
-    .hero-scene canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .hero-veil {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      background:
-        linear-gradient(180deg, rgba(6, 9, 19, 0.55) 0%, rgba(6, 9, 19, 0.12) 34%, rgba(6, 9, 19, 0.12) 62%, var(--ink-950) 100%),
-        radial-gradient(58% 62% at 38% 46%, rgba(6, 9, 19, 0.72) 0%, rgba(6, 9, 19, 0.25) 55%, rgba(6, 9, 19, 0.05) 100%);
-    }
-
-    .hero-inner {
-      position: relative;
-      z-index: 2;
-      padding-top: 72px;
-      padding-bottom: 96px;
-    }
-
-    .hero-rule {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 26px;
-      font-size: 12.5px;
-      color: var(--text-3);
-      letter-spacing: 0.04em;
-    }
-
-    .rule-line {
-      height: 1px;
-      width: 64px;
-      background: var(--hairline-strong);
-    }
-
-    .hero-title {
-      font-family: var(--font-display);
-      font-size: clamp(42px, 7.2vw, 76px);
-      font-weight: 400;
-      line-height: 1.04;
-      letter-spacing: -0.015em;
-      color: var(--text-1);
-      margin-bottom: 26px;
-      max-width: 14ch;
-    }
-
-    .hero-lede {
-      font-size: 16.5px;
-      line-height: 1.75;
-      color: var(--text-2);
-      max-width: 52ch;
-      margin-bottom: 36px;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    /* ---------- Section head ---------- */
-
-    .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 14px;
-      margin: 56px 0 20px;
-    }
-
-    /* ---------- Canvas frame ---------- */
-
-    .canvas-frame {
-      position: relative;
-      background:
-        radial-gradient(120% 90% at 50% 0%, rgba(18, 26, 51, 0.5) 0%, transparent 60%),
-        var(--ink-950);
-    }
-
-    .coord-readout {
-      position: absolute;
-      top: 14px;
-      right: 16px;
-      font-size: 12px;
-      color: var(--text-3);
-      background: rgba(6, 9, 19, 0.72);
-      border: 1px solid var(--hairline);
-      border-radius: 8px;
-      padding: 5px 11px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.18s ease;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .coord-readout.visible {
-      opacity: 1;
-    }
-
-    .loading-note {
-      text-align: center;
-      margin-top: 12px;
-      color: var(--text-3);
-      font-size: 13.5px;
-      font-family: var(--font-mono);
-    }
-
-    @media (max-width: 768px) {
-      .hero { display: none; }
-      .section-head { margin-top: 36px; }
-    }
-
-    /* ---------- Mode toggle ---------- */
-
-    .mode-toggle {
-      display: inline-flex;
-      gap: 4px;
-      padding: 4px;
-      background: var(--ink-900);
-      border: 1px solid var(--hairline);
-      border-radius: 12px;
-      margin-bottom: 18px;
-    }
-
-    .mode-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 16px;
-      font-family: var(--font-ui);
-      font-size: 13.5px;
-      font-weight: 500;
-      color: var(--text-2);
-      background: transparent;
-      border: none;
-      border-radius: 9px;
-      cursor: pointer;
-      transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .mode-btn svg {
-      width: 15px;
-      height: 15px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .mode-btn:hover {
-      color: var(--text-1);
-    }
-
-    .mode-btn.active {
-      color: #04222b;
-      background: var(--curve);
-      box-shadow: 0 4px 16px -4px rgba(45, 212, 238, 0.4);
-    }
-
-    /* ---------- Function panel ---------- */
-
-    .field-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-bottom: 8px;
-    }
-
-    .func-input-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .func-prefix {
-      font-size: 14px;
-      color: var(--curve);
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-
-    .func-input {
-      flex: 1;
-      min-width: 0;
-      width: 100%;
-      padding: 11px 14px;
-      font-size: 14.5px;
-      color: var(--text-1);
-      background: var(--ink-950);
-      border: 1px solid var(--hairline-strong);
-      border-radius: 10px;
-      outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .func-input:focus {
-      border-color: var(--curve);
-      box-shadow: 0 0 0 3px rgba(45, 212, 238, 0.15);
-    }
-
-    .func-range-row {
-      display: flex;
-      align-items: flex-end;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-
-    .func-field {
-      flex: 1;
-      min-width: 110px;
-    }
-
-    .func-hints {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .hint-label {
-      font-size: 12.5px;
-      color: var(--text-3);
-    }
-
-    .hint-chip {
-      padding: 5px 11px;
-      font-size: 12px;
-      color: var(--text-2);
-      background: var(--ink-850);
-      border: 1px solid var(--hairline);
-      border-radius: 9999px;
-      cursor: pointer;
-      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .hint-chip:hover {
-      color: var(--curve);
-      border-color: var(--hairline-strong);
-      background: var(--ink-800);
-    }
-
-    .func-note {
-      font-size: 11.5px;
-      color: var(--text-3);
-      line-height: 1.7;
-      margin: 0;
-    }
-
-    @media (max-width: 560px) {
-      .mode-toggle { display: flex; width: 100%; }
-      .mode-btn { flex: 1; justify-content: center; }
-      .func-input-row { flex-wrap: wrap; }
-      .func-prefix { width: 100%; }
-      .plot-func-btn { width: 100%; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .brand-mark .mark-curve {
-        animation: none;
-        stroke-dashoffset: 0;
-      }
-    }
-  </style>
 
   <!-- ============ HERO THREE.JS SCENE ============ -->
   <script type="importmap">
@@ -451,6 +158,32 @@ import Layout from '../layouts/Layout.astro';
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let THREE;
+
+    function readHexVar(name, fallback) {
+      const value = getComputedStyle(document.documentElement)
+        .getPropertyValue(name)
+        .trim();
+
+      if (!value) return fallback;
+      if (value.startsWith('#')) return parseInt(value.slice(1), 16);
+
+      const rgb = value.match(/\d+/g);
+      if (!rgb || rgb.length < 3) return fallback;
+      return (Number(rgb[0]) << 16) | (Number(rgb[1]) << 8) | Number(rgb[2]);
+    }
+
+    function getScenePalette() {
+      return {
+        bg: readHexVar('--scene-bg', 0x060913),
+        fog: readHexVar('--scene-fog', 0x060913),
+        gridMajor: readHexVar('--scene-grid-major', 0x2b3a66),
+        gridMinor: readHexVar('--scene-grid-minor', 0x141d3a),
+        curve: readHexVar('--scene-curve', 0x2dd4ee),
+        pos: readHexVar('--scene-pos', 0x9d7bff),
+        neg: readHexVar('--scene-neg', 0xff6b8b),
+        dust: readHexVar('--scene-dust', 0x2dd4ee)
+      };
+    }
 
     function curveFn(x) {
       return 2.1 * Math.sin(x * 0.55) + 0.75 * Math.sin(x * 1.35 + 1.7) + 0.35 * Math.cos(x * 2.1);
@@ -518,15 +251,18 @@ import Layout from '../layouts/Layout.astro';
       c.width = c.height = 64;
       const g = c.getContext('2d');
       const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      grad.addColorStop(0, 'rgba(45,212,238,1)');
-      grad.addColorStop(0.35, 'rgba(45,212,238,0.4)');
-      grad.addColorStop(1, 'rgba(45,212,238,0)');
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.35, 'rgba(255,255,255,0.4)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
       g.fillStyle = grad;
       g.fillRect(0, 0, 64, 64);
       return new THREE.CanvasTexture(c);
     }
 
     let renderer, scene, camera;
+    let grid = null;
+    let ribbon = null;
+    let halo = null;
     let slabs = [];
     let particles = null;
     let rafId = null;
@@ -534,6 +270,33 @@ import Layout from '../layouts/Layout.astro';
     const mouse = { x: 0, y: 0 };
     let camTarget;
     let clock;
+
+    function createGrid(palette) {
+      if (grid) {
+        scene.remove(grid);
+        grid.geometry.dispose();
+        grid.material.dispose();
+      }
+      grid = new THREE.GridHelper(90, 90, palette.gridMajor, palette.gridMinor);
+      grid.material.transparent = true;
+      grid.material.opacity = 0.5;
+      scene.add(grid);
+    }
+
+    function applySceneTheme() {
+      if (!scene) return;
+      const palette = getScenePalette();
+      scene.background.set(palette.bg);
+      scene.fog.color.set(palette.fog);
+      createGrid(palette);
+      if (ribbon) ribbon.material.color.set(palette.curve);
+      if (halo) halo.material.color.set(palette.curve);
+      if (particles) particles.material.color.set(palette.dust);
+      slabs.forEach((slab) => {
+        slab.material.color.set(slab.userData.positive ? palette.pos : palette.neg);
+      });
+      if (renderer && camera) renderer.render(scene, camera);
+    }
 
     function init() {
       const w = heroEl.clientWidth;
@@ -544,9 +307,10 @@ import Layout from '../layouts/Layout.astro';
       renderer.setSize(w, h);
       heroEl.appendChild(renderer.domElement);
 
+      const palette = getScenePalette();
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x060913);
-      scene.fog = new THREE.Fog(0x060913, 20, 52);
+      scene.background = new THREE.Color(palette.bg);
+      scene.fog = new THREE.Fog(palette.fog, 20, 52);
 
       camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 200);
       camera.position.set(0, 6.4, 24);
@@ -557,23 +321,20 @@ import Layout from '../layouts/Layout.astro';
       dir.position.set(6, 14, 10);
       scene.add(dir);
 
-      const grid = new THREE.GridHelper(90, 90, 0x2b3a66, 0x141d3a);
-      grid.material.transparent = true;
-      grid.material.opacity = 0.5;
-      scene.add(grid);
+      createGrid(palette);
 
       const pts = buildCurvePoints();
 
       // luminous curve ribbon + halo
-      const ribbon = new THREE.Mesh(
+      ribbon = new THREE.Mesh(
         buildRibbon(pts, 0.14),
-        new THREE.MeshBasicMaterial({ color: 0x2dd4ee, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false })
+        new THREE.MeshBasicMaterial({ color: palette.curve, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false })
       );
       scene.add(ribbon);
 
-      const halo = new THREE.Mesh(
+      halo = new THREE.Mesh(
         buildRibbon(pts, 1.1),
-        new THREE.MeshBasicMaterial({ color: 0x2dd4ee, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })
+        new THREE.MeshBasicMaterial({ color: palette.curve, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })
       );
       scene.add(halo);
 
@@ -586,14 +347,14 @@ import Layout from '../layouts/Layout.astro';
         const slab = new THREE.Mesh(
           buildSlab(p1, p2, 1.4),
           new THREE.MeshBasicMaterial({
-            color: isPos ? 0x9d7bff : 0xff6b8b,
+            color: isPos ? palette.pos : palette.neg,
             transparent: true,
             opacity: 0.13,
             side: THREE.DoubleSide,
             depthWrite: false
           })
         );
-        slab.userData = { delay: 0.35 + i * 0.028, baseY: 1, phase: i * 0.32 };
+        slab.userData = { delay: 0.35 + i * 0.028, baseY: 1, phase: i * 0.32, positive: isPos };
         slab.scale.y = 0;
         slabGroup.add(slab);
         slabs.push(slab);
@@ -617,7 +378,7 @@ import Layout from '../layouts/Layout.astro';
         new THREE.PointsMaterial({
           size: 0.09,
           map: makeGlowTexture(),
-          color: 0x2dd4ee,
+          color: palette.dust,
           transparent: true,
           opacity: 0.45,
           depthWrite: false,
@@ -691,6 +452,7 @@ import Layout from '../layouts/Layout.astro';
     }
 
     if (!isMobile && heroEl) {
+      window.addEventListener('themechange', applySceneTheme);
       (async () => {
         THREE = await import('three');
         camTarget = new THREE.Vector3(0, 1.6, 0);
@@ -705,6 +467,11 @@ import Layout from '../layouts/Layout.astro';
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+
+    function cssVar(name, fallback) {
+      const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return value || fallback;
+    }
     const calculateBtn = document.getElementById('calculateBtn');
     const clearBtn = document.getElementById('clearBtn');
     const errorMessage = document.getElementById('errorMessage');
@@ -785,7 +552,7 @@ import Layout from '../layouts/Layout.astro';
     function drawGrid() {
       const { originX, originY, scaleX, scaleY, canvasWidth, canvasHeight } = coordinateSystem;
 
-      ctx.strokeStyle = 'rgba(148, 163, 216, 0.08)';
+      ctx.strokeStyle = cssVar('--canvas-grid', 'rgba(148, 163, 216, 0.08)');
       ctx.lineWidth = 0.5;
 
       for (let x = originX % scaleX; x < canvasWidth; x += scaleX) {
@@ -805,7 +572,7 @@ import Layout from '../layouts/Layout.astro';
     function drawAxes() {
       const { xAxisScreenY, yAxisScreenX, canvasWidth, canvasHeight } = coordinateSystem;
 
-      ctx.strokeStyle = 'rgba(148, 163, 216, 0.45)';
+      ctx.strokeStyle = cssVar('--canvas-axis', 'rgba(148, 163, 216, 0.45)');
       ctx.lineWidth = 1;
 
       ctx.beginPath(); ctx.moveTo(0, xAxisScreenY); ctx.lineTo(canvasWidth, xAxisScreenY); ctx.stroke();
@@ -815,7 +582,7 @@ import Layout from '../layouts/Layout.astro';
     function drawAxisLabels() {
       const { originX, originY, scaleX, scaleY, canvasWidth, canvasHeight, mathToScreen } = coordinateSystem;
 
-      ctx.fillStyle = 'rgba(102, 112, 143, 0.85)';
+      ctx.fillStyle = cssVar('--canvas-label', 'rgba(102, 112, 143, 0.85)');
       ctx.font = '10px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
@@ -865,7 +632,9 @@ import Layout from '../layouts/Layout.astro';
         ctx.lineTo(s2.x, axisY);
         ctx.lineTo(s1.x, axisY);
         ctx.closePath();
-        ctx.fillStyle = avgY >= 0 ? 'rgba(157, 123, 255, 0.13)' : 'rgba(255, 107, 139, 0.13)';
+        ctx.fillStyle = avgY >= 0
+          ? cssVar('--canvas-pos', 'rgba(157, 123, 255, 0.13)')
+          : cssVar('--canvas-neg', 'rgba(255, 107, 139, 0.13)');
         ctx.fill();
       }
     }
@@ -874,7 +643,7 @@ import Layout from '../layouts/Layout.astro';
       if (points.length < 2) {
         if (points.length === 1) {
           const s = coordinateSystem.mathToScreen(points[0].x, points[0].y);
-          ctx.fillStyle = '#2dd4ee';
+          ctx.fillStyle = cssVar('--canvas-curve', '#2dd4ee');
           ctx.beginPath();
           ctx.arc(s.x, s.y, 3.5, 0, Math.PI * 2);
           ctx.fill();
@@ -882,11 +651,11 @@ import Layout from '../layouts/Layout.astro';
         return;
       }
 
-      ctx.strokeStyle = '#2dd4ee';
+      ctx.strokeStyle = cssVar('--canvas-curve', '#2dd4ee');
       ctx.lineWidth = 2.5;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.shadowColor = 'rgba(45, 212, 238, 0.55)';
+      ctx.shadowColor = cssVar('--canvas-glow', 'rgba(45, 212, 238, 0.55)');
       ctx.shadowBlur = 12;
 
       ctx.beginPath();
@@ -898,7 +667,7 @@ import Layout from '../layouts/Layout.astro';
       ctx.stroke();
       ctx.shadowBlur = 0;
 
-      ctx.fillStyle = '#2dd4ee';
+      ctx.fillStyle = cssVar('--canvas-curve', '#2dd4ee');
       for (const p of points) {
         const screen = coordinateSystem.mathToScreen(p.x, p.y);
         ctx.beginPath();
@@ -917,6 +686,10 @@ import Layout from '../layouts/Layout.astro';
       drawAxisLabels();
       drawCurve();
     }
+
+    window.addEventListener('themechange', () => {
+      if (coordinateSystem) draw();
+    });
 
     function getCanvasPoint(e) {
       const rect = canvas.getBoundingClientRect();

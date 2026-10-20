@@ -1,22 +1,36 @@
-<!DOCTYPE html><html lang="es" data-astro-cid-sckkx6r4> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CalculusWeb — Cálculo bajo la curva</title><meta name="description" content="CalculusWeb — dibuja una curva y calcula el área bajo la curva mediante integración numérica (regla del trapecio)."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.DdlxDJp5.css">
-<link rel="stylesheet" href="/_astro/index.CxhIvwmp.css"><script type="module" src="/_astro/hoisted.Cxb3LM4K.js"></script></head> <body data-astro-cid-sckkx6r4> <header class="site-header" data-astro-cid-sckkx6r4> <div class="container header-inner" data-astro-cid-sckkx6r4> <a href="/" class="brand" aria-label="CalculusWeb — Inicio" data-astro-cid-sckkx6r4> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true" data-astro-cid-sckkx6r4> <path d="M4 4v28M4 32h30" stroke="rgba(148,163,216,0.4)" stroke-width="1.2" stroke-linecap="round" data-astro-cid-sckkx6r4></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="#2dd4ee" stroke-width="2" stroke-linecap="round" data-astro-cid-sckkx6r4></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="rgba(157,123,255,0.1)" stroke="none" data-astro-cid-sckkx6r4></path> </svg> <span class="brand-word" data-astro-cid-sckkx6r4>Calculus<em data-astro-cid-sckkx6r4>Web</em></span> </a> <nav class="site-nav" aria-label="Navegación principal" data-astro-cid-sckkx6r4> <a href="/" data-nav="/" data-astro-cid-sckkx6r4>Inicio</a> <a href="/calculo/" data-nav="/calculo/" data-astro-cid-sckkx6r4>Cálculo 3D</a> <a href="/formula/" data-nav="/formula/" data-astro-cid-sckkx6r4>Fórmulas</a> <a href="/nosotros/" data-nav="/nosotros/" data-astro-cid-sckkx6r4>Nosotros</a> </nav> </div> </header> <main class="site-main" data-astro-cid-sckkx6r4>   <section class="hero" data-astro-cid-j7pv25f6> <div id="heroScene" class="hero-scene" aria-hidden="true" data-astro-cid-j7pv25f6></div> <div class="hero-veil" aria-hidden="true" data-astro-cid-j7pv25f6></div> <div class="container hero-inner" data-astro-cid-j7pv25f6> <div class="hero-rule" data-astro-cid-j7pv25f6> <span class="mono" data-astro-cid-j7pv25f6>∫ f(x) dx</span> <span class="rule-line" data-astro-cid-j7pv25f6></span> <span class="mono" data-astro-cid-j7pv25f6>regla del trapecio</span> </div> <h1 class="hero-title" data-astro-cid-j7pv25f6>Dibuja la curva.<br data-astro-cid-j7pv25f6>Mide el área.</h1> <p class="hero-lede" data-astro-cid-j7pv25f6>
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CalculusWeb — Cálculo bajo la curva</title><meta name="description" content="CalculusWeb — dibuja una curva y calcula el área bajo la curva mediante integración numérica (regla del trapecio)."><meta name="theme-color" content="#060913"><script>
+      (() => {
+        let stored = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {}
+        const dark = stored
+          ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', dark ? '#060913' : '#f4f7fb');
+      })();
+    </script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.DZAkDJGe.css"><script type="module" src="/_astro/hoisted.C4NBjXqr.js"></script></head> <body> <header class="site-header"> <div class="container header-inner"> <a href="/" class="brand" aria-label="CalculusWeb — Inicio"> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"> <path d="M4 4v28M4 32h30" stroke="var(--border-strong)" stroke-width="1.2" stroke-linecap="round"></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="var(--accent)" fill-opacity="0.12" stroke="none"></path> </svg> <span class="brand-word">Calculus<em>Web</em></span> </a> <div class="flex items-center gap-2"> <nav class="site-nav" aria-label="Navegación principal"> <a href="/" data-nav="/">Inicio</a> <a href="/calculo/" data-nav="/calculo/">Cálculo 3D</a> <a href="/formula/" data-nav="/formula/">Fórmulas</a> <a href="/nosotros/" data-nav="/nosotros/">Nosotros</a> </nav> <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar a modo claro" aria-pressed="false" title="Cambiar tema"> <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path> </svg> <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path> </svg> </button> </div> </div> </header> <main class="site-main">   <section class="hero"> <div id="heroScene" class="hero-scene" aria-hidden="true"></div> <div class="hero-veil" aria-hidden="true"></div> <div class="container hero-inner"> <div class="hero-rule"> <span class="mono">∫ f(x) dx</span> <span class="rule-line"></span> <span class="mono">regla del trapecio</span> </div> <h1 class="hero-title">Dibuja la curva.<br>Mide el área.</h1> <p class="hero-lede">
 Traza una función con el mouse, el dedo o el trackpad, o escribe
         f(x) directamente y la graficamos por ti. CalculusWeb la convierte
         en una integral definida: calcula el área firmada, las áreas positiva y negativa,
         y el área geométrica total — y la exhibe en tres dimensiones.
-</p> <div class="hero-actions" data-astro-cid-j7pv25f6> <a href="#instrumento" class="btn btn-primary" data-astro-cid-j7pv25f6>
+</p> <div class="hero-actions"> <a href="#instrumento" class="btn btn-primary">
 Empezar a dibujar
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-j7pv25f6><line x1="12" y1="5" x2="12" y2="19" data-astro-cid-j7pv25f6></line><polyline points="19 12 12 19 5 12" data-astro-cid-j7pv25f6></polyline></svg> </a> <a href="/calculo/" class="btn btn-ghost" data-astro-cid-j7pv25f6>Ver en tres dimensiones</a> </div> </div> </section>  <div class="container" id="instrumento" data-astro-cid-j7pv25f6> <div class="section-head" data-astro-cid-j7pv25f6> <h2 class="section-title" data-astro-cid-j7pv25f6>Plano cartesiano</h2> <div class="badge" data-astro-cid-j7pv25f6><span class="dot" data-astro-cid-j7pv25f6></span><span id="pointCount" data-astro-cid-j7pv25f6>Puntos: 0</span></div> </div> <div class="mode-toggle" role="tablist" aria-label="Modo de entrada" data-astro-cid-j7pv25f6> <button class="mode-btn active" id="modeDraw" role="tab" aria-selected="true" data-astro-cid-j7pv25f6> <svg viewBox="0 0 24 24" data-astro-cid-j7pv25f6><path d="M12 20h9" data-astro-cid-j7pv25f6></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" data-astro-cid-j7pv25f6></path></svg>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg> </a> <a href="/calculo/" class="btn btn-ghost">Ver en tres dimensiones</a> </div> </div> </section>  <div class="container" id="instrumento"> <div class="instrument-head"> <h2 class="section-title">Plano cartesiano</h2> <div class="badge"><span class="dot"></span><span id="pointCount">Puntos: 0</span></div> </div> <div class="mode-toggle" role="tablist" aria-label="Modo de entrada"> <button class="mode-btn active" id="modeDraw" role="tab" aria-selected="true"> <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
 Dibujar a mano
-</button> <button class="mode-btn" id="modeFunc" role="tab" aria-selected="false" data-astro-cid-j7pv25f6> <svg viewBox="0 0 24 24" data-astro-cid-j7pv25f6><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" data-astro-cid-j7pv25f6></polyline></svg>
+</button> <button class="mode-btn" id="modeFunc" role="tab" aria-selected="false"> <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
 Función f(x)
-</button> </div> <div id="functionPanel" style="display: none;" data-astro-cid-j7pv25f6> <div class="panel" style="margin-bottom: 18px;" data-astro-cid-j7pv25f6> <div class="panel-body" data-astro-cid-j7pv25f6> <label class="field-label" for="funcInput" data-astro-cid-j7pv25f6>Función a graficar</label> <div class="func-input-row" data-astro-cid-j7pv25f6> <span class="func-prefix mono" data-astro-cid-j7pv25f6>f(x) =</span> <input id="funcInput" class="func-input mono" type="text" placeholder="sin(x) * exp(-0.2 * x)" spellcheck="false" autocomplete="off" autocapitalize="off" data-astro-cid-j7pv25f6> </div> <div class="func-range-row" data-astro-cid-j7pv25f6> <div class="func-field" data-astro-cid-j7pv25f6> <label class="field-label" for="rangeStart" data-astro-cid-j7pv25f6>Intervalo desde</label> <input id="rangeStart" class="func-input mono" type="number" step="any" value="-5" data-astro-cid-j7pv25f6> </div> <div class="func-field" data-astro-cid-j7pv25f6> <label class="field-label" for="rangeEnd" data-astro-cid-j7pv25f6>hasta</label> <input id="rangeEnd" class="func-input mono" type="number" step="any" value="5" data-astro-cid-j7pv25f6> </div> <button id="plotFuncBtn" class="btn btn-primary" data-astro-cid-j7pv25f6> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-j7pv25f6><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" data-astro-cid-j7pv25f6></polyline><polyline points="17 6 23 6 23 12" data-astro-cid-j7pv25f6></polyline></svg>
+</button> </div> <div id="functionPanel" class="hidden"> <div class="panel mb-4"> <div class="panel-body"> <label class="field-label" for="funcInput">Función a graficar</label> <div class="func-input-row"> <span class="func-prefix mono">f(x) =</span> <input id="funcInput" class="func-input mono" type="text" placeholder="sin(x) * exp(-0.2 * x)" spellcheck="false" autocomplete="off" autocapitalize="off"> </div> <div class="func-range-row"> <div class="func-field"> <label class="field-label" for="rangeStart">Intervalo desde</label> <input id="rangeStart" class="func-input mono" type="number" step="any" value="-5"> </div> <div class="func-field"> <label class="field-label" for="rangeEnd">hasta</label> <input id="rangeEnd" class="func-input mono" type="number" step="any" value="5"> </div> <button id="plotFuncBtn" class="btn btn-primary"> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
 Graficar y calcular
-</button> </div> <div class="func-hints" data-astro-cid-j7pv25f6> <span class="hint-label" data-astro-cid-j7pv25f6>Ejemplos:</span> <button class="hint-chip mono" data-expr="x**2 - 4" data-astro-cid-j7pv25f6>x² − 4</button> <button class="hint-chip mono" data-expr="sin(x)" data-astro-cid-j7pv25f6>sin(x)</button> <button class="hint-chip mono" data-expr="exp(-0.3*x) * cos(3*x)" data-astro-cid-j7pv25f6>e^−0.3x·cos(3x)</button> <button class="hint-chip mono" data-expr="sqrt(abs(x))" data-astro-cid-j7pv25f6>√|x|</button> <button class="hint-chip mono" data-expr="1 / (1 + exp(-x))" data-astro-cid-j7pv25f6>sigmoide</button> </div> <p class="func-note mono" data-astro-cid-j7pv25f6>Operadores: + − * / ** ^ · Funciones: sin cos tan asin acos atan atan2 sqrt cbrt abs exp log log2 sinh cosh tanh floor ceil factorial · Constantes: pi e tau</p> </div> </div> </div> <div class="panel" data-astro-cid-j7pv25f6> <div class="canvas-frame" data-astro-cid-j7pv25f6> <canvas id="canvas" style="display: block; width: 100%; touch-action: none;" data-astro-cid-j7pv25f6></canvas> <div class="coord-readout mono" id="coordReadout" aria-hidden="true" data-astro-cid-j7pv25f6>x: 0.00&nbsp;&nbsp;y: 0.00</div> </div> </div> <div id="errorMessage" style="display: none; margin-top: 16px;" data-astro-cid-j7pv25f6></div> <div class="toolbar" role="toolbar" aria-label="Controles de cálculo" data-astro-cid-j7pv25f6> <button id="calculateBtn" class="btn btn-primary" disabled data-astro-cid-j7pv25f6> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-j7pv25f6> <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" data-astro-cid-j7pv25f6></polygon> </svg>
+</button> </div> <div class="func-hints"> <span class="hint-label">Ejemplos:</span> <button class="hint-chip mono" data-expr="x**2 - 4">x² − 4</button> <button class="hint-chip mono" data-expr="sin(x)">sin(x)</button> <button class="hint-chip mono" data-expr="exp(-0.3*x) * cos(3*x)">e^−0.3x·cos(3x)</button> <button class="hint-chip mono" data-expr="sqrt(abs(x))">√|x|</button> <button class="hint-chip mono" data-expr="1 / (1 + exp(-x))">sigmoide</button> </div> <p class="func-note mono">Operadores: + − * / ** ^ · Funciones: sin cos tan asin acos atan atan2 sqrt cbrt abs exp log log2 sinh cosh tanh floor ceil factorial · Constantes: pi e tau</p> </div> </div> </div> <div class="panel"> <div class="canvas-frame"> <canvas id="canvas" class="block w-full touch-none"></canvas> <div class="coord-readout mono" id="coordReadout" aria-hidden="true">x: 0.00&nbsp;&nbsp;y: 0.00</div> </div> </div> <div id="errorMessage" class="hidden mt-4"></div> <div class="toolbar" role="toolbar" aria-label="Controles de cálculo"> <button id="calculateBtn" class="btn btn-primary" disabled> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon> </svg>
 Calcular área
-</button> <button id="clearBtn" class="btn btn-ghost" disabled data-astro-cid-j7pv25f6> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-j7pv25f6> <polyline points="3 6 5 6 21 6" data-astro-cid-j7pv25f6></polyline> <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" data-astro-cid-j7pv25f6></path> </svg>
+</button> <button id="clearBtn" class="btn btn-ghost" disabled> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <polyline points="3 6 5 6 21 6"></polyline> <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path> </svg>
 Limpiar
-</button> </div> <div id="loadingIndicator" style="display: none; margin-top: 18px;" data-astro-cid-j7pv25f6> <div class="progress-bar" data-astro-cid-j7pv25f6><div class="progress-bar-fill" data-astro-cid-j7pv25f6></div></div> <p class="loading-note" data-astro-cid-j7pv25f6>Calculando la integral…</p> </div> <div id="resultsSummary" style="display: none; margin-top: 28px;" data-astro-cid-j7pv25f6> <div class="readout" role="region" aria-label="Resultados del cálculo" data-astro-cid-j7pv25f6> <div class="readout-cell" data-astro-cid-j7pv25f6> <div class="readout-bar" data-astro-cid-j7pv25f6></div> <div class="readout-label" data-astro-cid-j7pv25f6>Integral firmada</div> <div class="readout-value" id="signedIntegral" data-astro-cid-j7pv25f6>0.0000</div> </div> <div class="readout-cell total" data-astro-cid-j7pv25f6> <div class="readout-bar" data-astro-cid-j7pv25f6></div> <div class="readout-label" data-astro-cid-j7pv25f6>Área geométrica total</div> <div class="readout-value" id="totalArea" data-astro-cid-j7pv25f6>0.0000</div> </div> <div class="readout-cell positive" data-astro-cid-j7pv25f6> <div class="readout-bar" data-astro-cid-j7pv25f6></div> <div class="readout-label" data-astro-cid-j7pv25f6>Área positiva</div> <div class="readout-value" id="positiveArea" data-astro-cid-j7pv25f6>0.0000</div> </div> <div class="readout-cell negative" data-astro-cid-j7pv25f6> <div class="readout-bar" data-astro-cid-j7pv25f6></div> <div class="readout-label" data-astro-cid-j7pv25f6>Área negativa</div> <div class="readout-value" id="negativeArea" data-astro-cid-j7pv25f6>0.0000</div> </div> </div> <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;" data-astro-cid-j7pv25f6> <a href="/results/" class="btn btn-ghost" data-astro-cid-j7pv25f6>Ver detalles y fórmulas</a> <a href="/calculo/" class="btn btn-ghost" data-astro-cid-j7pv25f6>Explorar en 3D</a> </div> </div> </div>   <script type="importmap">
+</button> </div> <div id="loadingIndicator" class="hidden mt-5"> <div class="progress-bar"><div class="progress-bar-fill"></div></div> <p class="loading-note">Calculando la integral…</p> </div> <div id="resultsSummary" class="hidden mt-7"> <div class="readout" role="region" aria-label="Resultados del cálculo"> <div class="readout-cell"> <div class="readout-bar"></div> <div class="readout-label">Integral firmada</div> <div class="readout-value" id="signedIntegral">0.0000</div> </div> <div class="readout-cell total"> <div class="readout-bar"></div> <div class="readout-label">Área geométrica total</div> <div class="readout-value" id="totalArea">0.0000</div> </div> <div class="readout-cell positive"> <div class="readout-bar"></div> <div class="readout-label">Área positiva</div> <div class="readout-value" id="positiveArea">0.0000</div> </div> <div class="readout-cell negative"> <div class="readout-bar"></div> <div class="readout-label">Área negativa</div> <div class="readout-value" id="negativeArea">0.0000</div> </div> </div> <div class="mt-5 flex flex-wrap gap-3"> <a href="/results/" class="btn btn-ghost">Ver detalles y fórmulas</a> <a href="/calculo/" class="btn btn-ghost">Explorar en 3D</a> </div> </div> </div>  <script type="importmap">
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
@@ -28,6 +42,32 @@ Limpiar
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let THREE;
+
+    function readHexVar(name, fallback) {
+      const value = getComputedStyle(document.documentElement)
+        .getPropertyValue(name)
+        .trim();
+
+      if (!value) return fallback;
+      if (value.startsWith('#')) return parseInt(value.slice(1), 16);
+
+      const rgb = value.match(/\d+/g);
+      if (!rgb || rgb.length < 3) return fallback;
+      return (Number(rgb[0]) << 16) | (Number(rgb[1]) << 8) | Number(rgb[2]);
+    }
+
+    function getScenePalette() {
+      return {
+        bg: readHexVar('--scene-bg', 0x060913),
+        fog: readHexVar('--scene-fog', 0x060913),
+        gridMajor: readHexVar('--scene-grid-major', 0x2b3a66),
+        gridMinor: readHexVar('--scene-grid-minor', 0x141d3a),
+        curve: readHexVar('--scene-curve', 0x2dd4ee),
+        pos: readHexVar('--scene-pos', 0x9d7bff),
+        neg: readHexVar('--scene-neg', 0xff6b8b),
+        dust: readHexVar('--scene-dust', 0x2dd4ee)
+      };
+    }
 
     function curveFn(x) {
       return 2.1 * Math.sin(x * 0.55) + 0.75 * Math.sin(x * 1.35 + 1.7) + 0.35 * Math.cos(x * 2.1);
@@ -95,15 +135,18 @@ Limpiar
       c.width = c.height = 64;
       const g = c.getContext('2d');
       const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      grad.addColorStop(0, 'rgba(45,212,238,1)');
-      grad.addColorStop(0.35, 'rgba(45,212,238,0.4)');
-      grad.addColorStop(1, 'rgba(45,212,238,0)');
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.35, 'rgba(255,255,255,0.4)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
       g.fillStyle = grad;
       g.fillRect(0, 0, 64, 64);
       return new THREE.CanvasTexture(c);
     }
 
     let renderer, scene, camera;
+    let grid = null;
+    let ribbon = null;
+    let halo = null;
     let slabs = [];
     let particles = null;
     let rafId = null;
@@ -111,6 +154,33 @@ Limpiar
     const mouse = { x: 0, y: 0 };
     let camTarget;
     let clock;
+
+    function createGrid(palette) {
+      if (grid) {
+        scene.remove(grid);
+        grid.geometry.dispose();
+        grid.material.dispose();
+      }
+      grid = new THREE.GridHelper(90, 90, palette.gridMajor, palette.gridMinor);
+      grid.material.transparent = true;
+      grid.material.opacity = 0.5;
+      scene.add(grid);
+    }
+
+    function applySceneTheme() {
+      if (!scene) return;
+      const palette = getScenePalette();
+      scene.background.set(palette.bg);
+      scene.fog.color.set(palette.fog);
+      createGrid(palette);
+      if (ribbon) ribbon.material.color.set(palette.curve);
+      if (halo) halo.material.color.set(palette.curve);
+      if (particles) particles.material.color.set(palette.dust);
+      slabs.forEach((slab) => {
+        slab.material.color.set(slab.userData.positive ? palette.pos : palette.neg);
+      });
+      if (renderer && camera) renderer.render(scene, camera);
+    }
 
     function init() {
       const w = heroEl.clientWidth;
@@ -121,9 +191,10 @@ Limpiar
       renderer.setSize(w, h);
       heroEl.appendChild(renderer.domElement);
 
+      const palette = getScenePalette();
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x060913);
-      scene.fog = new THREE.Fog(0x060913, 20, 52);
+      scene.background = new THREE.Color(palette.bg);
+      scene.fog = new THREE.Fog(palette.fog, 20, 52);
 
       camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 200);
       camera.position.set(0, 6.4, 24);
@@ -134,23 +205,20 @@ Limpiar
       dir.position.set(6, 14, 10);
       scene.add(dir);
 
-      const grid = new THREE.GridHelper(90, 90, 0x2b3a66, 0x141d3a);
-      grid.material.transparent = true;
-      grid.material.opacity = 0.5;
-      scene.add(grid);
+      createGrid(palette);
 
       const pts = buildCurvePoints();
 
       // luminous curve ribbon + halo
-      const ribbon = new THREE.Mesh(
+      ribbon = new THREE.Mesh(
         buildRibbon(pts, 0.14),
-        new THREE.MeshBasicMaterial({ color: 0x2dd4ee, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false })
+        new THREE.MeshBasicMaterial({ color: palette.curve, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false })
       );
       scene.add(ribbon);
 
-      const halo = new THREE.Mesh(
+      halo = new THREE.Mesh(
         buildRibbon(pts, 1.1),
-        new THREE.MeshBasicMaterial({ color: 0x2dd4ee, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })
+        new THREE.MeshBasicMaterial({ color: palette.curve, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending })
       );
       scene.add(halo);
 
@@ -163,14 +231,14 @@ Limpiar
         const slab = new THREE.Mesh(
           buildSlab(p1, p2, 1.4),
           new THREE.MeshBasicMaterial({
-            color: isPos ? 0x9d7bff : 0xff6b8b,
+            color: isPos ? palette.pos : palette.neg,
             transparent: true,
             opacity: 0.13,
             side: THREE.DoubleSide,
             depthWrite: false
           })
         );
-        slab.userData = { delay: 0.35 + i * 0.028, baseY: 1, phase: i * 0.32 };
+        slab.userData = { delay: 0.35 + i * 0.028, baseY: 1, phase: i * 0.32, positive: isPos };
         slab.scale.y = 0;
         slabGroup.add(slab);
         slabs.push(slab);
@@ -194,7 +262,7 @@ Limpiar
         new THREE.PointsMaterial({
           size: 0.09,
           map: makeGlowTexture(),
-          color: 0x2dd4ee,
+          color: palette.dust,
           transparent: true,
           opacity: 0.45,
           depthWrite: false,
@@ -268,6 +336,7 @@ Limpiar
     }
 
     if (!isMobile && heroEl) {
+      window.addEventListener('themechange', applySceneTheme);
       (async () => {
         THREE = await import('three');
         camTarget = new THREE.Vector3(0, 1.6, 0);
@@ -276,7 +345,62 @@ Limpiar
         init();
       })();
     }
-  </script>    </main> <footer class="site-footer" data-astro-cid-sckkx6r4> <div class="container footer-inner" data-astro-cid-sckkx6r4> <span class="footer-note" data-astro-cid-sckkx6r4>CalculusWeb — <span data-astro-cid-sckkx6r4>∫ f(x) dx</span> por la regla del trapecio</span> <span class="footer-note" data-astro-cid-sckkx6r4>Astro · Canvas API · Three.js · FastAPI</span> </div> </footer> <nav class="bottom-nav" role="navigation" aria-label="Navegación principal" data-astro-cid-sckkx6r4> <a href="/" class="nav-home" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" data-astro-cid-sckkx6r4></path> <path d="M9 22V12h6v10" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Inicio</span> </a> <a href="/calculo/" class="nav-calculo" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958" data-astro-cid-sckkx6r4></path> <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z" data-astro-cid-sckkx6r4></path> <path d="M9 8h6" data-astro-cid-sckkx6r4></path> <path d="M9 12h6" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>3D</span> </a> <a href="/formula/" class="nav-formula" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-astro-cid-sckkx6r4></path> <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Fórmulas</span> </a> <a href="/nosotros/" class="nav-nosotros" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" data-astro-cid-sckkx6r4></path> <circle cx="9" cy="7" r="4" data-astro-cid-sckkx6r4></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87" data-astro-cid-sckkx6r4></path> <path d="M16 3.13a4 4 0 0 1 0 7.75" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Nosotros</span> </a> </nav> <script type="module">
+  </script>    </main> <footer class="site-footer"> <div class="container footer-inner"> <span class="footer-note">CalculusWeb — <span>∫ f(x) dx</span> por la regla del trapecio</span> <span class="footer-note">Astro · Canvas API · Three.js · FastAPI</span> </div> </footer> <nav class="bottom-nav" role="navigation" aria-label="Navegación principal"> <a href="/" class="nav-home"> <svg viewBox="0 0 24 24"> <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path> <path d="M9 22V12h6v10"></path> </svg> <span>Inicio</span> </a> <a href="/calculo/" class="nav-calculo"> <svg viewBox="0 0 24 24"> <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958"></path> <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z"></path> <path d="M9 8h6"></path> <path d="M9 12h6"></path> </svg> <span>3D</span> </a> <a href="/formula/" class="nav-formula"> <svg viewBox="0 0 24 24"> <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path> <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2"></path> </svg> <span>Fórmulas</span> </a> <a href="/nosotros/" class="nav-nosotros"> <svg viewBox="0 0 24 24"> <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path> <circle cx="9" cy="7" r="4"></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path> <path d="M16 3.13a4 4 0 0 1 0 7.75"></path> </svg> <span>Nosotros</span> </a> </nav> <script>
+      (() => {
+        const root = document.documentElement;
+        const toggle = document.getElementById('themeToggle');
+        const meta = document.querySelector('meta[name="theme-color"]');
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const getStoredTheme = () => {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        };
+
+        const applyTheme = (theme, persist) => {
+          const isDark = theme === 'dark';
+          root.classList.toggle('dark', isDark);
+          root.style.colorScheme = isDark ? 'dark' : 'light';
+          if (persist) {
+            try {
+              localStorage.setItem('theme', theme);
+            } catch {}
+          }
+          if (meta) meta.setAttribute('content', isDark ? '#060913' : '#f4f7fb');
+          if (toggle) {
+            toggle.setAttribute(
+              'aria-label',
+              isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+            );
+            toggle.setAttribute('aria-pressed', String(isDark));
+          }
+          window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+        };
+
+        const stored = getStoredTheme();
+        const initial =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : media.matches
+              ? 'dark'
+              : 'light';
+
+        applyTheme(initial, false);
+
+        toggle?.addEventListener('click', () => {
+          applyTheme(root.classList.contains('dark') ? 'light' : 'dark', true);
+        });
+
+        media.addEventListener?.('change', (event) => {
+          if (!getStoredTheme()) {
+            applyTheme(event.matches ? 'dark' : 'light', false);
+          }
+        });
+      })();
+    </script> <script type="module">
       const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
       document.querySelectorAll('[data-nav]').forEach(link => {
         const href = link.getAttribute('data-nav').replace(/\/$/, '') || '/';

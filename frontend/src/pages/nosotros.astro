@@ -6,14 +6,14 @@ import Layout from '../layouts/Layout.astro';
     <header class="page-head">
       <div>
         <h1 class="page-title">Nosotros</h1>
-        <p class="page-lede" style="margin-top: 12px;">
+        <p class="page-lede mt-3">
           El equipo y la idea detrás de esta herramienta
           para aprender integración numérica dibujando.
         </p>
       </div>
     </header>
 
-    <div class="panel" style="margin-bottom: 24px;">
+    <div class="panel mb-6">
       <div class="panel-header">
         <h2 class="section-title">El proyecto</h2>
       </div>
@@ -34,7 +34,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-    <div class="panel" style="margin-bottom: 24px;">
+    <div class="panel mb-6">
       <div class="panel-header">
         <h2 class="section-title">Justificación</h2>
       </div>
@@ -56,7 +56,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-    <div class="panel" style="margin-bottom: 24px;">
+    <div class="panel mb-6">
       <div class="panel-header">
         <h2 class="section-title">Profesora guía</h2>
       </div>
@@ -72,7 +72,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-    <div class="panel" style="margin-bottom: 24px;">
+    <div class="panel mb-6">
       <div class="panel-header">
         <h2 class="section-title">Integrantes del equipo</h2>
       </div>
@@ -102,106 +102,12 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-    <div style="text-align: center; padding: 28px 0 8px;">
-      <div class="avatar" style="--a1: #1b2547; --a2: #2b3a66; width: 92px; height: 92px; font-size: 22px; margin: 0 auto;">IUE</div>
-      <p class="mono" style="color: var(--text-3); font-size: 12px; margin-top: 12px;">
+    <div class="pt-7 pb-2 text-center">
+      <div class="avatar mx-auto size-[92px] text-[22px]" style="--a1: var(--avatar-neutral-a); --a2: var(--avatar-neutral-b);">IUE</div>
+      <p class="mono mt-3 text-xs text-subtle">
         Institucion Universitaria de Envigado
       </p>
     </div>
   </div>
 
-  <style>
-    .page-head {
-      padding: 56px 0 30px;
-    }
-
-    .prose {
-      max-width: 72ch;
-    }
-
-    .prose p {
-      color: var(--text-2);
-      line-height: 1.85;
-      font-size: 15px;
-      margin-bottom: 14px;
-    }
-
-    .prose p:last-child {
-      margin-bottom: 0;
-    }
-
-    .person-row {
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      flex-wrap: wrap;
-      padding: 6px 0;
-    }
-
-    .avatar {
-      width: 84px;
-      height: 84px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-display);
-      font-size: 26px;
-      font-weight: 500;
-      color: var(--text-1);
-      background:
-        radial-gradient(120% 120% at 20% 15%, var(--a1) 0%, transparent 55%),
-        radial-gradient(120% 120% at 85% 90%, var(--a2) 0%, transparent 55%),
-        var(--ink-800);
-      border: 1px solid var(--hairline-strong);
-      box-shadow: inset 0 0 24px rgba(6, 9, 19, 0.5);
-    }
-
-    .person-name {
-      font-family: var(--font-display);
-      font-size: 21px;
-      font-weight: 500;
-      color: var(--text-1);
-      margin-bottom: 3px;
-    }
-
-    .person-role {
-      color: var(--curve);
-      font-size: 13.5px;
-      margin-bottom: 6px;
-    }
-
-    .person-bio {
-      color: var(--text-2);
-      font-size: 14px;
-      max-width: 52ch;
-    }
-
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 20px;
-    }
-
-    .team-member {
-      text-align: center;
-      padding: 26px 16px 22px;
-      background: var(--ink-900);
-      border: 1px solid var(--hairline);
-      border-radius: var(--radius-lg);
-    }
-
-    .team-member .avatar {
-      margin: 0 auto 18px;
-    }
-
-    .team-member .person-role {
-      margin-bottom: 0;
-    }
-
-    @media (max-width: 768px) {
-      .page-head { padding: 36px 0 24px; }
-    }
-  </style>
 </Layout>

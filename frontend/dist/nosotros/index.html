@@ -1,30 +1,98 @@
-<!DOCTYPE html><html lang="es" data-astro-cid-sckkx6r4> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nosotros — CalculusWeb</title><meta name="description" content="CalculusWeb — dibuja una curva y calcula el área bajo la curva mediante integración numérica (regla del trapecio)."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.DdlxDJp5.css">
-<style>.page-head[data-astro-cid-noeej2nj]{padding:56px 0 30px}.prose[data-astro-cid-noeej2nj]{max-width:72ch}.prose[data-astro-cid-noeej2nj] p[data-astro-cid-noeej2nj]{color:var(--text-2);line-height:1.85;font-size:15px;margin-bottom:14px}.prose[data-astro-cid-noeej2nj] p[data-astro-cid-noeej2nj]:last-child{margin-bottom:0}.person-row[data-astro-cid-noeej2nj]{display:flex;align-items:center;gap:28px;flex-wrap:wrap;padding:6px 0}.avatar[data-astro-cid-noeej2nj]{width:84px;height:84px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:26px;font-weight:500;color:var(--text-1);background:radial-gradient(120% 120% at 20% 15%,var(--a1) 0%,transparent 55%),radial-gradient(120% 120% at 85% 90%,var(--a2) 0%,transparent 55%),var(--ink-800);border:1px solid var(--hairline-strong);box-shadow:inset 0 0 24px #06091380}.person-name[data-astro-cid-noeej2nj]{font-family:var(--font-display);font-size:21px;font-weight:500;color:var(--text-1);margin-bottom:3px}.person-role[data-astro-cid-noeej2nj]{color:var(--curve);font-size:13.5px;margin-bottom:6px}.person-bio[data-astro-cid-noeej2nj]{color:var(--text-2);font-size:14px;max-width:52ch}.team-grid[data-astro-cid-noeej2nj]{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px}.team-member[data-astro-cid-noeej2nj]{text-align:center;padding:26px 16px 22px;background:var(--ink-900);border:1px solid var(--hairline);border-radius:var(--radius-lg)}.team-member[data-astro-cid-noeej2nj] .avatar[data-astro-cid-noeej2nj]{margin:0 auto 18px}.team-member[data-astro-cid-noeej2nj] .person-role[data-astro-cid-noeej2nj]{margin-bottom:0}@media (max-width: 768px){.page-head[data-astro-cid-noeej2nj]{padding:36px 0 24px}}
-</style></head> <body data-astro-cid-sckkx6r4> <header class="site-header" data-astro-cid-sckkx6r4> <div class="container header-inner" data-astro-cid-sckkx6r4> <a href="/" class="brand" aria-label="CalculusWeb — Inicio" data-astro-cid-sckkx6r4> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true" data-astro-cid-sckkx6r4> <path d="M4 4v28M4 32h30" stroke="rgba(148,163,216,0.4)" stroke-width="1.2" stroke-linecap="round" data-astro-cid-sckkx6r4></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="#2dd4ee" stroke-width="2" stroke-linecap="round" data-astro-cid-sckkx6r4></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="rgba(157,123,255,0.1)" stroke="none" data-astro-cid-sckkx6r4></path> </svg> <span class="brand-word" data-astro-cid-sckkx6r4>Calculus<em data-astro-cid-sckkx6r4>Web</em></span> </a> <nav class="site-nav" aria-label="Navegación principal" data-astro-cid-sckkx6r4> <a href="/" data-nav="/" data-astro-cid-sckkx6r4>Inicio</a> <a href="/calculo/" data-nav="/calculo/" data-astro-cid-sckkx6r4>Cálculo 3D</a> <a href="/formula/" data-nav="/formula/" data-astro-cid-sckkx6r4>Fórmulas</a> <a href="/nosotros/" data-nav="/nosotros/" data-astro-cid-sckkx6r4>Nosotros</a> </nav> </div> </header> <main class="site-main" data-astro-cid-sckkx6r4>  <div class="container" data-astro-cid-noeej2nj> <header class="page-head" data-astro-cid-noeej2nj> <div data-astro-cid-noeej2nj> <h1 class="page-title" data-astro-cid-noeej2nj>Nosotros</h1> <p class="page-lede" style="margin-top: 12px;" data-astro-cid-noeej2nj>
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nosotros — CalculusWeb</title><meta name="description" content="CalculusWeb — dibuja una curva y calcula el área bajo la curva mediante integración numérica (regla del trapecio)."><meta name="theme-color" content="#060913"><script>
+      (() => {
+        let stored = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {}
+        const dark = stored
+          ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', dark ? '#060913' : '#f4f7fb');
+      })();
+    </script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.DZAkDJGe.css"></head> <body> <header class="site-header"> <div class="container header-inner"> <a href="/" class="brand" aria-label="CalculusWeb — Inicio"> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"> <path d="M4 4v28M4 32h30" stroke="var(--border-strong)" stroke-width="1.2" stroke-linecap="round"></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="var(--accent)" fill-opacity="0.12" stroke="none"></path> </svg> <span class="brand-word">Calculus<em>Web</em></span> </a> <div class="flex items-center gap-2"> <nav class="site-nav" aria-label="Navegación principal"> <a href="/" data-nav="/">Inicio</a> <a href="/calculo/" data-nav="/calculo/">Cálculo 3D</a> <a href="/formula/" data-nav="/formula/">Fórmulas</a> <a href="/nosotros/" data-nav="/nosotros/">Nosotros</a> </nav> <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar a modo claro" aria-pressed="false" title="Cambiar tema"> <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path> </svg> <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path> </svg> </button> </div> </div> </header> <main class="site-main">  <div class="container"> <header class="page-head"> <div> <h1 class="page-title">Nosotros</h1> <p class="page-lede mt-3">
 El equipo y la idea detrás de esta herramienta
           para aprender integración numérica dibujando.
-</p> </div> </header> <div class="panel" style="margin-bottom: 24px;" data-astro-cid-noeej2nj> <div class="panel-header" data-astro-cid-noeej2nj> <h2 class="section-title" data-astro-cid-noeej2nj>El proyecto</h2> </div> <div class="panel-body" data-astro-cid-noeej2nj> <div class="prose" data-astro-cid-noeej2nj> <p data-astro-cid-noeej2nj>
+</p> </div> </header> <div class="panel mb-6"> <div class="panel-header"> <h2 class="section-title">El proyecto</h2> </div> <div class="panel-body"> <div class="prose"> <p>
 CalculusWeb es una aplicación web educativa que permite dibujar curvas
             de forma interactiva y calcular el área bajo la curva mediante
             integración numérica con la regla del trapecio.
-</p> <p data-astro-cid-noeej2nj>
+</p> <p>
 La arquitectura separa frontend y backend: Astro.js en el navegador
             —con Canvas API para el dibujo y Three.js para la visualización en
             tres dimensiones— y FastAPI con NumPy y Pydantic para los cálculos
             numéricos y la validación de datos.
-</p> </div> </div> </div> <div class="panel" style="margin-bottom: 24px;" data-astro-cid-noeej2nj> <div class="panel-header" data-astro-cid-noeej2nj> <h2 class="section-title" data-astro-cid-noeej2nj>Justificación</h2> </div> <div class="panel-body" data-astro-cid-noeej2nj> <div class="prose" data-astro-cid-noeej2nj> <p data-astro-cid-noeej2nj>
+</p> </div> </div> </div> <div class="panel mb-6"> <div class="panel-header"> <h2 class="section-title">Justificación</h2> </div> <div class="panel-body"> <div class="prose"> <p>
 El cálculo integral es uno de los conceptos más fundamentales —y más
             abstractos— de las matemáticas. Esta aplicación busca hacerlo accesible:
             una interfaz donde el estudiante traza una función y ve el área bajo
             la curva materializarse, tanto en el plano como en volumen.
-</p> <p data-astro-cid-noeej2nj>
+</p> <p>
 Al combinar dibujo libre, cálculo automático y visualización 3D, se
             puede experimentar con distintas curvas y observar cómo cambian los
             resultados: la integral firmada, las áreas positiva y negativa, y las
             intersecciones con los ejes coordenados.
-</p> </div> </div> </div> <div class="panel" style="margin-bottom: 24px;" data-astro-cid-noeej2nj> <div class="panel-header" data-astro-cid-noeej2nj> <h2 class="section-title" data-astro-cid-noeej2nj>Profesora guía</h2> </div> <div class="panel-body" data-astro-cid-noeej2nj> <div class="person-row" data-astro-cid-noeej2nj> <div class="avatar" style="--a1: #2dd4ee; --a2: #9d7bff;" data-astro-cid-noeej2nj>MF</div> <div data-astro-cid-noeej2nj> <h3 class="person-name" data-astro-cid-noeej2nj>Sandra Vicky Zapata Garcia</h3> <p class="person-role" data-astro-cid-noeej2nj>Departamento de Matemáticas Aplicadas</p> <p class="person-bio" data-astro-cid-noeej2nj>Especialista en análisis matemático y educación superior.</p> </div> </div> </div> </div> <div class="panel" style="margin-bottom: 24px;" data-astro-cid-noeej2nj> <div class="panel-header" data-astro-cid-noeej2nj> <h2 class="section-title" data-astro-cid-noeej2nj>Integrantes del equipo</h2> </div> <div class="panel-body" data-astro-cid-noeej2nj> <div class="team-grid" data-astro-cid-noeej2nj> <div class="team-member" data-astro-cid-noeej2nj> <div class="avatar" style="--a1: #3ddc97; --a2: #2dd4ee;" data-astro-cid-noeej2nj>LT</div> <h3 class="person-name" data-astro-cid-noeej2nj>Luis Torres</h3> <p class="person-role" data-astro-cid-noeej2nj>DevOps</p> </div> <div class="team-member" data-astro-cid-noeej2nj> <div class="avatar" style="--a1: #2dd4ee; --a2: #9d7bff;" data-astro-cid-noeej2nj>DG</div> <h3 class="person-name" data-astro-cid-noeej2nj>David Gómez</h3> <p class="person-role" data-astro-cid-noeej2nj>Desarrollo frontend (Astro)</p> </div> <div class="team-member" data-astro-cid-noeej2nj> <div class="avatar" style="--a1: #9d7bff; --a2: #ff6b8b;" data-astro-cid-noeej2nj>KA</div> <h3 class="person-name" data-astro-cid-noeej2nj>Krystal Arias</h3> <p class="person-role" data-astro-cid-noeej2nj>Algoritmos numéricos</p> </div> <div class="team-member" data-astro-cid-noeej2nj> <div class="avatar" style="--a1: #ff6b8b; --a2: #f59e0b;" data-astro-cid-noeej2nj>IG</div> <h3 class="person-name" data-astro-cid-noeej2nj>Isabel García</h3> <p class="person-role" data-astro-cid-noeej2nj>UI/UX y diseño</p> </div> </div> </div> </div> <div style="text-align: center; padding: 28px 0 8px;" data-astro-cid-noeej2nj> <div class="avatar" style="--a1: #1b2547; --a2: #2b3a66; width: 92px; height: 92px; font-size: 22px; margin: 0 auto;" data-astro-cid-noeej2nj>IUE</div> <p class="mono" style="color: var(--text-3); font-size: 12px; margin-top: 12px;" data-astro-cid-noeej2nj>
+</p> </div> </div> </div> <div class="panel mb-6"> <div class="panel-header"> <h2 class="section-title">Profesora guía</h2> </div> <div class="panel-body"> <div class="person-row"> <div class="avatar" style="--a1: #2dd4ee; --a2: #9d7bff;">MF</div> <div> <h3 class="person-name">Sandra Vicky Zapata Garcia</h3> <p class="person-role">Departamento de Matemáticas Aplicadas</p> <p class="person-bio">Especialista en análisis matemático y educación superior.</p> </div> </div> </div> </div> <div class="panel mb-6"> <div class="panel-header"> <h2 class="section-title">Integrantes del equipo</h2> </div> <div class="panel-body"> <div class="team-grid"> <div class="team-member"> <div class="avatar" style="--a1: #3ddc97; --a2: #2dd4ee;">LT</div> <h3 class="person-name">Luis Torres</h3> <p class="person-role">DevOps</p> </div> <div class="team-member"> <div class="avatar" style="--a1: #2dd4ee; --a2: #9d7bff;">DG</div> <h3 class="person-name">David Gómez</h3> <p class="person-role">Desarrollo frontend (Astro)</p> </div> <div class="team-member"> <div class="avatar" style="--a1: #9d7bff; --a2: #ff6b8b;">KA</div> <h3 class="person-name">Krystal Arias</h3> <p class="person-role">Algoritmos numéricos</p> </div> <div class="team-member"> <div class="avatar" style="--a1: #ff6b8b; --a2: #f59e0b;">IG</div> <h3 class="person-name">Isabel García</h3> <p class="person-role">UI/UX y diseño</p> </div> </div> </div> </div> <div class="pt-7 pb-2 text-center"> <div class="avatar mx-auto size-[92px] text-[22px]" style="--a1: var(--avatar-neutral-a); --a2: var(--avatar-neutral-b);">IUE</div> <p class="mono mt-3 text-xs text-subtle">
 Institucion Universitaria de Envigado
-</p> </div> </div>   </main> <footer class="site-footer" data-astro-cid-sckkx6r4> <div class="container footer-inner" data-astro-cid-sckkx6r4> <span class="footer-note" data-astro-cid-sckkx6r4>CalculusWeb — <span data-astro-cid-sckkx6r4>∫ f(x) dx</span> por la regla del trapecio</span> <span class="footer-note" data-astro-cid-sckkx6r4>Astro · Canvas API · Three.js · FastAPI</span> </div> </footer> <nav class="bottom-nav" role="navigation" aria-label="Navegación principal" data-astro-cid-sckkx6r4> <a href="/" class="nav-home" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" data-astro-cid-sckkx6r4></path> <path d="M9 22V12h6v10" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Inicio</span> </a> <a href="/calculo/" class="nav-calculo" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958" data-astro-cid-sckkx6r4></path> <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z" data-astro-cid-sckkx6r4></path> <path d="M9 8h6" data-astro-cid-sckkx6r4></path> <path d="M9 12h6" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>3D</span> </a> <a href="/formula/" class="nav-formula" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-astro-cid-sckkx6r4></path> <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Fórmulas</span> </a> <a href="/nosotros/" class="nav-nosotros" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" data-astro-cid-sckkx6r4></path> <circle cx="9" cy="7" r="4" data-astro-cid-sckkx6r4></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87" data-astro-cid-sckkx6r4></path> <path d="M16 3.13a4 4 0 0 1 0 7.75" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Nosotros</span> </a> </nav> <script type="module">
+</p> </div> </div>  </main> <footer class="site-footer"> <div class="container footer-inner"> <span class="footer-note">CalculusWeb — <span>∫ f(x) dx</span> por la regla del trapecio</span> <span class="footer-note">Astro · Canvas API · Three.js · FastAPI</span> </div> </footer> <nav class="bottom-nav" role="navigation" aria-label="Navegación principal"> <a href="/" class="nav-home"> <svg viewBox="0 0 24 24"> <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path> <path d="M9 22V12h6v10"></path> </svg> <span>Inicio</span> </a> <a href="/calculo/" class="nav-calculo"> <svg viewBox="0 0 24 24"> <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958"></path> <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z"></path> <path d="M9 8h6"></path> <path d="M9 12h6"></path> </svg> <span>3D</span> </a> <a href="/formula/" class="nav-formula"> <svg viewBox="0 0 24 24"> <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path> <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2"></path> </svg> <span>Fórmulas</span> </a> <a href="/nosotros/" class="nav-nosotros"> <svg viewBox="0 0 24 24"> <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path> <circle cx="9" cy="7" r="4"></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path> <path d="M16 3.13a4 4 0 0 1 0 7.75"></path> </svg> <span>Nosotros</span> </a> </nav> <script>
+      (() => {
+        const root = document.documentElement;
+        const toggle = document.getElementById('themeToggle');
+        const meta = document.querySelector('meta[name="theme-color"]');
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const getStoredTheme = () => {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        };
+
+        const applyTheme = (theme, persist) => {
+          const isDark = theme === 'dark';
+          root.classList.toggle('dark', isDark);
+          root.style.colorScheme = isDark ? 'dark' : 'light';
+          if (persist) {
+            try {
+              localStorage.setItem('theme', theme);
+            } catch {}
+          }
+          if (meta) meta.setAttribute('content', isDark ? '#060913' : '#f4f7fb');
+          if (toggle) {
+            toggle.setAttribute(
+              'aria-label',
+              isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+            );
+            toggle.setAttribute('aria-pressed', String(isDark));
+          }
+          window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+        };
+
+        const stored = getStoredTheme();
+        const initial =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : media.matches
+              ? 'dark'
+              : 'light';
+
+        applyTheme(initial, false);
+
+        toggle?.addEventListener('click', () => {
+          applyTheme(root.classList.contains('dark') ? 'light' : 'dark', true);
+        });
+
+        media.addEventListener?.('change', (event) => {
+          if (!getStoredTheme()) {
+            applyTheme(event.matches ? 'dark' : 'light', false);
+          }
+        });
+      })();
+    </script> <script type="module">
       const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
       document.querySelectorAll('[data-nav]').forEach(link => {
         const href = link.getAttribute('data-nav').replace(/\/$/, '') || '/';

@@ -1,21 +1,34 @@
-<!DOCTYPE html><html lang="es" data-astro-cid-sckkx6r4> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cálculo 3D — CalculusWeb</title><meta name="description" content="CalculusWeb — dibuja una curva y calcula el área bajo la curva mediante integración numérica (regla del trapecio)."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.DdlxDJp5.css">
-<style>.page-head[data-astro-cid-5cmvulhv]{padding:56px 0 30px}.three-container[data-astro-cid-5cmvulhv]{width:100%;height:560px;position:relative;background:radial-gradient(120% 90% at 50% 0%,rgba(27,37,71,.35) 0%,transparent 55%),var(--ink-950)}.three-container[data-astro-cid-5cmvulhv] canvas[data-astro-cid-5cmvulhv]{display:block}.info-strip[data-astro-cid-5cmvulhv]{margin-top:18px;padding:18px 22px;background:var(--ink-850);border:1px solid var(--hairline);border-left:3px solid var(--curve);border-radius:var(--radius-md)}.info-strip[data-astro-cid-5cmvulhv] p[data-astro-cid-5cmvulhv]{color:var(--text-2);font-size:14px;line-height:1.7;max-width:72ch}@media (max-width: 768px){.page-head[data-astro-cid-5cmvulhv]{padding:36px 0 24px}.three-container[data-astro-cid-5cmvulhv]{height:420px}}
-</style></head> <body data-astro-cid-sckkx6r4> <header class="site-header" data-astro-cid-sckkx6r4> <div class="container header-inner" data-astro-cid-sckkx6r4> <a href="/" class="brand" aria-label="CalculusWeb — Inicio" data-astro-cid-sckkx6r4> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true" data-astro-cid-sckkx6r4> <path d="M4 4v28M4 32h30" stroke="rgba(148,163,216,0.4)" stroke-width="1.2" stroke-linecap="round" data-astro-cid-sckkx6r4></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="#2dd4ee" stroke-width="2" stroke-linecap="round" data-astro-cid-sckkx6r4></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="rgba(157,123,255,0.1)" stroke="none" data-astro-cid-sckkx6r4></path> </svg> <span class="brand-word" data-astro-cid-sckkx6r4>Calculus<em data-astro-cid-sckkx6r4>Web</em></span> </a> <nav class="site-nav" aria-label="Navegación principal" data-astro-cid-sckkx6r4> <a href="/" data-nav="/" data-astro-cid-sckkx6r4>Inicio</a> <a href="/calculo/" data-nav="/calculo/" data-astro-cid-sckkx6r4>Cálculo 3D</a> <a href="/formula/" data-nav="/formula/" data-astro-cid-sckkx6r4>Fórmulas</a> <a href="/nosotros/" data-nav="/nosotros/" data-astro-cid-sckkx6r4>Nosotros</a> </nav> </div> </header> <main class="site-main" data-astro-cid-sckkx6r4>  <div class="container" data-astro-cid-5cmvulhv> <header class="page-head" data-astro-cid-5cmvulhv> <div data-astro-cid-5cmvulhv> <h1 class="page-title" data-astro-cid-5cmvulhv>La integral, en volumen</h1> <p class="page-lede" style="margin-top: 12px;" data-astro-cid-5cmvulhv>
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cálculo 3D — CalculusWeb</title><meta name="description" content="CalculusWeb — dibuja una curva y calcula el área bajo la curva mediante integración numérica (regla del trapecio)."><meta name="theme-color" content="#060913"><script>
+      (() => {
+        let stored = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {}
+        const dark = stored
+          ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', dark ? '#060913' : '#f4f7fb');
+      })();
+    </script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.DZAkDJGe.css"></head> <body> <header class="site-header"> <div class="container header-inner"> <a href="/" class="brand" aria-label="CalculusWeb — Inicio"> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"> <path d="M4 4v28M4 32h30" stroke="var(--border-strong)" stroke-width="1.2" stroke-linecap="round"></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="var(--accent)" fill-opacity="0.12" stroke="none"></path> </svg> <span class="brand-word">Calculus<em>Web</em></span> </a> <div class="flex items-center gap-2"> <nav class="site-nav" aria-label="Navegación principal"> <a href="/" data-nav="/">Inicio</a> <a href="/calculo/" data-nav="/calculo/">Cálculo 3D</a> <a href="/formula/" data-nav="/formula/">Fórmulas</a> <a href="/nosotros/" data-nav="/nosotros/">Nosotros</a> </nav> <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar a modo claro" aria-pressed="false" title="Cambiar tema"> <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path> </svg> <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path> </svg> </button> </div> </div> </header> <main class="site-main">  <div class="container"> <header class="page-head"> <div> <h1 class="page-title">La integral, en volumen</h1> <p class="page-lede mt-3">
 La curva dibujada y cada trapecio que aproxima el área, levantados del plano
           y expuestos en tres dimensiones. Gira, acerca y alterna la malla para inspeccionar cada rebanada.
-</p> </div> </header> <div id="errorMessage" style="display: none; margin: 16px 0;" data-astro-cid-5cmvulhv></div> <div class="panel" data-astro-cid-5cmvulhv> <div class="panel-header" data-astro-cid-5cmvulhv> <h2 class="section-title" data-astro-cid-5cmvulhv>Visualización 3D</h2> <div class="badge" data-astro-cid-5cmvulhv><span class="dot" data-astro-cid-5cmvulhv></span><span id="trapecioCount" data-astro-cid-5cmvulhv>Trapecios: 0</span></div> </div> <div class="panel-body flush" data-astro-cid-5cmvulhv> <div id="threeContainer" class="three-container" data-astro-cid-5cmvulhv></div> </div> </div> <div class="toolbar" role="toolbar" aria-label="Controles de visualización 3D" data-astro-cid-5cmvulhv> <button id="replayBtn" class="btn btn-primary" data-astro-cid-5cmvulhv> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-5cmvulhv> <path d="M3 12a9 9 0 0 1 2.91-6.36L12 2l6.09 3.64A9 9 0 0 1 21 12" data-astro-cid-5cmvulhv></path> </svg>
+</p> </div> </header> <div id="errorMessage" class="hidden my-4"></div> <div class="panel"> <div class="panel-header"> <h2 class="section-title">Visualización 3D</h2> <div class="badge"><span class="dot"></span><span id="trapecioCount">Trapecios: 0</span></div> </div> <div class="panel-body flush"> <div id="threeContainer" class="three-container"></div> </div> </div> <div class="toolbar" role="toolbar" aria-label="Controles de visualización 3D"> <button id="replayBtn" class="btn btn-primary"> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <path d="M3 12a9 9 0 0 1 2.91-6.36L12 2l6.09 3.64A9 9 0 0 1 21 12"></path> </svg>
 Reproducir animación
-</button> <button id="rotateBtn" class="btn btn-ghost" data-astro-cid-5cmvulhv> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-5cmvulhv> <path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8" data-astro-cid-5cmvulhv></path> <path d="M21 3v5h-5" data-astro-cid-5cmvulhv></path> </svg>
+</button> <button id="rotateBtn" class="btn btn-ghost"> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <path d="M21 12a9 9 0 11-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path> <path d="M21 3v5h-5"></path> </svg>
 Rotar automáticamente
-</button> <button id="resetViewBtn" class="btn btn-ghost" data-astro-cid-5cmvulhv> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-5cmvulhv> <circle cx="12" cy="12" r="3" data-astro-cid-5cmvulhv></circle> <path d="M12 2v3m0 14v3M2 12h3m14 0h3" data-astro-cid-5cmvulhv></path> </svg>
+</button> <button id="resetViewBtn" class="btn btn-ghost"> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="3"></circle> <path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path> </svg>
 Restablecer vista
-</button> <button id="toggleWireframeBtn" class="btn btn-ghost" data-astro-cid-5cmvulhv> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-5cmvulhv> <rect x="3" y="3" width="18" height="18" rx="2" ry="2" data-astro-cid-5cmvulhv></rect> <path d="M3 9h18M3 15h18M9 3v18M15 3v18" data-astro-cid-5cmvulhv></path> </svg>
+</button> <button id="toggleWireframeBtn" class="btn btn-ghost"> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect> <path d="M3 9h18M3 15h18M9 3v18M15 3v18"></path> </svg>
 Alternar malla
-</button> </div> <div class="info-strip" data-astro-cid-5cmvulhv> <p data-astro-cid-5cmvulhv>
+</button> </div> <div class="info-strip"> <p>
 La curva aparece en cian; los trapecios por encima del eje X, en violeta;
         los que quedan por debajo, en rosa. El eje X es horizontal, la altura es Y
         y la profundidad extiende cada rebanada hacia el observador.
-</p> </div> </div>  <script type="importmap">
+</p> </div> </div> <script type="importmap">
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -36,38 +49,100 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    function readHexVar(name, fallback) {
+      const value = getComputedStyle(document.documentElement)
+        .getPropertyValue(name)
+        .trim();
+
+      if (!value) return fallback;
+      if (value.startsWith('#')) return parseInt(value.slice(1), 16);
+
+      const rgb = value.match(/\d+/g);
+      if (!rgb || rgb.length < 3) return fallback;
+      return (Number(rgb[0]) << 16) | (Number(rgb[1]) << 8) | Number(rgb[2]);
+    }
+
+    function getScenePalette() {
+      return {
+        bg: readHexVar('--scene-bg', 0x060913),
+        fog: readHexVar('--scene-fog', 0x060913),
+        gridMajor: readHexVar('--scene-grid-major', 0x2b3a66),
+        gridMinor: readHexVar('--scene-grid-minor', 0x141d3a),
+        curve: readHexVar('--scene-curve', 0x2dd4ee),
+        areaPos: readHexVar('--scene-pos', 0x9d7bff),
+        areaNeg: readHexVar('--scene-neg', 0xff6b8b),
+        dust: readHexVar('--scene-dust', 0x9db1e8),
+        ambient: readHexVar('--scene-ambient', 0x9db1e8)
+      };
+    }
+
     let scene, camera, renderer, controls;
+    let ambient, grid, cyanGlow, violetGlow;
     let curveLine, curveGlow, curvePointsGroup, trapezoidGroup, dust;
     let wireframeEnabled = false;
     let revealT = 0;
     let revealing = false;
     const REVEAL_DURATION = 2.2;
 
-    const COLORS = {
-      curve: 0x2dd4ee,
-      areaPos: 0x9d7bff,
-      areaNeg: 0xff6b8b,
-      gridCenter: 0x2b3a66,
-      grid: 0x141d3a
-    };
-
     function makeGlowTexture() {
       const c = document.createElement('canvas');
       c.width = c.height = 64;
       const g = c.getContext('2d');
       const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      grad.addColorStop(0, 'rgba(45,212,238,1)');
-      grad.addColorStop(0.4, 'rgba(45,212,238,0.35)');
-      grad.addColorStop(1, 'rgba(45,212,238,0)');
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.4, 'rgba(255,255,255,0.35)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
       g.fillStyle = grad;
       g.fillRect(0, 0, 64, 64);
       return new THREE.CanvasTexture(c);
     }
 
+    function createGrid(palette) {
+      if (grid) {
+        scene.remove(grid);
+        grid.geometry.dispose();
+        grid.material.dispose();
+      }
+      grid = new THREE.GridHelper(70, 70, palette.gridMajor, palette.gridMinor);
+      grid.material.transparent = true;
+      grid.material.opacity = 0.55;
+      scene.add(grid);
+    }
+
+    function applySceneTheme() {
+      if (!scene) return;
+      const palette = getScenePalette();
+      scene.background.set(palette.bg);
+      scene.fog.color.set(palette.fog);
+
+      createGrid(palette);
+
+      if (ambient) ambient.color.set(palette.ambient);
+      if (cyanGlow) cyanGlow.color.set(palette.curve);
+      if (violetGlow) violetGlow.color.set(palette.areaPos);
+      if (curveLine) curveLine.material.color.set(palette.curve);
+      if (curveGlow) curveGlow.material.color.set(palette.curve);
+      if (dust) dust.material.color.set(palette.dust);
+
+      curvePointsGroup?.children.forEach((sphere) => {
+        sphere.material.color.set(palette.curve);
+        sphere.material.emissive.set(palette.curve);
+      });
+
+      trapezoidGroup?.children.forEach((mesh) => {
+        const color = mesh.userData.positive ? palette.areaPos : palette.areaNeg;
+        mesh.material.color.set(color);
+        mesh.material.emissive.set(color);
+      });
+
+      if (renderer && camera) renderer.render(scene, camera);
+    }
+
     function initScene() {
+      const palette = getScenePalette();
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x060913);
-      scene.fog = new THREE.Fog(0x060913, 34, 90);
+      scene.background = new THREE.Color(palette.bg);
+      scene.fog = new THREE.Fog(palette.fog, 34, 90);
 
       const width = threeContainer.clientWidth;
       const height = threeContainer.clientHeight;
@@ -82,24 +157,22 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
       renderer.toneMappingExposure = 1.1;
       threeContainer.appendChild(renderer.domElement);
 
-      scene.add(new THREE.AmbientLight(0x9db1e8, 0.5));
+      ambient = new THREE.AmbientLight(palette.ambient, 0.5);
+      scene.add(ambient);
 
       const key = new THREE.DirectionalLight(0xffffff, 1.1);
       key.position.set(14, 24, 16);
       scene.add(key);
 
-      const cyanGlow = new THREE.PointLight(0x2dd4ee, 22, 40);
+      cyanGlow = new THREE.PointLight(palette.curve, 22, 40);
       cyanGlow.position.set(0, 6, 4);
       scene.add(cyanGlow);
 
-      const violetGlow = new THREE.PointLight(0x9d7bff, 14, 40);
+      violetGlow = new THREE.PointLight(palette.areaPos, 14, 40);
       violetGlow.position.set(0, -4, -6);
       scene.add(violetGlow);
 
-      const grid = new THREE.GridHelper(70, 70, COLORS.gridCenter, COLORS.grid);
-      grid.material.transparent = true;
-      grid.material.opacity = 0.55;
-      scene.add(grid);
+      createGrid(palette);
 
       const axes = new THREE.AxesHelper(12);
       axes.material.transparent = true;
@@ -138,7 +211,7 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
         new THREE.PointsMaterial({
           size: 0.14,
           map: makeGlowTexture(),
-          color: 0x9db1e8,
+          color: palette.dust,
           transparent: true,
           opacity: 0.35,
           depthWrite: false,
@@ -198,6 +271,7 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
     }
 
     function createCurveLine(points) {
+      const colors = getScenePalette();
       clearGroup(curvePointsGroup);
       if (curveLine) {
         curveLine.geometry.dispose();
@@ -217,7 +291,7 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
 
       curveLine = new THREE.Line(
         geometry,
-        new THREE.LineBasicMaterial({ color: COLORS.curve, transparent: true, opacity: 0.95 })
+        new THREE.LineBasicMaterial({ color: colors.curve, transparent: true, opacity: 0.95 })
       );
       scene.add(curveLine);
 
@@ -228,7 +302,7 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
         new THREE.PointsMaterial({
           size: 0.34,
           map: makeGlowTexture(),
-          color: COLORS.curve,
+          color: colors.curve,
           transparent: true,
           opacity: 0.5,
           depthWrite: false,
@@ -241,8 +315,8 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
       // vertex markers, scaled to zero, popped in during the reveal
       const sphereGeo = new THREE.SphereGeometry(0.16, 14, 14);
       const sphereMat = new THREE.MeshStandardMaterial({
-        color: COLORS.curve,
-        emissive: COLORS.curve,
+        color: colors.curve,
+        emissive: colors.curve,
         emissiveIntensity: 0.55,
         roughness: 0.3,
         metalness: 0.1
@@ -258,6 +332,7 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
     }
 
     function createTrapezoids(points) {
+      const colors = getScenePalette();
       clearGroup(trapezoidGroup);
 
       const depth = 3;
@@ -267,7 +342,7 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
         const p2 = points[i + 1];
 
         const isPositive = (p1.y + p2.y) / 2 >= 0;
-        const color = isPositive ? COLORS.areaPos : COLORS.areaNeg;
+        const color = isPositive ? colors.areaPos : colors.areaNeg;
 
         const vertices = new Float32Array([
           p1.x, p1.y, -depth / 2,
@@ -309,7 +384,7 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
 
         const mesh = new THREE.Mesh(geometry, material);
         mesh.renderOrder = 1;
-        mesh.userData = { delay: 0.55 + i * 0.05, index: i };
+        mesh.userData = { delay: 0.55 + i * 0.05, index: i, positive: isPositive };
         mesh.scale.y = reducedMotion ? 1 : 0;
         trapezoidGroup.add(mesh);
       }
@@ -446,7 +521,63 @@ La curva aparece en cian; los trapecios por encima del eje X, en violeta;
 
     initScene();
     loadData();
-  </script>  </main> <footer class="site-footer" data-astro-cid-sckkx6r4> <div class="container footer-inner" data-astro-cid-sckkx6r4> <span class="footer-note" data-astro-cid-sckkx6r4>CalculusWeb — <span data-astro-cid-sckkx6r4>∫ f(x) dx</span> por la regla del trapecio</span> <span class="footer-note" data-astro-cid-sckkx6r4>Astro · Canvas API · Three.js · FastAPI</span> </div> </footer> <nav class="bottom-nav" role="navigation" aria-label="Navegación principal" data-astro-cid-sckkx6r4> <a href="/" class="nav-home" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" data-astro-cid-sckkx6r4></path> <path d="M9 22V12h6v10" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Inicio</span> </a> <a href="/calculo/" class="nav-calculo" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958" data-astro-cid-sckkx6r4></path> <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z" data-astro-cid-sckkx6r4></path> <path d="M9 8h6" data-astro-cid-sckkx6r4></path> <path d="M9 12h6" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>3D</span> </a> <a href="/formula/" class="nav-formula" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-astro-cid-sckkx6r4></path> <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Fórmulas</span> </a> <a href="/nosotros/" class="nav-nosotros" data-astro-cid-sckkx6r4> <svg viewBox="0 0 24 24" data-astro-cid-sckkx6r4> <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" data-astro-cid-sckkx6r4></path> <circle cx="9" cy="7" r="4" data-astro-cid-sckkx6r4></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87" data-astro-cid-sckkx6r4></path> <path d="M16 3.13a4 4 0 0 1 0 7.75" data-astro-cid-sckkx6r4></path> </svg> <span data-astro-cid-sckkx6r4>Nosotros</span> </a> </nav> <script type="module">
+    window.addEventListener('themechange', applySceneTheme);
+  </script>  </main> <footer class="site-footer"> <div class="container footer-inner"> <span class="footer-note">CalculusWeb — <span>∫ f(x) dx</span> por la regla del trapecio</span> <span class="footer-note">Astro · Canvas API · Three.js · FastAPI</span> </div> </footer> <nav class="bottom-nav" role="navigation" aria-label="Navegación principal"> <a href="/" class="nav-home"> <svg viewBox="0 0 24 24"> <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path> <path d="M9 22V12h6v10"></path> </svg> <span>Inicio</span> </a> <a href="/calculo/" class="nav-calculo"> <svg viewBox="0 0 24 24"> <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958"></path> <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z"></path> <path d="M9 8h6"></path> <path d="M9 12h6"></path> </svg> <span>3D</span> </a> <a href="/formula/" class="nav-formula"> <svg viewBox="0 0 24 24"> <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path> <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2"></path> </svg> <span>Fórmulas</span> </a> <a href="/nosotros/" class="nav-nosotros"> <svg viewBox="0 0 24 24"> <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path> <circle cx="9" cy="7" r="4"></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path> <path d="M16 3.13a4 4 0 0 1 0 7.75"></path> </svg> <span>Nosotros</span> </a> </nav> <script>
+      (() => {
+        const root = document.documentElement;
+        const toggle = document.getElementById('themeToggle');
+        const meta = document.querySelector('meta[name="theme-color"]');
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const getStoredTheme = () => {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        };
+
+        const applyTheme = (theme, persist) => {
+          const isDark = theme === 'dark';
+          root.classList.toggle('dark', isDark);
+          root.style.colorScheme = isDark ? 'dark' : 'light';
+          if (persist) {
+            try {
+              localStorage.setItem('theme', theme);
+            } catch {}
+          }
+          if (meta) meta.setAttribute('content', isDark ? '#060913' : '#f4f7fb');
+          if (toggle) {
+            toggle.setAttribute(
+              'aria-label',
+              isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+            );
+            toggle.setAttribute('aria-pressed', String(isDark));
+          }
+          window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+        };
+
+        const stored = getStoredTheme();
+        const initial =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : media.matches
+              ? 'dark'
+              : 'light';
+
+        applyTheme(initial, false);
+
+        toggle?.addEventListener('click', () => {
+          applyTheme(root.classList.contains('dark') ? 'light' : 'dark', true);
+        });
+
+        media.addEventListener?.('change', (event) => {
+          if (!getStoredTheme()) {
+            applyTheme(event.matches ? 'dark' : 'light', false);
+          }
+        });
+      })();
+    </script> <script type="module">
       const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
       document.querySelectorAll('[data-nav]').forEach(link => {
         const href = link.getAttribute('data-nav').replace(/\/$/, '') || '/';

@@ -6,14 +6,14 @@ import Layout from '../layouts/Layout.astro';
     <header class="page-head">
       <div>
         <h1 class="page-title">La integral, en volumen</h1>
-        <p class="page-lede" style="margin-top: 12px;">
+        <p class="page-lede mt-3">
           La curva dibujada y cada trapecio que aproxima el área, levantados del plano
           y expuestos en tres dimensiones. Gira, acerca y alterna la malla para inspeccionar cada rebanada.
         </p>
       </div>
     </header>
 
-    <div id="errorMessage" style="display: none; margin: 16px 0;"></div>
+    <div id="errorMessage" class="hidden my-4"></div>
 
     <div class="panel">
       <div class="panel-header">
@@ -64,45 +64,6 @@ import Layout from '../layouts/Layout.astro';
     </div>
   </div>
 
-  <style>
-    .page-head {
-      padding: 56px 0 30px;
-    }
-
-    .three-container {
-      width: 100%;
-      height: 560px;
-      position: relative;
-      background:
-        radial-gradient(120% 90% at 50% 0%, rgba(27, 37, 71, 0.35) 0%, transparent 55%),
-        var(--ink-950);
-    }
-
-    .three-container canvas {
-      display: block;
-    }
-
-    .info-strip {
-      margin-top: 18px;
-      padding: 18px 22px;
-      background: var(--ink-850);
-      border: 1px solid var(--hairline);
-      border-left: 3px solid var(--curve);
-      border-radius: var(--radius-md);
-    }
-
-    .info-strip p {
-      color: var(--text-2);
-      font-size: 14px;
-      line-height: 1.7;
-      max-width: 72ch;
-    }
-
-    @media (max-width: 768px) {
-      .page-head { padding: 36px 0 24px; }
-      .three-container { height: 420px; }
-    }
-  </style>
 
   <script type="importmap">
     {
@@ -127,38 +88,100 @@ import Layout from '../layouts/Layout.astro';
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    function readHexVar(name, fallback) {
+      const value = getComputedStyle(document.documentElement)
+        .getPropertyValue(name)
+        .trim();
+
+      if (!value) return fallback;
+      if (value.startsWith('#')) return parseInt(value.slice(1), 16);
+
+      const rgb = value.match(/\d+/g);
+      if (!rgb || rgb.length < 3) return fallback;
+      return (Number(rgb[0]) << 16) | (Number(rgb[1]) << 8) | Number(rgb[2]);
+    }
+
+    function getScenePalette() {
+      return {
+        bg: readHexVar('--scene-bg', 0x060913),
+        fog: readHexVar('--scene-fog', 0x060913),
+        gridMajor: readHexVar('--scene-grid-major', 0x2b3a66),
+        gridMinor: readHexVar('--scene-grid-minor', 0x141d3a),
+        curve: readHexVar('--scene-curve', 0x2dd4ee),
+        areaPos: readHexVar('--scene-pos', 0x9d7bff),
+        areaNeg: readHexVar('--scene-neg', 0xff6b8b),
+        dust: readHexVar('--scene-dust', 0x9db1e8),
+        ambient: readHexVar('--scene-ambient', 0x9db1e8)
+      };
+    }
+
     let scene, camera, renderer, controls;
+    let ambient, grid, cyanGlow, violetGlow;
     let curveLine, curveGlow, curvePointsGroup, trapezoidGroup, dust;
     let wireframeEnabled = false;
     let revealT = 0;
     let revealing = false;
     const REVEAL_DURATION = 2.2;
 
-    const COLORS = {
-      curve: 0x2dd4ee,
-      areaPos: 0x9d7bff,
-      areaNeg: 0xff6b8b,
-      gridCenter: 0x2b3a66,
-      grid: 0x141d3a
-    };
-
     function makeGlowTexture() {
       const c = document.createElement('canvas');
       c.width = c.height = 64;
       const g = c.getContext('2d');
       const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      grad.addColorStop(0, 'rgba(45,212,238,1)');
-      grad.addColorStop(0.4, 'rgba(45,212,238,0.35)');
-      grad.addColorStop(1, 'rgba(45,212,238,0)');
+      grad.addColorStop(0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.4, 'rgba(255,255,255,0.35)');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
       g.fillStyle = grad;
       g.fillRect(0, 0, 64, 64);
       return new THREE.CanvasTexture(c);
     }
 
+    function createGrid(palette) {
+      if (grid) {
+        scene.remove(grid);
+        grid.geometry.dispose();
+        grid.material.dispose();
+      }
+      grid = new THREE.GridHelper(70, 70, palette.gridMajor, palette.gridMinor);
+      grid.material.transparent = true;
+      grid.material.opacity = 0.55;
+      scene.add(grid);
+    }
+
+    function applySceneTheme() {
+      if (!scene) return;
+      const palette = getScenePalette();
+      scene.background.set(palette.bg);
+      scene.fog.color.set(palette.fog);
+
+      createGrid(palette);
+
+      if (ambient) ambient.color.set(palette.ambient);
+      if (cyanGlow) cyanGlow.color.set(palette.curve);
+      if (violetGlow) violetGlow.color.set(palette.areaPos);
+      if (curveLine) curveLine.material.color.set(palette.curve);
+      if (curveGlow) curveGlow.material.color.set(palette.curve);
+      if (dust) dust.material.color.set(palette.dust);
+
+      curvePointsGroup?.children.forEach((sphere) => {
+        sphere.material.color.set(palette.curve);
+        sphere.material.emissive.set(palette.curve);
+      });
+
+      trapezoidGroup?.children.forEach((mesh) => {
+        const color = mesh.userData.positive ? palette.areaPos : palette.areaNeg;
+        mesh.material.color.set(color);
+        mesh.material.emissive.set(color);
+      });
+
+      if (renderer && camera) renderer.render(scene, camera);
+    }
+
     function initScene() {
+      const palette = getScenePalette();
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x060913);
-      scene.fog = new THREE.Fog(0x060913, 34, 90);
+      scene.background = new THREE.Color(palette.bg);
+      scene.fog = new THREE.Fog(palette.fog, 34, 90);
 
       const width = threeContainer.clientWidth;
       const height = threeContainer.clientHeight;
@@ -173,24 +196,22 @@ import Layout from '../layouts/Layout.astro';
       renderer.toneMappingExposure = 1.1;
       threeContainer.appendChild(renderer.domElement);
 
-      scene.add(new THREE.AmbientLight(0x9db1e8, 0.5));
+      ambient = new THREE.AmbientLight(palette.ambient, 0.5);
+      scene.add(ambient);
 
       const key = new THREE.DirectionalLight(0xffffff, 1.1);
       key.position.set(14, 24, 16);
       scene.add(key);
 
-      const cyanGlow = new THREE.PointLight(0x2dd4ee, 22, 40);
+      cyanGlow = new THREE.PointLight(palette.curve, 22, 40);
       cyanGlow.position.set(0, 6, 4);
       scene.add(cyanGlow);
 
-      const violetGlow = new THREE.PointLight(0x9d7bff, 14, 40);
+      violetGlow = new THREE.PointLight(palette.areaPos, 14, 40);
       violetGlow.position.set(0, -4, -6);
       scene.add(violetGlow);
 
-      const grid = new THREE.GridHelper(70, 70, COLORS.gridCenter, COLORS.grid);
-      grid.material.transparent = true;
-      grid.material.opacity = 0.55;
-      scene.add(grid);
+      createGrid(palette);
 
       const axes = new THREE.AxesHelper(12);
       axes.material.transparent = true;
@@ -229,7 +250,7 @@ import Layout from '../layouts/Layout.astro';
         new THREE.PointsMaterial({
           size: 0.14,
           map: makeGlowTexture(),
-          color: 0x9db1e8,
+          color: palette.dust,
           transparent: true,
           opacity: 0.35,
           depthWrite: false,
@@ -289,6 +310,7 @@ import Layout from '../layouts/Layout.astro';
     }
 
     function createCurveLine(points) {
+      const colors = getScenePalette();
       clearGroup(curvePointsGroup);
       if (curveLine) {
         curveLine.geometry.dispose();
@@ -308,7 +330,7 @@ import Layout from '../layouts/Layout.astro';
 
       curveLine = new THREE.Line(
         geometry,
-        new THREE.LineBasicMaterial({ color: COLORS.curve, transparent: true, opacity: 0.95 })
+        new THREE.LineBasicMaterial({ color: colors.curve, transparent: true, opacity: 0.95 })
       );
       scene.add(curveLine);
 
@@ -319,7 +341,7 @@ import Layout from '../layouts/Layout.astro';
         new THREE.PointsMaterial({
           size: 0.34,
           map: makeGlowTexture(),
-          color: COLORS.curve,
+          color: colors.curve,
           transparent: true,
           opacity: 0.5,
           depthWrite: false,
@@ -332,8 +354,8 @@ import Layout from '../layouts/Layout.astro';
       // vertex markers, scaled to zero, popped in during the reveal
       const sphereGeo = new THREE.SphereGeometry(0.16, 14, 14);
       const sphereMat = new THREE.MeshStandardMaterial({
-        color: COLORS.curve,
-        emissive: COLORS.curve,
+        color: colors.curve,
+        emissive: colors.curve,
         emissiveIntensity: 0.55,
         roughness: 0.3,
         metalness: 0.1
@@ -349,6 +371,7 @@ import Layout from '../layouts/Layout.astro';
     }
 
     function createTrapezoids(points) {
+      const colors = getScenePalette();
       clearGroup(trapezoidGroup);
 
       const depth = 3;
@@ -358,7 +381,7 @@ import Layout from '../layouts/Layout.astro';
         const p2 = points[i + 1];
 
         const isPositive = (p1.y + p2.y) / 2 >= 0;
-        const color = isPositive ? COLORS.areaPos : COLORS.areaNeg;
+        const color = isPositive ? colors.areaPos : colors.areaNeg;
 
         const vertices = new Float32Array([
           p1.x, p1.y, -depth / 2,
@@ -400,7 +423,7 @@ import Layout from '../layouts/Layout.astro';
 
         const mesh = new THREE.Mesh(geometry, material);
         mesh.renderOrder = 1;
-        mesh.userData = { delay: 0.55 + i * 0.05, index: i };
+        mesh.userData = { delay: 0.55 + i * 0.05, index: i, positive: isPositive };
         mesh.scale.y = reducedMotion ? 1 : 0;
         trapezoidGroup.add(mesh);
       }
@@ -537,5 +560,6 @@ import Layout from '../layouts/Layout.astro';
 
     initScene();
     loadData();
+    window.addEventListener('themechange', applySceneTheme);
   </script>
 </Layout>

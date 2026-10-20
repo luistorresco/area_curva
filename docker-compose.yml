@@ -3,8 +3,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: calculus-web:latest
     ports:
-      - "8080:80"
+      - "${APP_PORT:-8080}:80"
     environment:
-      - PORT=80
+      PORT: 80
+    init: true
     restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1/api/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

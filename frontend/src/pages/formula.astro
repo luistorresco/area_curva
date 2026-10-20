@@ -6,19 +6,19 @@ import Layout from '../layouts/Layout.astro';
     <header class="page-head">
       <div>
         <h1 class="page-title">Fórmulas y metodología</h1>
-        <p class="page-lede" style="margin-top: 12px;">
+        <p class="page-lede mt-3">
           El recorrido completo de una integral numérica:
           desde el trazo crudo hasta el número final, con cada fórmula en su sitio.
         </p>
       </div>
     </header>
 
-    <div id="noDataMessage" style="display: none; text-align: center; padding: 80px 20px;">
-      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="1.4" style="margin-bottom: 20px;">
+    <div id="noDataMessage" class="hidden px-5 py-20 text-center">
+      <svg class="mb-5 text-subtle" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
         <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
       </svg>
-      <h2 class="page-title" style="font-size: 26px; margin-bottom: 10px;">No hay datos de cálculo</h2>
-      <p class="page-lede" style="margin: 0 auto 28px;">Dibuja una curva en la pantalla principal y calcula su área para ver el proceso detallado.</p>
+      <h2 class="page-title mb-2.5 text-2xl">No hay datos de cálculo</h2>
+      <p class="page-lede mx-auto mb-7">Dibuja una curva en la pantalla principal y calcula su área para ver el proceso detallado.</p>
       <a href="/" class="btn btn-primary">Ir al plano cartesiano</a>
     </div>
 
@@ -219,9 +219,9 @@ Integral<sub>firmada</sub> = Área<sub>positiva</sub> + Área<sub>negativa</sub>
               </div>
             </div>
 
-            <div id="trapezoidBreakdown" style="margin-top: 32px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
-                <h3 class="section-title" style="font-size: 18px;">Desglose de trapecios</h3>
+            <div id="trapezoidBreakdown" class="mt-8">
+              <div class="mb-3.5 flex flex-wrap items-center justify-between gap-2.5">
+                <h3 class="section-title text-lg">Desglose de trapecios</h3>
                 <div class="badge"><span class="dot"></span><span id="trapezoidBreakdownCount">0 trapecios</span></div>
               </div>
               <div class="trapezoid-head">
@@ -247,66 +247,6 @@ Integral<sub>firmada</sub> = Área<sub>positiva</sub> + Área<sub>negativa</sub>
     </div>
   </div>
 
-  <style>
-    .page-head {
-      padding: 56px 0 30px;
-    }
-
-    .mono.strong {
-      color: var(--curve);
-      font-weight: 600;
-    }
-
-    .formula-block strong {
-      color: var(--text-1);
-      font-weight: 600;
-    }
-
-    .actions-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 20px 0 8px;
-    }
-
-    @media (max-width: 768px) {
-      .page-head { padding: 36px 0 24px; }
-      .section { margin-bottom: 28px; }
-      .section-head { margin-bottom: 18px; }
-      .step {
-        padding: 20px 18px 20px 62px;
-        margin-bottom: 16px;
-      }
-      .step-index {
-        left: 14px;
-        top: 20px;
-        width: 34px;
-        height: 34px;
-        font-size: 12.5px;
-      }
-      .step::before {
-        left: 30.5px;
-        top: 37px;
-        bottom: -53px;
-      }
-      .step-title { font-size: 17px; }
-      .step-meta { margin-top: 14px; }
-    }
-
-    @media (max-width: 560px) {
-      .trapezoid-head { display: none; }
-      .trapezoid-head,
-      .trapezoid-item {
-        grid-template-columns: 52px minmax(0, 1fr) auto;
-        gap: 10px;
-      }
-      .trapezoid-item {
-        padding: 12px 14px;
-        font-size: 12px;
-      }
-    }
-  </style>
 
   <script>
     const resultsData = sessionStorage.getItem('calculusResult');
