@@ -55,6 +55,7 @@ import Layout from '../layouts/Layout.astro';
             <span class="func-prefix mono">f(x) =</span>
             <input id="funcInput" class="func-input mono" type="text" placeholder="sin(x) * exp(-0.2 * x)" spellcheck="false" autocomplete="off" autocapitalize="off" />
           </div>
+          <p id="recognizedHint" class="field-help hidden"></p>
           <div class="func-range-row">
             <div class="func-field">
               <label class="field-label" for="rangeStart">Intervalo desde</label>
@@ -63,6 +64,10 @@ import Layout from '../layouts/Layout.astro';
             <div class="func-field">
               <label class="field-label" for="rangeEnd">hasta</label>
               <input id="rangeEnd" class="func-input mono" type="number" step="any" value="5" />
+            </div>
+            <div class="func-field func-samples">
+              <label class="field-label" for="samplesInput">Muestras</label>
+              <input id="samplesInput" class="func-input mono" type="number" min="20" max="2000" step="20" value="240" />
             </div>
             <button id="plotFuncBtn" class="btn btn-primary">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
@@ -77,7 +82,7 @@ import Layout from '../layouts/Layout.astro';
             <button class="hint-chip mono" data-expr="sqrt(abs(x))">√|x|</button>
             <button class="hint-chip mono" data-expr="1 / (1 + exp(-x))">sigmoide</button>
           </div>
-          <p class="func-note mono">Operadores: + − * / ** ^ · Funciones: sin cos tan asin acos atan atan2 sqrt cbrt abs exp log log2 sinh cosh tanh floor ceil factorial · Constantes: pi e tau</p>
+          <p class="func-note mono">Operadores: + − * / ** ^ · Funciones: sin cos tan asin acos atan atan2 sqrt cbrt abs exp log log10 log2 sinh cosh tanh floor ceil factorial · Constantes: pi e tau<br />La integral es una aproximación por trapecios. Más muestras reducen el error, pero no lo eliminan.</p>
         </div>
       </div>
     </div>
@@ -98,6 +103,19 @@ import Layout from '../layouts/Layout.astro';
         </svg>
         Calcular área
       </button>
+      <button id="validateBtn" class="btn btn-ghost draw-only" type="button" disabled>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 6L9 17l-5-5"></path>
+        </svg>
+        Validar dibujo
+      </button>
+      <button id="recognizeBtn" class="btn btn-ghost draw-only" type="button" disabled>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v3m0 12v3M3 12h3m12 0h3"></path>
+          <circle cx="12" cy="12" r="4"></circle>
+        </svg>
+        Encontrar f(x)
+      </button>
       <button id="clearBtn" class="btn btn-ghost" disabled>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"></polyline>
@@ -105,6 +123,25 @@ import Layout from '../layouts/Layout.astro';
         </svg>
         Limpiar
       </button>
+      <a href="/curvas/" class="btn btn-ghost">Área entre curvas</a>
+    </div>
+
+    <div id="drawAnalysisPanel" class="panel mt-6 hidden" aria-live="polite">
+      <div class="panel-header">
+        <h2 class="section-title">Análisis del dibujo</h2>
+        <span id="analysisBadge" class="badge"><span id="analysisBadgeText">Sin analizar</span></span>
+      </div>
+      <div class="panel-body">
+        <div id="validationReport" class="analysis-report"></div>
+        <div id="recognitionBox" class="analysis-recognition hidden">
+          <div class="analysis-subhead">
+            <h3 class="section-title text-lg">Funciones candidatas</h3>
+            <button id="closeRecognitionBtn" class="btn btn-ghost btn-sm" type="button">Cerrar</button>
+          </div>
+          <div id="recognitionNote" class="field-help"></div>
+          <div id="candidateList" class="candidate-list"></div>
+        </div>
+      </div>
     </div>
 
     <div id="loadingIndicator" class="hidden mt-5">
@@ -135,10 +172,11 @@ import Layout from '../layouts/Layout.astro';
           <div class="readout-value" id="negativeArea">0.0000</div>
         </div>
       </div>
-      <div class="mt-5 flex flex-wrap gap-3">
-        <a href="/results/" class="btn btn-ghost">Ver detalles y fórmulas</a>
-        <a href="/calculo/" class="btn btn-ghost">Explorar en 3D</a>
       </div>
+    </div>
+    <div class="mt-5 flex flex-wrap gap-3" id="resultsActions" style="display: none;">
+      <a href="/results/" class="btn btn-ghost">Ver detalles y fórmulas</a>
+      <a href="/calculo/" class="btn btn-ghost">Explorar en 3D</a>
     </div>
   </div>
 
@@ -479,10 +517,26 @@ import Layout from '../layouts/Layout.astro';
     const resultsSummary = document.getElementById('resultsSummary');
     const pointCount = document.getElementById('pointCount');
     const coordReadout = document.getElementById('coordReadout');
+    const validateBtn = document.getElementById('validateBtn');
+    const recognizeBtn = document.getElementById('recognizeBtn');
+    const drawAnalysisPanel = document.getElementById('drawAnalysisPanel');
+    const analysisBadge = document.getElementById('analysisBadge');
+    const analysisBadgeText = document.getElementById('analysisBadgeText');
+    const validationReport = document.getElementById('validationReport');
+    const recognitionBox = document.getElementById('recognitionBox');
+    const recognitionNote = document.getElementById('recognitionNote');
+    const candidateList = document.getElementById('candidateList');
+    const closeRecognitionBtn = document.getElementById('closeRecognitionBtn');
+    const recognizedHint = document.getElementById('recognizedHint');
+    const funcInput = document.getElementById('funcInput');
 
     let points = [];
     let isDrawing = false;
     let coordinateSystem = null;
+    let lastValidation = null;
+    let validatedSignature = null;
+    let analysisRequestId = 0;
+    let inferredExpression = '';
 
     function resizeCanvas() {
       const rect = canvas.parentElement.getBoundingClientRect();
@@ -699,11 +753,20 @@ import Layout from '../layouts/Layout.astro';
     }
 
     function startDrawing(e) {
+      if (points.length >= 5000) {
+        showError('El dibujo alcanzó el máximo de 5000 puntos. Limpia o continúa con una función.');
+        return;
+      }
       isDrawing = true;
+      hideInferredHint();
+      invalidateAnalysis();
       const pt = getCanvasPoint(e);
       const mathPt = coordinateSystem.screenToMath(pt.x, pt.y);
       points.push({ x: mathPt.x, y: mathPt.y });
       sessionStorage.removeItem('functionSpec');
+      sessionStorage.removeItem('recognizedFunction');
+      sessionStorage.removeItem('calculusResult');
+      resultsSummary.style.display = 'none';
       updateUI();
       savePoints();
       draw();
@@ -716,6 +779,8 @@ import Layout from '../layouts/Layout.astro';
       coordReadout.innerHTML = `x: ${mathPt.x.toFixed(2)}&nbsp;&nbsp;y: ${mathPt.y.toFixed(2)}`;
       coordReadout.classList.add('visible');
       if (!isDrawing) return;
+      if (points.length >= 5000) return;
+      invalidateAnalysis();
       points.push({ x: mathPt.x, y: mathPt.y });
       updateUI();
       savePoints();
@@ -731,6 +796,8 @@ import Layout from '../layouts/Layout.astro';
       pointCount.textContent = `Puntos: ${points.length}`;
       calculateBtn.disabled = points.length < 2;
       clearBtn.disabled = points.length === 0;
+      validateBtn.disabled = points.length < 2;
+      recognizeBtn.disabled = points.length < 8;
     }
 
     function savePoints() {
@@ -747,16 +814,359 @@ import Layout from '../layouts/Layout.astro';
           <line x1="12" y1="8" x2="12" y2="12"></line>
           <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
-        <span>${msg}</span>
+        <span></span>
       `;
+      errorMessage.querySelector('span').textContent = msg;
     }
 
     function hideError() {
       errorMessage.style.display = 'none';
     }
 
+    function apiErrorMessage(data, fallback) {
+      if (typeof data?.detail === 'string') return data.detail;
+      if (Array.isArray(data?.detail)) {
+        return data.detail.map((item) => item.msg || '').filter(Boolean).join(' · ') || fallback;
+      }
+      return fallback;
+    }
+
+    function pointsSignature() {
+      if (!points.length) return '0';
+      const first = points[0];
+      const last = points[points.length - 1];
+      return [
+        points.length,
+        first.x.toFixed(6),
+        first.y.toFixed(6),
+        last.x.toFixed(6),
+        last.y.toFixed(6)
+      ].join(':');
+    }
+
+    function formatPercent(value) {
+      return typeof value === 'number' && Number.isFinite(value)
+        ? `${(value * 100).toFixed(1)}%`
+        : '—';
+    }
+
+    function setAnalysisBadge(label, tone) {
+      analysisBadgeText.textContent = label;
+      analysisBadge.className = `badge ${tone}`;
+    }
+
+    function showInferredHint(expression, confidence = '') {
+      inferredExpression = expression;
+      recognizedHint.textContent = `Expresión inferida del dibujo${confidence ? ` (confianza ${confidence})` : ''}: ${expression}. Revisa la expresión antes de calcular; puedes editarla.`;
+      recognizedHint.classList.remove('hidden');
+    }
+
+    function hideInferredHint() {
+      inferredExpression = '';
+      recognizedHint.textContent = '';
+      recognizedHint.classList.add('hidden');
+    }
+
+    function invalidateAnalysis() {
+      lastValidation = null;
+      validatedSignature = null;
+      analysisRequestId += 1;
+      drawAnalysisPanel.classList.add('hidden');
+      recognitionBox.classList.add('hidden');
+      candidateList.replaceChildren();
+      sessionStorage.removeItem('drawingValidation');
+    }
+
+    function renderValidation(data) {
+      drawAnalysisPanel.classList.remove('hidden');
+      validationReport.replaceChildren();
+
+      const tone = data.status === 'valid' ? 'badge-valid' : data.status === 'invalid' ? 'badge-invalid' : 'badge-uncertain';
+      const label = data.status === 'valid' ? 'Válido' : data.status === 'invalid' ? 'No válido' : 'Incierto';
+      setAnalysisBadge(label, tone);
+
+      const box = document.createElement('div');
+      box.className = `analysis-result ${data.status}`;
+
+      const message = document.createElement('p');
+      message.className = 'analysis-message';
+      message.textContent = data.message;
+      box.appendChild(message);
+
+      const reason = document.createElement('p');
+      reason.className = 'analysis-reason mono';
+      reason.textContent = `Diagnóstico: ${data.reason_code}`;
+      box.appendChild(reason);
+
+      const meta = data.diagnostics || {};
+      const chips = document.createElement('div');
+      chips.className = 'analysis-chips';
+      const values = [
+        ['Puntos', meta.point_count ?? '—'],
+        ['Dirección', meta.direction === 'increasing'
+          ? 'creciente'
+          : meta.direction === 'decreasing'
+            ? 'decreciente'
+            : meta.direction === 'mixed'
+              ? 'mixta'
+              : '—'],
+        ['Retroceso', formatPercent(meta.backtrack_ratio)],
+        ['Ruido', formatPercent(meta.noise_ratio)],
+        ['Saltos', meta.gaps ?? 0],
+        ['Cruces propios', meta.self_intersections ?? 0]
+      ];
+      for (const [name, value] of values) {
+        const chip = document.createElement('span');
+        chip.className = 'analysis-chip';
+        const nameEl = document.createElement('span');
+        nameEl.textContent = name;
+        const valueEl = document.createElement('strong');
+        valueEl.textContent = String(value);
+        chip.append(nameEl, valueEl);
+        chips.appendChild(chip);
+      }
+      box.appendChild(chips);
+
+      const ambiguous = Array.isArray(meta.ambiguous_regions) ? meta.ambiguous_regions : [];
+      if (ambiguous.length) {
+        const note = document.createElement('p');
+        note.className = 'analysis-note';
+        note.textContent = `${ambiguous.length} región(es) ambigua(s) detectada(s). Revisa el tramo señalado antes de calcular.`;
+        box.appendChild(note);
+      }
+
+      const details = document.createElement('details');
+      details.className = 'analysis-details';
+      const summary = document.createElement('summary');
+      summary.textContent = 'Criterios utilizados';
+      details.appendChild(summary);
+      const list = document.createElement('ul');
+      for (const criterion of meta.criteria || []) {
+        const item = document.createElement('li');
+        item.textContent = criterion;
+        list.appendChild(item);
+      }
+      details.appendChild(list);
+      box.appendChild(details);
+
+      validationReport.appendChild(box);
+    }
+
+    async function requestValidation() {
+      if (points.length < 2) {
+        showError('Dibuja al menos dos puntos para validar el trazo.');
+        return null;
+      }
+      const requestId = ++analysisRequestId;
+      validateBtn.disabled = true;
+      recognizeBtn.disabled = true;
+      setAnalysisBadge('Analizando…', 'badge-pending');
+      drawAnalysisPanel.classList.remove('hidden');
+      hideError();
+
+      try {
+        const response = await fetch('/api/validate-drawing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ points })
+        });
+        const data = await response.json();
+        if (requestId !== analysisRequestId) return null;
+        if (!response.ok) {
+          throw new Error(apiErrorMessage(data, 'No se pudo validar el dibujo.'));
+        }
+        lastValidation = data;
+        validatedSignature = pointsSignature();
+        sessionStorage.setItem('drawingValidation', JSON.stringify(data));
+        renderValidation(data);
+        if (data.status !== 'valid') showError(data.message);
+        return data;
+      } catch (err) {
+        if (requestId === analysisRequestId) {
+          setAnalysisBadge('Error', 'badge-invalid');
+          showError(err.message);
+        }
+        return null;
+      } finally {
+        if (requestId === analysisRequestId) {
+          validateBtn.disabled = points.length < 2;
+          recognizeBtn.disabled = points.length < 8;
+        }
+      }
+    }
+
+    async function ensureDrawValid() {
+      if (inputMode !== 'draw') return true;
+      if (lastValidation && validatedSignature === pointsSignature()) {
+        if (lastValidation.status === 'valid') return true;
+        showError(lastValidation.message);
+        return false;
+      }
+      const result = await requestValidation();
+      return Boolean(result && result.status === 'valid');
+    }
+
+    function metricText(metrics, key, digits = 2) {
+      const value = metrics?.[key];
+      return typeof value === 'number' && Number.isFinite(value)
+        ? value.toExponential(digits)
+        : '—';
+    }
+
+    function acceptCandidate(candidate, confidence = '') {
+      funcInput.value = candidate.expression;
+      rangeStart.value = String(candidate.domain.start);
+      rangeEnd.value = String(candidate.domain.end);
+      showInferredHint(candidate.expression, confidence);
+      sessionStorage.setItem('recognizedFunction', JSON.stringify({
+        expression: candidate.expression,
+        domain: candidate.domain,
+        metrics: candidate.metrics,
+        model: candidate.model
+      }));
+      sessionStorage.removeItem('drawingValidation');
+      setMode('function');
+      plotFunction();
+    }
+
+    function renderRecognition(data) {
+      if (data.validation) renderValidation(data.validation);
+      drawAnalysisPanel.classList.remove('hidden');
+      recognitionBox.classList.remove('hidden');
+      candidateList.replaceChildren();
+
+      const noteText = {
+        success: 'Se encontró un modelo compatible. Revisa la expresión y acéptala si representa tu dibujo.',
+        low_confidence: 'Hay candidatos, pero el ajuste no es concluyente. No se usará automáticamente.',
+        no_fit: 'No se encontró un modelo compatible con suficiente confianza.',
+        invalid: 'El dibujo no es válido como función y = f(x); no se intentará ajustar.',
+        uncertain: 'El dibujo es ambiguo o insuficiente; corrige el trazo antes de reconocer una función.'
+      }[data.status] || 'Reconocimiento terminado.';
+      recognitionNote.textContent = `${noteText}${data.confidence ? ` Confianza: ${data.confidence}.` : ''}`;
+
+      if (Array.isArray(data.warnings) && data.warnings.length) {
+        const warnings = document.createElement('ul');
+        warnings.className = 'analysis-warnings';
+        for (const warning of data.warnings) {
+          const item = document.createElement('li');
+          item.textContent = warning;
+          warnings.appendChild(item);
+        }
+        recognitionNote.appendChild(warnings);
+      }
+
+      const candidates = Array.isArray(data.candidates) ? data.candidates : [];
+      if (!candidates.length) {
+        const empty = document.createElement('p');
+        empty.className = 'field-help';
+        empty.textContent = 'No hay expresiones candidatas para mostrar.';
+        candidateList.appendChild(empty);
+        if (data.status === 'invalid') {
+          setAnalysisBadge('No válida', 'badge-invalid');
+        } else if (data.status === 'uncertain') {
+          setAnalysisBadge('Incierta', 'badge-uncertain');
+        } else {
+          setAnalysisBadge('Sin candidatos', 'badge-uncertain');
+        }
+        return;
+      }
+
+      setAnalysisBadge(data.recognized ? 'Reconocida' : 'Revisar', data.recognized ? 'badge-valid' : 'badge-uncertain');
+      for (const candidate of candidates) {
+        const card = document.createElement('article');
+        card.className = 'candidate-card';
+
+        const head = document.createElement('div');
+        head.className = 'candidate-head';
+        const model = document.createElement('span');
+        model.className = 'candidate-model';
+        model.textContent = `${candidate.label} · complejidad ${candidate.complexity}`;
+        head.appendChild(model);
+        if (candidate.expression === data.expression && data.recognized) {
+          const badge = document.createElement('span');
+          badge.className = 'badge badge-valid';
+          badge.textContent = 'Recomendada';
+          head.appendChild(badge);
+        }
+        card.appendChild(head);
+
+        const expression = document.createElement('code');
+        expression.className = 'candidate-expression';
+        expression.textContent = `f(x) = ${candidate.expression}`;
+        card.appendChild(expression);
+
+        const metrics = document.createElement('div');
+        metrics.className = 'candidate-metrics mono';
+        metrics.textContent = `RMSE ${metricText(candidate.metrics, 'rmse')} · Error rel. ${formatPercent(candidate.metrics?.relative_error)} · Máx. ${metricText(candidate.metrics, 'max_error')}`;
+        if (candidate.metrics?.validation_rmse !== undefined) {
+          metrics.textContent += ` · Validación ${metricText(candidate.metrics, 'validation_rmse')}`;
+        }
+        card.appendChild(metrics);
+
+        for (const warning of candidate.warnings || []) {
+          const warningEl = document.createElement('p');
+          warningEl.className = 'candidate-warning';
+          warningEl.textContent = warning;
+          card.appendChild(warningEl);
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'candidate-actions';
+        const use = document.createElement('button');
+        use.type = 'button';
+        use.className = 'btn btn-primary btn-sm';
+        use.textContent = 'Usar esta función';
+        use.addEventListener('click', () => acceptCandidate(candidate, data.confidence || ''));
+        actions.appendChild(use);
+        card.appendChild(actions);
+
+        candidateList.appendChild(card);
+      }
+    }
+
+    async function recognizeDrawing() {
+      if (points.length < 8) {
+        showError('Dibuja una curva más larga para intentar reconocer una función.');
+        return;
+      }
+      const requestId = ++analysisRequestId;
+      validateBtn.disabled = true;
+      recognizeBtn.disabled = true;
+      setAnalysisBadge('Reconociendo…', 'badge-pending');
+      drawAnalysisPanel.classList.remove('hidden');
+      recognitionBox.classList.add('hidden');
+      hideError();
+
+      try {
+        const response = await fetch('/api/recognize-function', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ points })
+        });
+        const data = await response.json();
+        if (requestId !== analysisRequestId) return;
+        if (!response.ok) {
+          throw new Error(apiErrorMessage(data, 'No se pudo reconocer la función.'));
+        }
+        renderRecognition(data);
+      } catch (err) {
+        if (requestId === analysisRequestId) {
+          setAnalysisBadge('Error', 'badge-invalid');
+          showError(err.message);
+        }
+      } finally {
+        if (requestId === analysisRequestId) {
+          validateBtn.disabled = points.length < 2;
+          recognizeBtn.disabled = points.length < 8;
+        }
+      }
+    }
+
     async function calculateArea() {
       if (points.length < 2) return;
+
+      const valid = await ensureDrawValid();
+      if (!valid) return;
 
       hideError();
       calculateBtn.disabled = true;
@@ -774,7 +1184,7 @@ import Layout from '../layouts/Layout.astro';
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.detail || 'Error en el cálculo');
+          throw new Error(apiErrorMessage(data, 'Error en el cálculo'));
         }
 
         data.original_points = points.length;
@@ -786,10 +1196,12 @@ import Layout from '../layouts/Layout.astro';
         document.getElementById('negativeArea').textContent = data.negative_area.toFixed(4);
 
         resultsSummary.style.display = 'block';
+        document.getElementById('resultsActions').style.display = 'flex';
         resultsSummary.scrollIntoView({ behavior: reducedMotionCheck() ? 'auto' : 'smooth', block: 'nearest' });
 
       } catch (err) {
         showError(err.message);
+        document.getElementById('resultsActions').style.display = 'flex';
       } finally {
         loadingIndicator.style.display = 'none';
         calculateBtn.disabled = points.length < 2;
@@ -803,11 +1215,21 @@ import Layout from '../layouts/Layout.astro';
 
     function clearCurve() {
       points = [];
+      hideInferredHint();
+      lastValidation = null;
+      validatedSignature = null;
+      analysisRequestId += 1;
       updateUI();
       hideError();
       resultsSummary.style.display = 'none';
+      document.getElementById('resultsActions').style.display = 'none';
+      drawAnalysisPanel.classList.add('hidden');
+      recognitionBox.classList.add('hidden');
+      candidateList.replaceChildren();
       sessionStorage.removeItem('drawnPoints');
       sessionStorage.removeItem('functionSpec');
+      sessionStorage.removeItem('drawingValidation');
+      sessionStorage.removeItem('recognizedFunction');
       if (inputMode === 'function') setMode('draw');
       resetView();
       draw();
@@ -818,13 +1240,20 @@ import Layout from '../layouts/Layout.astro';
     const modeDraw = document.getElementById('modeDraw');
     const modeFunc = document.getElementById('modeFunc');
     const functionPanel = document.getElementById('functionPanel');
-    const funcInput = document.getElementById('funcInput');
     const rangeStart = document.getElementById('rangeStart');
     const rangeEnd = document.getElementById('rangeEnd');
+    const samplesInput = document.getElementById('samplesInput');
     const plotFuncBtn = document.getElementById('plotFuncBtn');
     const loadingNote = loadingIndicator.querySelector('.loading-note');
 
     let inputMode = 'draw';
+
+    function getSampleCount() {
+      const parsed = parseInt(samplesInput.value, 10);
+      const samples = Number.isFinite(parsed) ? Math.min(2000, Math.max(20, parsed)) : 240;
+      samplesInput.value = String(samples);
+      return samples;
+    }
 
     function setMode(mode) {
       inputMode = mode;
@@ -836,6 +1265,13 @@ import Layout from '../layouts/Layout.astro';
       functionPanel.style.display = isFunc ? 'block' : 'none';
       canvas.style.pointerEvents = isFunc ? 'none' : 'auto';
       coordReadout.classList.remove('visible');
+      document.querySelectorAll('.draw-only').forEach((element) => {
+        element.classList.toggle('hidden', isFunc);
+      });
+      if (isFunc) {
+        drawAnalysisPanel.classList.add('hidden');
+        recognitionBox.classList.add('hidden');
+      }
       if (!isFunc) {
         resetView();
       } else if (points.length >= 2) {
@@ -845,14 +1281,20 @@ import Layout from '../layouts/Layout.astro';
     }
 
     modeDraw.addEventListener('click', () => setMode('draw'));
-    modeFunc.addEventListener('click', () => setMode('function'));
+    modeFunc.addEventListener('click', () => {
+      hideInferredHint();
+      setMode('function');
+    });
 
     document.querySelectorAll('.hint-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
+        hideInferredHint();
         funcInput.value = chip.dataset.expr || '';
         funcInput.focus();
       });
     });
+
+    funcInput.addEventListener('input', hideInferredHint);
 
     funcInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -865,7 +1307,9 @@ import Layout from '../layouts/Layout.astro';
       sessionStorage.setItem('functionSpec', JSON.stringify({
         expression: funcInput.value.trim(),
         start: rangeStart.value,
-        end: rangeEnd.value
+        end: rangeEnd.value,
+        samples: getSampleCount(),
+        inferred: inferredExpression
       }));
     }
 
@@ -873,6 +1317,7 @@ import Layout from '../layouts/Layout.astro';
       const expression = funcInput.value.trim();
       const start = parseFloat(rangeStart.value);
       const end = parseFloat(rangeEnd.value);
+      const samples = getSampleCount();
 
       hideError();
 
@@ -901,16 +1346,17 @@ import Layout from '../layouts/Layout.astro';
         const response = await fetch('/api/evaluate-function', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ expression, start, end, samples: 240 })
+          body: JSON.stringify({ expression, start, end, samples })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.detail || 'No se pudo graficar la función.');
+          throw new Error(apiErrorMessage(data, 'No se pudo graficar la función.'));
         }
 
         points = data.points;
+        invalidateAnalysis();
         updateUI();
         savePoints();
         saveFunctionSpec();
@@ -930,6 +1376,11 @@ import Layout from '../layouts/Layout.astro';
     }
 
     plotFuncBtn.addEventListener('click', plotFunction);
+    validateBtn.addEventListener('click', requestValidation);
+    recognizeBtn.addEventListener('click', recognizeDrawing);
+    closeRecognitionBtn.addEventListener('click', () => {
+      recognitionBox.classList.add('hidden');
+    });
 
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', drawPoint);
@@ -967,8 +1418,24 @@ import Layout from '../layouts/Layout.astro';
         funcInput.value = spec.expression || '';
         if (spec.start !== undefined) rangeStart.value = spec.start;
         if (spec.end !== undefined) rangeEnd.value = spec.end;
+        if (spec.samples !== undefined) samplesInput.value = spec.samples;
+        if (typeof spec.inferred === 'string' && spec.inferred) {
+          showInferredHint(spec.inferred);
+        }
         setMode('function');
       } catch (e) { /* ignore */ }
+    } else if (points.length >= 2) {
+      const savedValidation = sessionStorage.getItem('drawingValidation');
+      if (savedValidation) {
+        try {
+          const validation = JSON.parse(savedValidation);
+          if (validation && validation.status) {
+            lastValidation = validation;
+            validatedSignature = pointsSignature();
+            renderValidation(validation);
+          }
+        } catch (e) { /* ignore */ }
+      }
     }
   </script>
 </Layout>

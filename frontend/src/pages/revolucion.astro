@@ -248,7 +248,15 @@ import Layout from '../layouts/Layout.astro';
       flex-wrap: wrap;
       align-items: flex-end;
     }
-    .rev-field { flex: 1; min-width: 180px; }
+    .rev-field select.func-input {
+      color-scheme: dark;
+      background-color: var(--ink-950);
+      color: var(--text-1);
+    }
+    .rev-field select.func-input option {
+      background-color: var(--ink-900);
+      color: var(--text-1);
+    }
     .rev-field input[type="range"] { width: 100%; accent-color: var(--curve); }
     @media (max-width: 900px) {
       .rev-layout { grid-template-columns: 1fr; }
