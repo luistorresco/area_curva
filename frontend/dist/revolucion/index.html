@@ -14,13 +14,11 @@
           ?.setAttribute('content', dark ? '#060913' : '#f4f7fb');
       })();
     </script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.qgjeSA2g.css">
-<style>.page-head[data-astro-cid-qhiawbtr]{padding:56px 0 30px}.three-container[data-astro-cid-qhiawbtr]{width:100%;height:560px;position:relative;background:radial-gradient(120% 90% at 50% 0%,rgba(27,37,71,.35) 0%,transparent 55%),var(--ink-950);border-radius:var(--radius-lg);border:1px solid var(--hairline);overflow:hidden}.rev-controls[data-astro-cid-qhiawbtr]{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end}.rev-field[data-astro-cid-qhiawbtr]{flex:1;min-width:180px}.rev-field[data-astro-cid-qhiawbtr] input[data-astro-cid-qhiawbtr][type=range]{width:100%;accent-color:var(--curve)}@media (max-width: 768px){.three-container[data-astro-cid-qhiawbtr]{height:420px}.page-head[data-astro-cid-qhiawbtr]{padding:36px 0 24px}}
+<style>.page-head[data-astro-cid-qhiawbtr]{padding:56px 0 30px}.rev-layout[data-astro-cid-qhiawbtr]{display:grid;grid-template-columns:1fr 1fr;gap:18px}.rev-canvas-panel[data-astro-cid-qhiawbtr],.rev-3d-panel[data-astro-cid-qhiawbtr]{margin:0}.three-container[data-astro-cid-qhiawbtr]{width:100%;height:420px;position:relative;background:radial-gradient(120% 90% at 50% 0%,rgba(27,37,71,.35) 0%,transparent 55%),var(--ink-950);border-radius:var(--radius-lg);border:1px solid var(--hairline);overflow:hidden}.rev-controls[data-astro-cid-qhiawbtr]{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end}.rev-field[data-astro-cid-qhiawbtr]{flex:1;min-width:180px}.rev-field[data-astro-cid-qhiawbtr] input[data-astro-cid-qhiawbtr][type=range]{width:100%;accent-color:var(--curve)}@media (max-width: 900px){.rev-layout[data-astro-cid-qhiawbtr]{grid-template-columns:1fr}.three-container[data-astro-cid-qhiawbtr]{height:360px}}@media (max-width: 768px){.page-head[data-astro-cid-qhiawbtr]{padding:36px 0 24px}}
 </style></head> <body> <header class="site-header"> <div class="container header-inner"> <a href="/" class="brand" aria-label="CalculusWeb — Inicio"> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"> <path d="M4 4v28M4 32h30" stroke="var(--border-strong)" stroke-width="1.2" stroke-linecap="round"></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="var(--accent)" fill-opacity="0.12" stroke="none"></path> </svg> <span class="brand-word">Calculus<em>Web</em></span> </a> <div class="flex items-center gap-2"> <nav class="site-nav" aria-label="Navegación principal"> <a href="/" data-nav="/">Inicio</a> <a href="/curvas/" data-nav="/curvas/">Curvas</a> <a href="/calculo/" data-nav="/calculo/">Cálculo 3D</a> <a href="/formula/" data-nav="/formula/">Fórmulas</a> <a href="/revolucion/" data-nav="/revolucion/">Revolución</a> <a href="/nosotros/" data-nav="/nosotros/">Nosotros</a> </nav> <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar a modo claro" aria-pressed="false" title="Cambiar tema"> <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path> </svg> <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path> </svg> </button> </div> </div> </header> <main class="site-main">  <div class="container" data-astro-cid-qhiawbtr> <header class="page-head" data-astro-cid-qhiawbtr> <div data-astro-cid-qhiawbtr> <h1 class="page-title" data-astro-cid-qhiawbtr>Sólido de revolución</h1> <p class="page-lede" style="margin-top: 12px;" data-astro-cid-qhiawbtr>
-Dibuja una curva en 2D y gírala alrededor de un eje para generar un volumen.
-          Cada punto se convierte en una circunferencia; el trazo entero forma un sólido.
-</p> </div> </header> <div class="panel" style="margin-bottom: 16px;" data-astro-cid-qhiawbtr> <div class="canvas-frame" data-astro-cid-qhiawbtr> <canvas id="canvas2d" style="display: block; width: 100%; touch-action: none;" data-astro-cid-qhiawbtr></canvas> </div> </div> <div class="toolbar" role="toolbar" data-astro-cid-qhiawbtr> <button id="clearBtn" class="btn btn-ghost" disabled data-astro-cid-qhiawbtr>Limpiar</button> <button id="generateBtn" class="btn btn-primary" disabled data-astro-cid-qhiawbtr>
-Generar sólido 3D
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-qhiawbtr><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" data-astro-cid-qhiawbtr></polyline></svg> </button> </div> <div class="panel" style="margin-top: 18px;" data-astro-cid-qhiawbtr> <div class="panel-header" data-astro-cid-qhiawbtr> <h2 class="section-title" data-astro-cid-qhiawbtr>Controles de revolución</h2> </div> <div class="panel-body" data-astro-cid-qhiawbtr> <div class="rev-controls" data-astro-cid-qhiawbtr> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="axisSelect" data-astro-cid-qhiawbtr>Eje de rotación</label> <select id="axisSelect" class="func-input" data-astro-cid-qhiawbtr> <option value="y" data-astro-cid-qhiawbtr>Eje Y (vertical)</option> <option value="x" data-astro-cid-qhiawbtr>Eje X (horizontal)</option> <option value="z" data-astro-cid-qhiawbtr>Eje Z (profundidad)</option> <option value="xy" data-astro-cid-qhiawbtr>Combinado X+Y (diagonal)</option> <option value="xz" data-astro-cid-qhiawbtr>Combinado X+Z (diagonal)</option> <option value="yz" data-astro-cid-qhiawbtr>Combinado Y+Z (diagonal)</option> <option value="xyz" data-astro-cid-qhiawbtr>Combinado X+Y+Z (diagonal)</option> </select> </div> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="segmentsRange" data-astro-cid-qhiawbtr>Segmentos: <span id="segVal" data-astro-cid-qhiawbtr>32</span></label> <input id="segmentsRange" type="range" min="8" max="64" step="1" value="32" data-astro-cid-qhiawbtr> </div> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="angleRange" data-astro-cid-qhiawbtr>Ángulo: <span id="angleVal" data-astro-cid-qhiawbtr>360°</span></label> <input id="angleRange" type="range" min="30" max="360" step="5" value="360" data-astro-cid-qhiawbtr> </div> </div> </div> </div> <div id="threeContainer" class="three-container" style="margin-top: 18px;" data-astro-cid-qhiawbtr></div> <div class="toolbar" style="margin-top: 12px;" data-astro-cid-qhiawbtr> <button id="resetViewBtn" class="btn btn-ghost" data-astro-cid-qhiawbtr>Restablecer vista</button> </div> </div>  <script type="importmap">
+Dibuja una curva (o una línea) en 2D y gírala alrededor de un eje para generar un volumen.
+          El resultado 3D se actualiza en vivo mientras dibujas.
+</p> </div> </header> <div class="rev-layout" data-astro-cid-qhiawbtr> <div class="panel rev-canvas-panel" data-astro-cid-qhiawbtr> <div class="canvas-frame" data-astro-cid-qhiawbtr> <canvas id="canvas2d" style="display: block; width: 100%; touch-action: none;" data-astro-cid-qhiawbtr></canvas> </div> <div class="toolbar" style="margin-top: 10px;" data-astro-cid-qhiawbtr> <button id="clearBtn" class="btn btn-ghost" disabled data-astro-cid-qhiawbtr>Limpiar</button> </div> </div> <div class="panel rev-3d-panel" data-astro-cid-qhiawbtr> <div class="panel-header" data-astro-cid-qhiawbtr> <h2 class="section-title" data-astro-cid-qhiawbtr>Resultado de la revolución</h2> </div> <div id="threeContainer" class="three-container" data-astro-cid-qhiawbtr></div> <div class="toolbar" style="margin-top: 10px;" data-astro-cid-qhiawbtr> <button id="resetViewBtn" class="btn btn-ghost" data-astro-cid-qhiawbtr>Restablecer vista</button> </div> </div> </div> <div class="panel" style="margin-top: 18px;" data-astro-cid-qhiawbtr> <div class="panel-header" data-astro-cid-qhiawbtr> <h2 class="section-title" data-astro-cid-qhiawbtr>Controles de revolución</h2> </div> <div class="panel-body" data-astro-cid-qhiawbtr> <div class="rev-controls" data-astro-cid-qhiawbtr> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="axisSelect" data-astro-cid-qhiawbtr>Eje de rotación</label> <select id="axisSelect" class="func-input" data-astro-cid-qhiawbtr> <option value="y" data-astro-cid-qhiawbtr>Eje Y (vertical)</option> <option value="x" data-astro-cid-qhiawbtr>Eje X (horizontal)</option> <option value="z" data-astro-cid-qhiawbtr>Eje Z (profundidad)</option> <option value="xy" data-astro-cid-qhiawbtr>Combinado X+Y</option> <option value="xz" data-astro-cid-qhiawbtr>Combinado X+Z</option> <option value="yz" data-astro-cid-qhiawbtr>Combinado Y+Z</option> <option value="xyz" data-astro-cid-qhiawbtr>Combinado X+Y+Z</option> </select> </div> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="segmentsRange" data-astro-cid-qhiawbtr>Segmentos: <span id="segVal" data-astro-cid-qhiawbtr>32</span></label> <input id="segmentsRange" type="range" min="8" max="64" step="1" value="32" data-astro-cid-qhiawbtr> </div> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="angleRange" data-astro-cid-qhiawbtr>Ángulo: <span id="angleVal" data-astro-cid-qhiawbtr>360°</span></label> <input id="angleRange" type="range" min="30" max="360" step="5" value="360" data-astro-cid-qhiawbtr> </div> </div> </div> </div> </div>  <script type="importmap">
     {"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
   </script> <script type="module">
     import * as THREE from 'three';
@@ -29,7 +27,6 @@ Generar sólido 3D
     const canvas = document.getElementById('canvas2d');
     const ctx = canvas.getContext('2d');
     const clearBtn = document.getElementById('clearBtn');
-    const generateBtn = document.getElementById('generateBtn');
     const axisSelect = document.getElementById('axisSelect');
     const segmentsRange = document.getElementById('segmentsRange');
     const angleRange = document.getElementById('angleRange');
@@ -41,7 +38,9 @@ Generar sólido 3D
     let points = [];
     let isDrawing = false;
     let coordinateSystem = null;
-    let scene, camera, renderer, controls, mesh;
+    let scene, camera, renderer, controls, mesh, profileLine;
+
+    function resizeCanvas() {
 
     function resizeCanvas() {
       const rect = canvas.parentElement.getBoundingClientRect();
@@ -117,14 +116,22 @@ Generar sólido 3D
       points.push({ x: m.x, y: m.y });
       updateUI(); draw2d(); e.preventDefault();
     }
-    function stopDrawing() { isDrawing = false; }
+    function stopDrawing() { isDrawing = false; if (points.length >= 2) generateSolid(); }
     function updateUI() {
-      generateBtn.disabled = points.length < 2;
       clearBtn.disabled = points.length === 0;
     }
     function clearCurve() {
       points = []; updateUI(); draw2d();
-      if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh = null; }
+      if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); mesh = null; }
+      if (profileLine) { scene.remove(profileLine); profileLine.geometry.dispose(); profileLine.material.dispose(); profileLine = null; }
+
+      // Reference line: the original 2D profile in the 3D scene
+      const linePts = pts.map(p => new THREE.Vector3(p.x, p.y, 0));
+      const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
+      profileLine = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x2dd4ee, linewidth: 2 }));
+      // orient same as the solid
+      profileLine.quaternion.copy(q);
+      scene.add(profileLine);
       renderer.render(scene, camera);
     }
 
@@ -140,8 +147,7 @@ Generar sólido 3D
     segmentsRange.addEventListener('input', () => { segVal.textContent = segmentsRange.value; if (points.length >= 2) generateSolid(); });
     angleRange.addEventListener('input', () => { angleVal.textContent = angleRange.value + '°'; if (points.length >= 2) generateSolid(); });
     axisSelect.addEventListener('change', () => { if (points.length >= 2) generateSolid(); });
-    generateBtn.addEventListener('click', generateSolid);
-    resetViewBtn.addEventListener('click', () => { camera.position.set(6, 6, 12); camera.lookAt(0, 0, 0); controls.reset(); });
+    resetViewBtn.addEventListener('click', () => { camera.position.set(8, 6, 12); camera.lookAt(0, 0, 0); controls.reset(); });
 
     function init3d() {
       const w = container.clientWidth;

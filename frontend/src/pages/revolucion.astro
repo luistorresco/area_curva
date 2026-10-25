@@ -7,24 +7,31 @@ import Layout from '../layouts/Layout.astro';
       <div>
         <h1 class="page-title">Sólido de revolución</h1>
         <p class="page-lede" style="margin-top: 12px;">
-          Dibuja una curva en 2D y gírala alrededor de un eje para generar un volumen.
-          Cada punto se convierte en una circunferencia; el trazo entero forma un sólido.
+          Dibuja una curva (o una línea) en 2D y gírala alrededor de un eje para generar un volumen.
+          El resultado 3D se actualiza en vivo mientras dibujas.
         </p>
       </div>
     </header>
 
-    <div class="panel" style="margin-bottom: 16px;">
-      <div class="canvas-frame">
-        <canvas id="canvas2d" style="display: block; width: 100%; touch-action: none;"></canvas>
+    <div class="rev-layout">
+      <div class="panel rev-canvas-panel">
+        <div class="canvas-frame">
+          <canvas id="canvas2d" style="display: block; width: 100%; touch-action: none;"></canvas>
+        </div>
+        <div class="toolbar" style="margin-top: 10px;">
+          <button id="clearBtn" class="btn btn-ghost" disabled>Limpiar</button>
+        </div>
       </div>
-    </div>
 
-    <div class="toolbar" role="toolbar">
-      <button id="clearBtn" class="btn btn-ghost" disabled>Limpiar</button>
-      <button id="generateBtn" class="btn btn-primary" disabled>
-        Generar sólido 3D
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg>
-      </button>
+      <div class="panel rev-3d-panel">
+        <div class="panel-header">
+          <h2 class="section-title">Resultado de la revolución</h2>
+        </div>
+        <div id="threeContainer" class="three-container"></div>
+        <div class="toolbar" style="margin-top: 10px;">
+          <button id="resetViewBtn" class="btn btn-ghost">Restablecer vista</button>
+        </div>
+      </div>
     </div>
 
     <div class="panel" style="margin-top: 18px;">
@@ -39,10 +46,10 @@ import Layout from '../layouts/Layout.astro';
               <option value="y">Eje Y (vertical)</option>
               <option value="x">Eje X (horizontal)</option>
               <option value="z">Eje Z (profundidad)</option>
-              <option value="xy">Combinado X+Y (diagonal)</option>
-              <option value="xz">Combinado X+Z (diagonal)</option>
-              <option value="yz">Combinado Y+Z (diagonal)</option>
-              <option value="xyz">Combinado X+Y+Z (diagonal)</option>
+              <option value="xy">Combinado X+Y</option>
+              <option value="xz">Combinado X+Z</option>
+              <option value="yz">Combinado Y+Z</option>
+              <option value="xyz">Combinado X+Y+Z</option>
             </select>
           </div>
           <div class="rev-field">
@@ -56,19 +63,19 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
     </div>
-
-    <div id="threeContainer" class="three-container" style="margin-top: 18px;"></div>
-
-    <div class="toolbar" style="margin-top: 12px;">
-      <button id="resetViewBtn" class="btn btn-ghost">Restablecer vista</button>
-    </div>
   </div>
 
   <style>
     .page-head { padding: 56px 0 30px; }
+    .rev-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .rev-canvas-panel, .rev-3d-panel { margin: 0; }
     .three-container {
       width: 100%;
-      height: 560px;
+      height: 420px;
       position: relative;
       background: radial-gradient(120% 90% at 50% 0%, rgba(27,37,71,0.35) 0%, transparent 55%), var(--ink-950);
       border-radius: var(--radius-lg);
@@ -83,8 +90,11 @@ import Layout from '../layouts/Layout.astro';
     }
     .rev-field { flex: 1; min-width: 180px; }
     .rev-field input[type="range"] { width: 100%; accent-color: var(--curve); }
+    @media (max-width: 900px) {
+      .rev-layout { grid-template-columns: 1fr; }
+      .three-container { height: 360px; }
+    }
     @media (max-width: 768px) {
-      .three-container { height: 420px; }
       .page-head { padding: 36px 0 24px; }
     }
   </style>
@@ -99,7 +109,6 @@ import Layout from '../layouts/Layout.astro';
     const canvas = document.getElementById('canvas2d');
     const ctx = canvas.getContext('2d');
     const clearBtn = document.getElementById('clearBtn');
-    const generateBtn = document.getElementById('generateBtn');
     const axisSelect = document.getElementById('axisSelect');
     const segmentsRange = document.getElementById('segmentsRange');
     const angleRange = document.getElementById('angleRange');
@@ -111,7 +120,9 @@ import Layout from '../layouts/Layout.astro';
     let points = [];
     let isDrawing = false;
     let coordinateSystem = null;
-    let scene, camera, renderer, controls, mesh;
+    let scene, camera, renderer, controls, mesh, profileLine;
+
+    function resizeCanvas() {
 
     function resizeCanvas() {
       const rect = canvas.parentElement.getBoundingClientRect();
@@ -187,14 +198,22 @@ import Layout from '../layouts/Layout.astro';
       points.push({ x: m.x, y: m.y });
       updateUI(); draw2d(); e.preventDefault();
     }
-    function stopDrawing() { isDrawing = false; }
+    function stopDrawing() { isDrawing = false; if (points.length >= 2) generateSolid(); }
     function updateUI() {
-      generateBtn.disabled = points.length < 2;
       clearBtn.disabled = points.length === 0;
     }
     function clearCurve() {
       points = []; updateUI(); draw2d();
-      if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh = null; }
+      if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); mesh = null; }
+      if (profileLine) { scene.remove(profileLine); profileLine.geometry.dispose(); profileLine.material.dispose(); profileLine = null; }
+
+      // Reference line: the original 2D profile in the 3D scene
+      const linePts = pts.map(p => new THREE.Vector3(p.x, p.y, 0));
+      const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
+      profileLine = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x2dd4ee, linewidth: 2 }));
+      // orient same as the solid
+      profileLine.quaternion.copy(q);
+      scene.add(profileLine);
       renderer.render(scene, camera);
     }
 
@@ -210,8 +229,7 @@ import Layout from '../layouts/Layout.astro';
     segmentsRange.addEventListener('input', () => { segVal.textContent = segmentsRange.value; if (points.length >= 2) generateSolid(); });
     angleRange.addEventListener('input', () => { angleVal.textContent = angleRange.value + '°'; if (points.length >= 2) generateSolid(); });
     axisSelect.addEventListener('change', () => { if (points.length >= 2) generateSolid(); });
-    generateBtn.addEventListener('click', generateSolid);
-    resetViewBtn.addEventListener('click', () => { camera.position.set(6, 6, 12); camera.lookAt(0, 0, 0); controls.reset(); });
+    resetViewBtn.addEventListener('click', () => { camera.position.set(8, 6, 12); camera.lookAt(0, 0, 0); controls.reset(); });
 
     function init3d() {
       const w = container.clientWidth;
