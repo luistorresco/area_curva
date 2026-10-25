@@ -48,8 +48,10 @@ const { title } = Astro.props;
         <div class="flex items-center gap-2">
           <nav class="site-nav" aria-label="Navegación principal">
             <a href="/" data-nav="/">Inicio</a>
+            <a href="/curvas/" data-nav="/curvas/">Curvas</a>
             <a href="/calculo/" data-nav="/calculo/">Cálculo 3D</a>
             <a href="/formula/" data-nav="/formula/">Fórmulas</a>
+<a href="/revolucion/" data-nav="/revolucion/">Revolución</a>
             <a href="/nosotros/" data-nav="/nosotros/">Nosotros</a>
           </nav>
           <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar a modo claro" aria-pressed="false" title="Cambiar tema">
@@ -83,6 +85,13 @@ const { title } = Astro.props;
           <path d="M9 22V12h6v10"></path>
         </svg>
         <span>Inicio</span>
+      </a>
+      <a href="/curvas/" class="nav-curvas">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 20c4 0 4-16 8-16s4 16 8 16"></path>
+          <path d="M4 14c4 0 4-8 8-8s4 8 8 8"></path>
+        </svg>
+        <span>Curvas</span>
       </a>
       <a href="/calculo/" class="nav-calculo">
         <svg viewBox="0 0 24 24">
@@ -172,7 +181,9 @@ const { title } = Astro.props;
       const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
       document.querySelectorAll('[data-nav]').forEach(link => {
         const href = link.getAttribute('data-nav').replace(/\/$/, '') || '/';
-        if (currentPath === href) link.classList.add('active');
+        if (currentPath === href || (href !== '/' && currentPath.startsWith(href))) {
+          link.classList.add('active');
+        }
       });
       document.querySelectorAll('.bottom-nav a').forEach(link => {
         const href = link.getAttribute('href').replace(/\/$/, '') || '/';

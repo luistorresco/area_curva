@@ -1,0 +1,288 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Sólido de revolución — CalculusWeb">
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1 class="page-title">Sólido de revolución</h1>
+        <p class="page-lede" style="margin-top: 12px;">
+          Dibuja una curva en 2D y gírala alrededor de un eje para generar un volumen.
+          Cada punto se convierte en una circunferencia; el trazo entero forma un sólido.
+        </p>
+      </div>
+    </header>
+
+    <div class="panel" style="margin-bottom: 16px;">
+      <div class="canvas-frame">
+        <canvas id="canvas2d" style="display: block; width: 100%; touch-action: none;"></canvas>
+      </div>
+    </div>
+
+    <div class="toolbar" role="toolbar">
+      <button id="clearBtn" class="btn btn-ghost" disabled>Limpiar</button>
+      <button id="generateBtn" class="btn btn-primary" disabled>
+        Generar sólido 3D
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline></svg>
+      </button>
+    </div>
+
+    <div class="panel" style="margin-top: 18px;">
+      <div class="panel-header">
+        <h2 class="section-title">Controles de revolución</h2>
+      </div>
+      <div class="panel-body">
+        <div class="rev-controls">
+          <div class="rev-field">
+            <label class="field-label" for="axisSelect">Eje de rotación</label>
+            <select id="axisSelect" class="func-input">
+              <option value="y">Eje Y (vertical)</option>
+              <option value="x">Eje X (horizontal)</option>
+              <option value="z">Eje Z (profundidad)</option>
+            </select>
+          </div>
+          <div class="rev-field">
+            <label class="field-label" for="segmentsRange">Segmentos: <span id="segVal">32</span></label>
+            <input id="segmentsRange" type="range" min="8" max="64" step="1" value="32" />
+          </div>
+          <div class="rev-field">
+            <label class="field-label" for="angleRange">Ángulo: <span id="angleVal">360°</span></label>
+            <input id="angleRange" type="range" min="30" max="360" step="5" value="360" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="threeContainer" class="three-container" style="margin-top: 18px;"></div>
+
+    <div class="toolbar" style="margin-top: 12px;">
+      <button id="resetViewBtn" class="btn btn-ghost">Restablecer vista</button>
+    </div>
+  </div>
+
+  <style>
+    .page-head { padding: 56px 0 30px; }
+    .three-container {
+      width: 100%;
+      height: 560px;
+      position: relative;
+      background: radial-gradient(120% 90% at 50% 0%, rgba(27,37,71,0.35) 0%, transparent 55%), var(--ink-950);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--hairline);
+      overflow: hidden;
+    }
+    .rev-controls {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    .rev-field { flex: 1; min-width: 180px; }
+    .rev-field input[type="range"] { width: 100%; accent-color: var(--curve); }
+    @media (max-width: 768px) {
+      .three-container { height: 420px; }
+      .page-head { padding: 36px 0 24px; }
+    }
+  </style>
+
+  <script type="importmap">
+    {"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+    const canvas = document.getElementById('canvas2d');
+    const ctx = canvas.getContext('2d');
+    const clearBtn = document.getElementById('clearBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    const axisSelect = document.getElementById('axisSelect');
+    const segmentsRange = document.getElementById('segmentsRange');
+    const angleRange = document.getElementById('angleRange');
+    const segVal = document.getElementById('segVal');
+    const angleVal = document.getElementById('angleVal');
+    const resetViewBtn = document.getElementById('resetViewBtn');
+    const container = document.getElementById('threeContainer');
+
+    let points = [];
+    let isDrawing = false;
+    let coordinateSystem = null;
+    let scene, camera, renderer, controls, mesh;
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const cssH = Math.max(260, Math.min(420, rect.width * 0.5));
+      canvas.width = rect.width * dpr;
+      canvas.height = cssH * dpr;
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = cssH + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = rect.width, h = cssH;
+      coordinateSystem = {
+        originX: w / 2, originY: h / 2,
+        scaleX: w / 12, scaleY: h / 12,
+        canvasWidth: w, canvasHeight: h,
+        screenToMath: (sx, sy) => ({ x: (sx - w/2)/(w/12), y: (h/2 - sy)/(h/12) }),
+        mathToScreen: (mx, my) => ({ x: w/2 + mx*(w/12), y: h/2 - my*(h/12) })
+      };
+      draw2d();
+    }
+
+    function drawGrid() {
+      const { originX, originY, scaleX, scaleY, canvasWidth, canvasHeight } = coordinateSystem;
+      ctx.strokeStyle = 'rgba(148,163,216,0.08)'; ctx.lineWidth = 0.5;
+      for (let x = originX % scaleX; x < canvasWidth; x += scaleX) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvasHeight); ctx.stroke(); }
+      for (let x = originX - scaleX; x > 0; x -= scaleX) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvasHeight); ctx.stroke(); }
+      for (let y = originY % scaleY; y < canvasHeight; y += scaleY) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvasWidth,y); ctx.stroke(); }
+      for (let y = originY - scaleY; y > 0; y -= scaleY) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvasWidth,y); ctx.stroke(); }
+    }
+    function drawAxes() {
+      const { canvasWidth, canvasHeight, originX, originY } = coordinateSystem;
+      ctx.strokeStyle = 'rgba(148,163,216,0.45)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, originY); ctx.lineTo(canvasWidth, originY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(originX, 0); ctx.lineTo(originX, canvasHeight); ctx.stroke();
+    }
+    function drawCurve2d() {
+      if (points.length < 2) return;
+      ctx.strokeStyle = '#2dd4ee'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.shadowColor = 'rgba(45,212,238,0.55)'; ctx.shadowBlur = 12;
+      ctx.beginPath();
+      for (let i = 0; i < points.length; i++) {
+        const s = coordinateSystem.mathToScreen(points[i].x, points[i].y);
+        if (i === 0) ctx.moveTo(s.x, s.y); else ctx.lineTo(s.x, s.y);
+      }
+      ctx.stroke(); ctx.shadowBlur = 0;
+      ctx.fillStyle = '#2dd4ee';
+      for (const p of points) { const s = coordinateSystem.mathToScreen(p.x, p.y); ctx.beginPath(); ctx.arc(s.x, s.y, 2.6, 0, Math.PI*2); ctx.fill(); }
+    }
+    function draw2d() {
+      if (!coordinateSystem) return;
+      const { canvasWidth, canvasHeight } = coordinateSystem;
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      drawGrid(); drawAxes(); drawCurve2d();
+    }
+
+    function getCanvasPoint(e) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - rect.left, y: cy - rect.top };
+    }
+    function startDrawing(e) {
+      isDrawing = true;
+      const pt = getCanvasPoint(e);
+      const m = coordinateSystem.screenToMath(pt.x, pt.y);
+      points.push({ x: m.x, y: m.y });
+      updateUI(); draw2d(); e.preventDefault();
+    }
+    function drawPoint(e) {
+      if (!isDrawing) return;
+      const pt = getCanvasPoint(e);
+      const m = coordinateSystem.screenToMath(pt.x, pt.y);
+      points.push({ x: m.x, y: m.y });
+      updateUI(); draw2d(); e.preventDefault();
+    }
+    function stopDrawing() { isDrawing = false; }
+    function updateUI() {
+      generateBtn.disabled = points.length < 2;
+      clearBtn.disabled = points.length === 0;
+    }
+    function clearCurve() {
+      points = []; updateUI(); draw2d();
+      if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh = null; }
+      renderer.render(scene, camera);
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', drawPoint);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', () => { stopDrawing(); });
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', drawPoint, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing);
+    clearBtn.addEventListener('click', clearCurve);
+
+    segmentsRange.addEventListener('input', () => { segVal.textContent = segmentsRange.value; if (points.length >= 2) generateSolid(); });
+    angleRange.addEventListener('input', () => { angleVal.textContent = angleRange.value + '°'; if (points.length >= 2) generateSolid(); });
+    axisSelect.addEventListener('change', () => { if (points.length >= 2) generateSolid(); });
+    generateBtn.addEventListener('click', generateSolid);
+    resetViewBtn.addEventListener('click', () => { camera.position.set(6, 6, 12); camera.lookAt(0, 0, 0); controls.reset(); });
+
+    function init3d() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(w, h);
+      container.appendChild(renderer.domElement);
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x060913);
+      scene.fog = new THREE.Fog(0x060913, 20, 52);
+      camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 200);
+      camera.position.set(8, 6, 12);
+      camera.lookAt(0, 0, 0);
+      scene.add(new THREE.AmbientLight(0x8fa3d9, 0.5));
+      const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+      dir.position.set(10, 14, 8);
+      scene.add(dir);
+      const grid = new THREE.GridHelper(20, 20, 0x2b3a66, 0x141d3a);
+      grid.material.transparent = true; grid.material.opacity = 0.4;
+      scene.add(grid);
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      animate();
+    }
+
+    function generateSolid() {
+      if (points.length < 2) return;
+      if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); mesh = null; }
+      const segs = parseInt(segmentsRange.value);
+      const angleDeg = parseInt(angleRange.value);
+      const phi = (angleDeg / 360) * Math.PI * 2;
+      const axis = axisSelect.value;
+
+      // Build 2D profile in the plane containing the axis
+      const pts = points.map(p => ({ x: p.x, y: p.y }));
+      const profile = pts.map(p => new THREE.Vector2(Math.max(0, Math.hypot(p.x, p.y)), p.y));
+      // sort by radial distance for lathe stability
+      profile.sort((a, b) => a.x - b.x);
+
+      const geo = new THREE.LatheGeometry(profile, segs, 0, phi);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x9d7bff, transparent: true, opacity: 0.6,
+        roughness: 0.4, metalness: 0.2, side: THREE.DoubleSide
+      });
+      mesh = new THREE.Mesh(geo, mat);
+      // wireframe overlay
+      const wire = new THREE.LineSegments(
+        new THREE.WireframeGeometry(geo),
+        new THREE.LineBasicMaterial({ color: 0x2dd4ee, transparent: true, opacity: 0.35 })
+      );
+      mesh.add(wire);
+
+      if (axis === 'x') { mesh.rotation.z = -Math.PI / 2; }
+      else if (axis === 'z') { mesh.rotation.x = Math.PI / 2; }
+
+      scene.add(mesh);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      if (!renderer) return;
+      const w = container.clientWidth, h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+
+    resizeCanvas();
+    init3d();
+  </script>
+</Layout>

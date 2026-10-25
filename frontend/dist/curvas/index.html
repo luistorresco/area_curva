@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Área entre curvas — CalculusWeb</title><meta name="description" content="CalculusWeb — dibuja una curva y calcula el área bajo la curva mediante integración numérica (regla del trapecio)."><meta name="theme-color" content="#060913"><script>
+      (() => {
+        let stored = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {}
+        const dark = stored
+          ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', dark ? '#060913' : '#f4f7fb');
+      })();
+    </script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.qgjeSA2g.css"><script type="module" src="/_astro/hoisted.CvlEsnzn.js"></script></head> <body> <header class="site-header"> <div class="container header-inner"> <a href="/" class="brand" aria-label="CalculusWeb — Inicio"> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"> <path d="M4 4v28M4 32h30" stroke="var(--border-strong)" stroke-width="1.2" stroke-linecap="round"></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="var(--accent)" fill-opacity="0.12" stroke="none"></path> </svg> <span class="brand-word">Calculus<em>Web</em></span> </a> <div class="flex items-center gap-2"> <nav class="site-nav" aria-label="Navegación principal"> <a href="/" data-nav="/">Inicio</a> <a href="/curvas/" data-nav="/curvas/">Curvas</a> <a href="/calculo/" data-nav="/calculo/">Cálculo 3D</a> <a href="/formula/" data-nav="/formula/">Fórmulas</a> <a href="/revolucion/" data-nav="/revolucion/">Revolución</a> <a href="/nosotros/" data-nav="/nosotros/">Nosotros</a> </nav> <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar a modo claro" aria-pressed="false" title="Cambiar tema"> <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path> </svg> <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path> </svg> </button> </div> </div> </header> <main class="site-main">  <div class="container"> <header class="page-head"> <div> <h1 class="page-title">El espacio entre dos curvas</h1> <p class="page-lede mt-3">
+Introduce dos funciones, elige el intervalo y calcula el área de cada región.
+          La integración detecta los cruces, separa los intervalos y distingue qué curva
+          queda por encima en cada tramo.
+</p> </div> </header> <div id="errorMessage" class="hidden my-4"></div> <div class="panel"> <div class="panel-header"> <h2 class="section-title">Funciones e intervalo</h2> <div class="badge"><span class="dot"></span><span id="domainBadge">x ∈ [−5, 5]</span></div> </div> <div class="panel-body"> <div class="curves-grid"> <div class="curve-card"> <div class="curve-card-head"> <span class="curve-card-title"><span class="curve-dot"></span> Curva f(x)</span> </div> <div class="func-input-row"> <span class="func-prefix mono">f(x) =</span> <input id="fInput" class="func-input mono" type="text" value="x**2 - 2" spellcheck="false" autocomplete="off" autocapitalize="off"> </div> </div> <div class="curve-card g"> <div class="curve-card-head"> <span class="curve-card-title"><span class="curve-dot"></span> Curva g(x)</span> </div> <div class="func-input-row"> <span class="func-prefix mono">g(x) =</span> <input id="gInput" class="func-input mono" type="text" value="sin(x)" spellcheck="false" autocomplete="off" autocapitalize="off"> </div> </div> </div> <div class="func-range-row mt-4"> <div class="func-field"> <label class="field-label" for="curveStart">Intervalo desde</label> <input id="curveStart" class="func-input mono" type="number" step="any" value="-5"> </div> <div class="func-field"> <label class="field-label" for="curveEnd">hasta</label> <input id="curveEnd" class="func-input mono" type="number" step="any" value="5"> </div> <div class="func-field func-samples"> <label class="field-label" for="curveSamples">Muestras</label> <input id="curveSamples" class="func-input mono" type="number" min="20" max="5000" step="20" value="1000"> </div> <button id="curveCalculateBtn" class="btn btn-primary" type="button"> <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon> </svg>
+Calcular área
+</button> <button id="curveSwapBtn" class="btn btn-ghost" type="button">Intercambiar f/g</button> </div> <div class="func-hints mt-4"> <span class="hint-label">Ejemplos:</span> <button class="hint-chip mono" type="button" data-f="x**2 - 2" data-g="sin(x)">x²−2 / sin(x)</button> <button class="hint-chip mono" type="button" data-f="sin(x)" data-g="cos(x)">sin(x) / cos(x)</button> <button class="hint-chip mono" type="button" data-f="x" data-g="x**2">x / x²</button> <button class="hint-chip mono" type="button" data-f="exp(-x**2)" data-g="0.3">gauss / 0.3</button> </div> </div> </div> <div class="panel mt-6"> <div class="panel-header"> <h2 class="section-title">Región entre las curvas</h2> <span id="curveStatusBadge" class="badge">Sin calcular</span> </div> <div class="panel-body flush"> <div class="canvas-frame"> <canvas id="curvesCanvas" class="curves-canvas" aria-label="Gráfica del área entre dos curvas"></canvas> </div> </div> <div class="panel-body"> <div class="curve-legend"> <span class="legend-item"><span class="legend-swatch"></span> f(x)</span> <span class="legend-item"><span class="legend-swatch g"></span> g(x)</span> <span class="legend-item"><span class="legend-swatch region"></span> región sombreada</span> </div> <div id="curveSummary" class="readout mt-4 hidden" role="region" aria-label="Resultados del área entre curvas"> <div class="readout-cell total"> <div class="readout-bar"></div> <div class="readout-label">Área total</div> <div class="readout-value" id="curveTotalArea">0.0000</div> </div> <div class="readout-cell"> <div class="readout-bar"></div> <div class="readout-label">Integral firmada</div> <div class="readout-value" id="curveSignedArea">0.0000</div> </div> <div class="readout-cell positive"> <div class="readout-bar"></div> <div class="readout-label">Intersecciones</div> <div class="readout-value" id="curveIntersections">0</div> </div> <div class="readout-cell"> <div class="readout-bar"></div> <div class="readout-label">Intervalos</div> <div class="readout-value" id="curveIntervals">0</div> </div> </div> <p id="curveMethodNote" class="curve-note"></p> <div id="curveIntervalsBox" class="hidden"> <h3 class="section-title text-lg mt-4">Desglose por intervalo</h3> <div id="curveIntervalList" class="interval-list"></div> </div> <div id="curveWarnings" class="curve-note hidden"></div> <div class="mt-5 flex flex-wrap gap-3"> <a href="/curvas3d/" class="btn btn-ghost">Ver la región en 3D</a> <button id="curveClearBtn" class="btn btn-ghost" type="button">Limpiar</button> </div> </div> </div> <div class="info-strip"> <p>
+El área total suma el valor absoluto de cada tramo. La integral firmada conserva
+        el signo de f(x) − g(x), así que los tramos donde g queda por encima restan.
+        Los cruces se buscan por cambio de signo y se refinan por bisección.
+</p> </div> </div>   </main> <footer class="site-footer"> <div class="container footer-inner"> <span class="footer-note">CalculusWeb — <span>∫ f(x) dx</span> por la regla del trapecio</span> <span class="footer-note">Astro · Canvas API · Three.js · FastAPI</span> </div> </footer> <nav class="bottom-nav" role="navigation" aria-label="Navegación principal"> <a href="/" class="nav-home"> <svg viewBox="0 0 24 24"> <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path> <path d="M9 22V12h6v10"></path> </svg> <span>Inicio</span> </a> <a href="/curvas/" class="nav-curvas"> <svg viewBox="0 0 24 24"> <path d="M4 20c4 0 4-16 8-16s4 16 8 16"></path> <path d="M4 14c4 0 4-8 8-8s4 8 8 8"></path> </svg> <span>Curvas</span> </a> <a href="/calculo/" class="nav-calculo"> <svg viewBox="0 0 24 24"> <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958"></path> <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z"></path> <path d="M9 8h6"></path> <path d="M9 12h6"></path> </svg> <span>3D</span> </a> <a href="/formula/" class="nav-formula"> <svg viewBox="0 0 24 24"> <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path> <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2"></path> </svg> <span>Fórmulas</span> </a> <a href="/nosotros/" class="nav-nosotros"> <svg viewBox="0 0 24 24"> <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path> <circle cx="9" cy="7" r="4"></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path> <path d="M16 3.13a4 4 0 0 1 0 7.75"></path> </svg> <span>Nosotros</span> </a> </nav> <script>
+      (() => {
+        const root = document.documentElement;
+        const toggle = document.getElementById('themeToggle');
+        const meta = document.querySelector('meta[name="theme-color"]');
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const getStoredTheme = () => {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        };
+
+        const applyTheme = (theme, persist) => {
+          const isDark = theme === 'dark';
+          root.classList.toggle('dark', isDark);
+          root.style.colorScheme = isDark ? 'dark' : 'light';
+          if (persist) {
+            try {
+              localStorage.setItem('theme', theme);
+            } catch {}
+          }
+          if (meta) meta.setAttribute('content', isDark ? '#060913' : '#f4f7fb');
+          if (toggle) {
+            toggle.setAttribute(
+              'aria-label',
+              isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+            );
+            toggle.setAttribute('aria-pressed', String(isDark));
+          }
+          window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+        };
+
+        const stored = getStoredTheme();
+        const initial =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : media.matches
+              ? 'dark'
+              : 'light';
+
+        applyTheme(initial, false);
+
+        toggle?.addEventListener('click', () => {
+          applyTheme(root.classList.contains('dark') ? 'light' : 'dark', true);
+        });
+
+        media.addEventListener?.('change', (event) => {
+          if (!getStoredTheme()) {
+            applyTheme(event.matches ? 'dark' : 'light', false);
+          }
+        });
+      })();
+    </script> <script type="module">
+      const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+      document.querySelectorAll('[data-nav]').forEach(link => {
+        const href = link.getAttribute('data-nav').replace(/\/$/, '') || '/';
+        if (currentPath === href || (href !== '/' && currentPath.startsWith(href))) {
+          link.classList.add('active');
+        }
+      });
+      document.querySelectorAll('.bottom-nav a').forEach(link => {
+        const href = link.getAttribute('href').replace(/\/$/, '') || '/';
+        if (currentPath === href) link.classList.add('active');
+      });
+    </script> </body> </html>

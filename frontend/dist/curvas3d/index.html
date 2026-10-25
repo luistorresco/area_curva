@@ -1,0 +1,417 @@
+<!DOCTYPE html><html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Área entre curvas en 3D — CalculusWeb</title><meta name="description" content="CalculusWeb — dibuja una curva y calcula el área bajo la curva mediante integración numérica (regla del trapecio)."><meta name="theme-color" content="#060913"><script>
+      (() => {
+        let stored = null;
+        try {
+          stored = localStorage.getItem('theme');
+        } catch {}
+        const dark = stored
+          ? stored === 'dark'
+          : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', dark ? '#060913' : '#f4f7fb');
+      })();
+    </script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/_astro/calculo.qgjeSA2g.css"></head> <body> <header class="site-header"> <div class="container header-inner"> <a href="/" class="brand" aria-label="CalculusWeb — Inicio"> <svg class="brand-mark" viewBox="0 0 36 36" fill="none" aria-hidden="true"> <path d="M4 4v28M4 32h30" stroke="var(--border-strong)" stroke-width="1.2" stroke-linecap="round"></path> <path class="mark-curve" d="M5 26 C 11 26, 13 8, 19 8 S 29 26, 33 26" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"></path> <path d="M5 26 L 11 26 L 13 8 L 19 8 L 21 20 L 29 26 L 33 26 L 33 32 L 5 32 Z" fill="var(--accent)" fill-opacity="0.12" stroke="none"></path> </svg> <span class="brand-word">Calculus<em>Web</em></span> </a> <div class="flex items-center gap-2"> <nav class="site-nav" aria-label="Navegación principal"> <a href="/" data-nav="/">Inicio</a> <a href="/curvas/" data-nav="/curvas/">Curvas</a> <a href="/calculo/" data-nav="/calculo/">Cálculo 3D</a> <a href="/formula/" data-nav="/formula/">Fórmulas</a> <a href="/revolucion/" data-nav="/revolucion/">Revolución</a> <a href="/nosotros/" data-nav="/nosotros/">Nosotros</a> </nav> <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar a modo claro" aria-pressed="false" title="Cambiar tema"> <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"> <circle cx="12" cy="12" r="4"></circle> <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path> </svg> <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path> </svg> </button> </div> </div> </header> <main class="site-main">  <div class="container"> <header class="page-head"> <div> <h1 class="page-title">La región, fuera del plano</h1> <p class="page-lede mt-3">
+Cada tramo entre las dos curvas se extruye en profundidad. Gira la escena
+          para comprobar cómo se separan los intervalos y qué curva queda arriba.
+</p> </div> </header> <div id="errorMessage" class="hidden my-4"></div> <div id="emptyState" class="curve-empty hidden">
+No hay un área entre curvas calculada. Vuelve a la vista 2D, elige dos funciones
+      y calcula la región para explorarla aquí.
+<div class="mt-4"> <a href="/curvas/" class="btn btn-primary">Ir a Área entre curvas</a> </div> </div> <div id="threePanel" class="panel hidden"> <div class="panel-header"> <h2 class="section-title">Región extruida</h2> <span id="sceneBadge" class="badge">0 intervalos</span> </div> <div class="panel-body flush"> <div id="threeContainer" class="three-container"></div> </div> <div class="panel-body"> <div class="readout mt-2"> <div class="readout-cell total"> <div class="readout-bar"></div> <div class="readout-label">Área total</div> <div class="readout-value" id="sceneTotalArea">0.0000</div> </div> <div class="readout-cell"> <div class="readout-bar"></div> <div class="readout-label">Integral firmada</div> <div class="readout-value" id="sceneSignedArea">0.0000</div> </div> <div class="readout-cell positive"> <div class="readout-bar"></div> <div class="readout-label">Intersecciones</div> <div class="readout-value" id="sceneIntersections">0</div> </div> <div class="readout-cell"> <div class="readout-bar"></div> <div class="readout-label">Intervalos</div> <div class="readout-value" id="sceneIntervals">0</div> </div> </div> <div class="curve-legend"> <span class="legend-item"><span class="legend-swatch"></span> f(x)</span> <span class="legend-item"><span class="legend-swatch g"></span> g(x)</span> <span class="legend-item"><span class="legend-swatch region"></span> región extruida</span> </div> <div class="toolbar"> <button id="replayBtn" class="btn btn-primary" type="button">Reproducir animación</button> <button id="rotateBtn" class="btn btn-ghost" type="button">Pausar rotación</button> <button id="resetViewBtn" class="btn btn-ghost" type="button">Restablecer vista</button> <button id="wireframeBtn" class="btn btn-ghost" type="button">Alternar malla</button> <a href="/curvas/" class="btn btn-ghost">Volver a 2D</a> </div> </div> </div> <div class="info-strip"> <p>
+La profundidad es solo una ayuda visual: el área se calcula en el plano XY.
+        Cada bloque corresponde a un intervalo entre cruces; su color indica qué
+        función queda por encima.
+</p> </div> </div> <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script> <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+    const threeContainer = document.getElementById('threeContainer');
+    const threePanel = document.getElementById('threePanel');
+    const emptyState = document.getElementById('emptyState');
+    const errorMessage = document.getElementById('errorMessage');
+    const sceneBadge = document.getElementById('sceneBadge');
+    const sceneTotalArea = document.getElementById('sceneTotalArea');
+    const sceneSignedArea = document.getElementById('sceneSignedArea');
+    const sceneIntersections = document.getElementById('sceneIntersections');
+    const sceneIntervals = document.getElementById('sceneIntervals');
+    const replayBtn = document.getElementById('replayBtn');
+    const rotateBtn = document.getElementById('rotateBtn');
+    const resetViewBtn = document.getElementById('resetViewBtn');
+    const wireframeBtn = document.getElementById('wireframeBtn');
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DEPTH = 2.4;
+
+    let result = null;
+    let renderer = null;
+    let scene = null;
+    let camera = null;
+    let controls = null;
+    let regionGroup = null;
+    let animationFrame = 0;
+    let animationStart = 0;
+    let animating = false;
+    let wireframe = false;
+
+    function cssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function color(name, fallback) {
+      return new THREE.Color(cssVar(name) || fallback);
+    }
+
+    function formatNumber(value) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+      const magnitude = Math.abs(value);
+      if (magnitude !== 0 && (magnitude < 1e-4 || magnitude >= 1e6)) {
+        return value.toExponential(3);
+      }
+      return value.toFixed(4).replace(/\.?0+$/, '') || '0';
+    }
+
+    function showEmpty() {
+      emptyState.classList.remove('hidden');
+      threePanel.classList.add('hidden');
+    }
+
+    function loadResult() {
+      const raw = sessionStorage.getItem('areaBetweenResult');
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.f_points) || !Array.isArray(parsed.g_points)) {
+          return null;
+        }
+        return parsed;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function updateReadout() {
+      sceneTotalArea.textContent = formatNumber(result.total_area);
+      sceneSignedArea.textContent = formatNumber(result.signed_integral);
+      sceneIntersections.textContent = String((result.intersections || []).length);
+      sceneIntervals.textContent = String((result.intervals || []).length);
+      sceneBadge.textContent = `${(result.intervals || []).length} intervalos`;
+      sceneBadge.className = 'badge badge-valid';
+    }
+
+    function buildScene() {
+      if (!result) return;
+
+      cancelAnimationFrame(animationFrame);
+      if (renderer) {
+        renderer.dispose();
+        threeContainer.replaceChildren();
+      }
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+      camera.position.set(7.5, 5.5, 10);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      threeContainer.replaceChildren(renderer.domElement);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.07;
+      controls.autoRotate = !reducedMotion;
+      controls.autoRotateSpeed = 0.9;
+      controls.target.set(0, 0, 0);
+      updateRotateButton();
+
+      scene.add(new THREE.AmbientLight(0xffffff, 1.9));
+      const key = new THREE.DirectionalLight(0xffffff, 2.2);
+      key.position.set(5, 9, 8);
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xffffff, 0.9);
+      fill.position.set(-6, -4, 3);
+      scene.add(fill);
+
+      const xValues = result.f_points.map((point) => point.x);
+      const yValues = [...result.f_points, ...result.g_points].map((point) => point.y);
+      const xMin = Math.min(...xValues);
+      const xMax = Math.max(...xValues);
+      const yMin = Math.min(...yValues);
+      const yMax = Math.max(...yValues);
+      const centerX = (xMin + xMax) / 2;
+      const centerY = (yMin + yMax) / 2;
+      const span = Math.max(xMax - xMin, yMax - yMin, 1);
+      const unit = 7 / span;
+
+      function mapX(x) {
+        return (x - centerX) * unit;
+      }
+
+      function mapY(y) {
+        return (y - centerY) * unit;
+      }
+
+      regionGroup = new THREE.Group();
+      scene.add(regionGroup);
+
+      const grid = new THREE.GridHelper(12, 12, color('--scene-grid-major', '#b6c5dc'), color('--scene-grid-minor', '#d7e0ee'));
+      grid.rotation.x = Math.PI / 2;
+      grid.position.z = -DEPTH / 2 - 0.05;
+      grid.material.transparent = true;
+      grid.material.opacity = 0.32;
+      scene.add(grid);
+
+      const axisPoints = [
+        new THREE.Vector3(-4.2, 0, DEPTH / 2 + 0.06),
+        new THREE.Vector3(4.2, 0, DEPTH / 2 + 0.06),
+        new THREE.Vector3(0, -4.2, DEPTH / 2 + 0.06),
+        new THREE.Vector3(0, 4.2, DEPTH / 2 + 0.06)
+      ];
+      const axisGeometry = new THREE.BufferGeometry().setFromPoints([
+        axisPoints[0], axisPoints[1], axisPoints[2], axisPoints[3]
+      ]);
+      const axisLines = new THREE.LineSegments(
+        axisGeometry,
+        new THREE.LineBasicMaterial({ color: color('--canvas-axis', '#94a3b8'), transparent: true, opacity: 0.65 })
+      );
+      scene.add(axisLines);
+
+      const colorF = color('--scene-region-f', '#2dd4ee');
+      const colorG = color('--scene-region-g', '#9d7bff');
+      const lineF = color('--scene-curve', '#2dd4ee');
+      const lineG = color('--scene-curve-2', '#9d7bff');
+
+      const intervals = Array.isArray(result.intervals) ? result.intervals : [];
+      for (const interval of intervals) {
+        const start = interval.start;
+        const end = interval.end;
+        const epsilon = Math.max((xMax - xMin) * 1e-9, 1e-12);
+        const fPoints = result.f_points.filter((point) => point.x >= start - epsilon && point.x <= end + epsilon);
+        const gPoints = result.g_points.filter((point) => point.x >= start - epsilon && point.x <= end + epsilon);
+        if (fPoints.length < 2 || gPoints.length < 2) continue;
+
+        const shape = new THREE.Shape();
+        shape.moveTo(mapX(fPoints[0].x), mapY(fPoints[0].y));
+        for (let i = 1; i < fPoints.length; i += 1) {
+          shape.lineTo(mapX(fPoints[i].x), mapY(fPoints[i].y));
+        }
+        for (let i = gPoints.length - 1; i >= 0; i -= 1) {
+          shape.lineTo(mapX(gPoints[i].x), mapY(gPoints[i].y));
+        }
+        shape.closePath();
+
+        const geometry = new THREE.ExtrudeGeometry(shape, {
+          depth: DEPTH,
+          bevelEnabled: false,
+          steps: 1,
+          curveSegments: 1
+        });
+        geometry.translate(0, 0, -DEPTH / 2);
+        geometry.computeVertexNormals();
+
+        const baseColor = interval.above === 'g' ? colorG : colorF;
+        const material = new THREE.MeshStandardMaterial({
+          color: baseColor,
+          transparent: true,
+          opacity: 0.44,
+          roughness: 0.48,
+          metalness: 0.08,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        material.userData.baseColor = baseColor.clone();
+        material.userData.kind = 'region';
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.userData.kind = 'region';
+        regionGroup.add(mesh);
+
+        const edges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(geometry, 22),
+          new THREE.LineBasicMaterial({ color: baseColor, transparent: true, opacity: 0.55 })
+        );
+        edges.userData.kind = 'edge';
+        regionGroup.add(edges);
+      }
+
+      function addCurve(points, lineColor) {
+        const positions = points.map((point) => new THREE.Vector3(mapX(point.x), mapY(point.y), DEPTH / 2 + 0.04));
+        const geometry = new THREE.BufferGeometry().setFromPoints(positions);
+        const material = new THREE.LineBasicMaterial({ color: lineColor });
+        regionGroup.add(new THREE.Line(geometry, material));
+      }
+
+      addCurve(result.f_points, lineF);
+      addCurve(result.g_points, lineG);
+
+      const sphereGeometry = new THREE.SphereGeometry(0.055, 12, 12);
+      const sphereMaterial = new THREE.MeshStandardMaterial({ color: color('--fg', '#eef2fc'), roughness: 0.4 });
+      for (const point of result.intersections || []) {
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.set(mapX(point.x), mapY(point.y), DEPTH / 2 + 0.05);
+        regionGroup.add(sphere);
+      }
+
+      resize();
+      animate(0);
+    }
+
+    function resize() {
+      if (!renderer || !camera) return;
+      const width = Math.max(threeContainer.clientWidth, 320);
+      const height = Math.max(threeContainer.clientHeight, 320);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
+    }
+
+    function animate(timestamp) {
+      animationFrame = requestAnimationFrame(animate);
+      if (animating && regionGroup) {
+        if (!animationStart) animationStart = timestamp;
+        const progress = Math.min((timestamp - animationStart) / 1100, 1);
+        const eased = 1 - (1 - progress) ** 3;
+        regionGroup.scale.z = Math.max(eased, 0.02);
+        if (progress >= 1) {
+          animating = false;
+          regionGroup.scale.z = 1;
+        }
+      }
+      controls?.update();
+      renderer?.render(scene, camera);
+    }
+
+    function updateRotateButton() {
+      rotateBtn.textContent = controls?.autoRotate ? 'Pausar rotación' : 'Rotar automáticamente';
+    }
+
+    replayBtn.addEventListener('click', () => {
+      if (!regionGroup) return;
+      regionGroup.scale.z = 0.02;
+      animationStart = 0;
+      animating = true;
+    });
+
+    rotateBtn.addEventListener('click', () => {
+      if (!controls) return;
+      controls.autoRotate = !controls.autoRotate;
+      updateRotateButton();
+    });
+
+    resetViewBtn.addEventListener('click', () => {
+      if (!camera || !controls) return;
+      camera.position.set(7.5, 5.5, 10);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    });
+
+    wireframeBtn.addEventListener('click', () => {
+      wireframe = !wireframe;
+      regionGroup?.traverse((child) => {
+        if (child.isMesh && child.material?.userData?.kind === 'region') {
+          child.material.wireframe = wireframe;
+        }
+        if (child.isLineSegments && child.userData.kind === 'edge') {
+          child.visible = !wireframe;
+        }
+      });
+    });
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('themechange', () => {
+      if (!result) return;
+      buildScene();
+    });
+
+    result = loadResult();
+    if (!result) {
+      showEmpty();
+    } else {
+      threePanel.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      updateReadout();
+      buildScene();
+    }
+
+    window.addEventListener('beforeunload', () => {
+      cancelAnimationFrame(animationFrame);
+      renderer?.dispose();
+    });
+  </script>  </main> <footer class="site-footer"> <div class="container footer-inner"> <span class="footer-note">CalculusWeb — <span>∫ f(x) dx</span> por la regla del trapecio</span> <span class="footer-note">Astro · Canvas API · Three.js · FastAPI</span> </div> </footer> <nav class="bottom-nav" role="navigation" aria-label="Navegación principal"> <a href="/" class="nav-home"> <svg viewBox="0 0 24 24"> <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path> <path d="M9 22V12h6v10"></path> </svg> <span>Inicio</span> </a> <a href="/curvas/" class="nav-curvas"> <svg viewBox="0 0 24 24"> <path d="M4 20c4 0 4-16 8-16s4 16 8 16"></path> <path d="M4 14c4 0 4-8 8-8s4 8 8 8"></path> </svg> <span>Curvas</span> </a> <a href="/calculo/" class="nav-calculo"> <svg viewBox="0 0 24 24"> <path d="M21 12.958V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10.958"></path> <path d="M12 16l4-4 4 4v4a2 2 0 0 1-2 2H12z"></path> <path d="M9 8h6"></path> <path d="M9 12h6"></path> </svg> <span>3D</span> </a> <a href="/formula/" class="nav-formula"> <svg viewBox="0 0 24 24"> <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path> <path d="M14 2l-4 4v6m4-10V8a2 2 0 1 0-2 2h0a2 2 0 1 0 2-2V2"></path> </svg> <span>Fórmulas</span> </a> <a href="/nosotros/" class="nav-nosotros"> <svg viewBox="0 0 24 24"> <path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path> <circle cx="9" cy="7" r="4"></circle> <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path> <path d="M16 3.13a4 4 0 0 1 0 7.75"></path> </svg> <span>Nosotros</span> </a> </nav> <script>
+      (() => {
+        const root = document.documentElement;
+        const toggle = document.getElementById('themeToggle');
+        const meta = document.querySelector('meta[name="theme-color"]');
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const getStoredTheme = () => {
+          try {
+            return localStorage.getItem('theme');
+          } catch {
+            return null;
+          }
+        };
+
+        const applyTheme = (theme, persist) => {
+          const isDark = theme === 'dark';
+          root.classList.toggle('dark', isDark);
+          root.style.colorScheme = isDark ? 'dark' : 'light';
+          if (persist) {
+            try {
+              localStorage.setItem('theme', theme);
+            } catch {}
+          }
+          if (meta) meta.setAttribute('content', isDark ? '#060913' : '#f4f7fb');
+          if (toggle) {
+            toggle.setAttribute(
+              'aria-label',
+              isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+            );
+            toggle.setAttribute('aria-pressed', String(isDark));
+          }
+          window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+        };
+
+        const stored = getStoredTheme();
+        const initial =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : media.matches
+              ? 'dark'
+              : 'light';
+
+        applyTheme(initial, false);
+
+        toggle?.addEventListener('click', () => {
+          applyTheme(root.classList.contains('dark') ? 'light' : 'dark', true);
+        });
+
+        media.addEventListener?.('change', (event) => {
+          if (!getStoredTheme()) {
+            applyTheme(event.matches ? 'dark' : 'light', false);
+          }
+        });
+      })();
+    </script> <script type="module">
+      const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+      document.querySelectorAll('[data-nav]').forEach(link => {
+        const href = link.getAttribute('data-nav').replace(/\/$/, '') || '/';
+        if (currentPath === href || (href !== '/' && currentPath.startsWith(href))) {
+          link.classList.add('active');
+        }
+      });
+      document.querySelectorAll('.bottom-nav a').forEach(link => {
+        const href = link.getAttribute('href').replace(/\/$/, '') || '/';
+        if (currentPath === href) link.classList.add('active');
+      });
+    </script> </body> </html>
