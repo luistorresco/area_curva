@@ -173,7 +173,7 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
     </div>
-    <div class="mt-5 flex flex-wrap gap-3" id="resultsActions" style="display: none;">
+    <div class="mt-7 flex flex-wrap gap-3" id="resultsActions" style="display: none;">
       <a href="/results/" class="btn btn-ghost">Ver detalles y fórmulas</a>
       <a href="/calculo/" class="btn btn-ghost">Explorar en 3D</a>
     </div>
@@ -1340,6 +1340,7 @@ import Layout from '../layouts/Layout.astro';
       loadingNote.textContent = 'Muestreando la función…';
       loadingIndicator.style.display = 'block';
       resultsSummary.style.display = 'none';
+      document.getElementById('resultsActions').style.display = 'none';
 
       try {
         const response = await fetch('/api/evaluate-function', {
