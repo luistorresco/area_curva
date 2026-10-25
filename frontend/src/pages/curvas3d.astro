@@ -1,0 +1,410 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Área entre curvas en 3D — CalculusWeb">
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1 class="page-title">La región, fuera del plano</h1>
+        <p class="page-lede mt-3">
+          Cada tramo entre las dos curvas se extruye en profundidad. Gira la escena
+          para comprobar cómo se separan los intervalos y qué curva queda arriba.
+        </p>
+      </div>
+    </header>
+
+    <div id="errorMessage" class="hidden my-4"></div>
+
+    <div id="emptyState" class="curve-empty hidden">
+      No hay un área entre curvas calculada. Vuelve a la vista 2D, elige dos funciones
+      y calcula la región para explorarla aquí.
+      <div class="mt-4">
+        <a href="/curvas/" class="btn btn-primary">Ir a Área entre curvas</a>
+      </div>
+    </div>
+
+    <div id="threePanel" class="panel hidden">
+      <div class="panel-header">
+        <h2 class="section-title">Región extruida</h2>
+        <span id="sceneBadge" class="badge">0 intervalos</span>
+      </div>
+      <div class="panel-body flush">
+        <div id="threeContainer" class="three-container"></div>
+      </div>
+      <div class="panel-body">
+        <div class="readout mt-2">
+          <div class="readout-cell total">
+            <div class="readout-bar"></div>
+            <div class="readout-label">Área total</div>
+            <div class="readout-value" id="sceneTotalArea">0.0000</div>
+          </div>
+          <div class="readout-cell">
+            <div class="readout-bar"></div>
+            <div class="readout-label">Integral firmada</div>
+            <div class="readout-value" id="sceneSignedArea">0.0000</div>
+          </div>
+          <div class="readout-cell positive">
+            <div class="readout-bar"></div>
+            <div class="readout-label">Intersecciones</div>
+            <div class="readout-value" id="sceneIntersections">0</div>
+          </div>
+          <div class="readout-cell">
+            <div class="readout-bar"></div>
+            <div class="readout-label">Intervalos</div>
+            <div class="readout-value" id="sceneIntervals">0</div>
+          </div>
+        </div>
+
+        <div class="curve-legend">
+          <span class="legend-item"><span class="legend-swatch"></span> f(x)</span>
+          <span class="legend-item"><span class="legend-swatch g"></span> g(x)</span>
+          <span class="legend-item"><span class="legend-swatch region"></span> región extruida</span>
+        </div>
+
+        <div class="toolbar">
+          <button id="replayBtn" class="btn btn-primary" type="button">Reproducir animación</button>
+          <button id="rotateBtn" class="btn btn-ghost" type="button">Pausar rotación</button>
+          <button id="resetViewBtn" class="btn btn-ghost" type="button">Restablecer vista</button>
+          <button id="wireframeBtn" class="btn btn-ghost" type="button">Alternar malla</button>
+          <a href="/curvas/" class="btn btn-ghost">Volver a 2D</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-strip">
+      <p>
+        La profundidad es solo una ayuda visual: el área se calcula en el plano XY.
+        Cada bloque corresponde a un intervalo entre cruces; su color indica qué
+        función queda por encima.
+      </p>
+    </div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+    const threeContainer = document.getElementById('threeContainer');
+    const threePanel = document.getElementById('threePanel');
+    const emptyState = document.getElementById('emptyState');
+    const errorMessage = document.getElementById('errorMessage');
+    const sceneBadge = document.getElementById('sceneBadge');
+    const sceneTotalArea = document.getElementById('sceneTotalArea');
+    const sceneSignedArea = document.getElementById('sceneSignedArea');
+    const sceneIntersections = document.getElementById('sceneIntersections');
+    const sceneIntervals = document.getElementById('sceneIntervals');
+    const replayBtn = document.getElementById('replayBtn');
+    const rotateBtn = document.getElementById('rotateBtn');
+    const resetViewBtn = document.getElementById('resetViewBtn');
+    const wireframeBtn = document.getElementById('wireframeBtn');
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const DEPTH = 2.4;
+
+    let result = null;
+    let renderer = null;
+    let scene = null;
+    let camera = null;
+    let controls = null;
+    let regionGroup = null;
+    let animationFrame = 0;
+    let animationStart = 0;
+    let animating = false;
+    let wireframe = false;
+
+    function cssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function color(name, fallback) {
+      return new THREE.Color(cssVar(name) || fallback);
+    }
+
+    function formatNumber(value) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+      const magnitude = Math.abs(value);
+      if (magnitude !== 0 && (magnitude < 1e-4 || magnitude >= 1e6)) {
+        return value.toExponential(3);
+      }
+      return value.toFixed(4).replace(/\.?0+$/, '') || '0';
+    }
+
+    function showEmpty() {
+      emptyState.classList.remove('hidden');
+      threePanel.classList.add('hidden');
+    }
+
+    function loadResult() {
+      const raw = sessionStorage.getItem('areaBetweenResult');
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.f_points) || !Array.isArray(parsed.g_points)) {
+          return null;
+        }
+        return parsed;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function updateReadout() {
+      sceneTotalArea.textContent = formatNumber(result.total_area);
+      sceneSignedArea.textContent = formatNumber(result.signed_integral);
+      sceneIntersections.textContent = String((result.intersections || []).length);
+      sceneIntervals.textContent = String((result.intervals || []).length);
+      sceneBadge.textContent = `${(result.intervals || []).length} intervalos`;
+      sceneBadge.className = 'badge badge-valid';
+    }
+
+    function buildScene() {
+      if (!result) return;
+
+      cancelAnimationFrame(animationFrame);
+      if (renderer) {
+        renderer.dispose();
+        threeContainer.replaceChildren();
+      }
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+      camera.position.set(7.5, 5.5, 10);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(threeContainer.clientWidth, threeContainer.clientHeight, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      threeContainer.replaceChildren(renderer.domElement);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.07;
+      controls.autoRotate = !reducedMotion;
+      controls.autoRotateSpeed = 0.9;
+      controls.target.set(0, 0, 0);
+      updateRotateButton();
+
+      scene.add(new THREE.AmbientLight(0xffffff, 1.9));
+      const key = new THREE.DirectionalLight(0xffffff, 2.2);
+      key.position.set(5, 9, 8);
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xffffff, 0.9);
+      fill.position.set(-6, -4, 3);
+      scene.add(fill);
+
+      const xValues = result.f_points.map((point) => point.x);
+      const yValues = [...result.f_points, ...result.g_points].map((point) => point.y);
+      const xMin = Math.min(...xValues);
+      const xMax = Math.max(...xValues);
+      const yMin = Math.min(...yValues);
+      const yMax = Math.max(...yValues);
+      const centerX = (xMin + xMax) / 2;
+      const centerY = (yMin + yMax) / 2;
+      const span = Math.max(xMax - xMin, yMax - yMin, 1);
+      const unit = 7 / span;
+
+      function mapX(x) {
+        return (x - centerX) * unit;
+      }
+
+      function mapY(y) {
+        return (y - centerY) * unit;
+      }
+
+      regionGroup = new THREE.Group();
+      scene.add(regionGroup);
+
+      const grid = new THREE.GridHelper(12, 12, color('--scene-grid-major', '#b6c5dc'), color('--scene-grid-minor', '#d7e0ee'));
+      grid.rotation.x = Math.PI / 2;
+      grid.position.z = -DEPTH / 2 - 0.05;
+      grid.material.transparent = true;
+      grid.material.opacity = 0.32;
+      scene.add(grid);
+
+      const axisPoints = [
+        new THREE.Vector3(-4.2, 0, DEPTH / 2 + 0.06),
+        new THREE.Vector3(4.2, 0, DEPTH / 2 + 0.06),
+        new THREE.Vector3(0, -4.2, DEPTH / 2 + 0.06),
+        new THREE.Vector3(0, 4.2, DEPTH / 2 + 0.06)
+      ];
+      const axisGeometry = new THREE.BufferGeometry().setFromPoints([
+        axisPoints[0], axisPoints[1], axisPoints[2], axisPoints[3]
+      ]);
+      const axisLines = new THREE.LineSegments(
+        axisGeometry,
+        new THREE.LineBasicMaterial({ color: color('--canvas-axis', '#94a3b8'), transparent: true, opacity: 0.65 })
+      );
+      scene.add(axisLines);
+
+      const colorF = color('--scene-region-f', '#2dd4ee');
+      const colorG = color('--scene-region-g', '#9d7bff');
+      const lineF = color('--scene-curve', '#2dd4ee');
+      const lineG = color('--scene-curve-2', '#9d7bff');
+
+      const intervals = Array.isArray(result.intervals) ? result.intervals : [];
+      for (const interval of intervals) {
+        const start = interval.start;
+        const end = interval.end;
+        const epsilon = Math.max((xMax - xMin) * 1e-9, 1e-12);
+        const fPoints = result.f_points.filter((point) => point.x >= start - epsilon && point.x <= end + epsilon);
+        const gPoints = result.g_points.filter((point) => point.x >= start - epsilon && point.x <= end + epsilon);
+        if (fPoints.length < 2 || gPoints.length < 2) continue;
+
+        const shape = new THREE.Shape();
+        shape.moveTo(mapX(fPoints[0].x), mapY(fPoints[0].y));
+        for (let i = 1; i < fPoints.length; i += 1) {
+          shape.lineTo(mapX(fPoints[i].x), mapY(fPoints[i].y));
+        }
+        for (let i = gPoints.length - 1; i >= 0; i -= 1) {
+          shape.lineTo(mapX(gPoints[i].x), mapY(gPoints[i].y));
+        }
+        shape.closePath();
+
+        const geometry = new THREE.ExtrudeGeometry(shape, {
+          depth: DEPTH,
+          bevelEnabled: false,
+          steps: 1,
+          curveSegments: 1
+        });
+        geometry.translate(0, 0, -DEPTH / 2);
+        geometry.computeVertexNormals();
+
+        const baseColor = interval.above === 'g' ? colorG : colorF;
+        const material = new THREE.MeshStandardMaterial({
+          color: baseColor,
+          transparent: true,
+          opacity: 0.44,
+          roughness: 0.48,
+          metalness: 0.08,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        });
+        material.userData.baseColor = baseColor.clone();
+        material.userData.kind = 'region';
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.userData.kind = 'region';
+        regionGroup.add(mesh);
+
+        const edges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(geometry, 22),
+          new THREE.LineBasicMaterial({ color: baseColor, transparent: true, opacity: 0.55 })
+        );
+        edges.userData.kind = 'edge';
+        regionGroup.add(edges);
+      }
+
+      function addCurve(points, lineColor) {
+        const positions = points.map((point) => new THREE.Vector3(mapX(point.x), mapY(point.y), DEPTH / 2 + 0.04));
+        const geometry = new THREE.BufferGeometry().setFromPoints(positions);
+        const material = new THREE.LineBasicMaterial({ color: lineColor });
+        regionGroup.add(new THREE.Line(geometry, material));
+      }
+
+      addCurve(result.f_points, lineF);
+      addCurve(result.g_points, lineG);
+
+      const sphereGeometry = new THREE.SphereGeometry(0.055, 12, 12);
+      const sphereMaterial = new THREE.MeshStandardMaterial({ color: color('--fg', '#eef2fc'), roughness: 0.4 });
+      for (const point of result.intersections || []) {
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.set(mapX(point.x), mapY(point.y), DEPTH / 2 + 0.05);
+        regionGroup.add(sphere);
+      }
+
+      resize();
+      animate(0);
+    }
+
+    function resize() {
+      if (!renderer || !camera) return;
+      const width = Math.max(threeContainer.clientWidth, 320);
+      const height = Math.max(threeContainer.clientHeight, 320);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
+    }
+
+    function animate(timestamp) {
+      animationFrame = requestAnimationFrame(animate);
+      if (animating && regionGroup) {
+        if (!animationStart) animationStart = timestamp;
+        const progress = Math.min((timestamp - animationStart) / 1100, 1);
+        const eased = 1 - (1 - progress) ** 3;
+        regionGroup.scale.z = Math.max(eased, 0.02);
+        if (progress >= 1) {
+          animating = false;
+          regionGroup.scale.z = 1;
+        }
+      }
+      controls?.update();
+      renderer?.render(scene, camera);
+    }
+
+    function updateRotateButton() {
+      rotateBtn.textContent = controls?.autoRotate ? 'Pausar rotación' : 'Rotar automáticamente';
+    }
+
+    replayBtn.addEventListener('click', () => {
+      if (!regionGroup) return;
+      regionGroup.scale.z = 0.02;
+      animationStart = 0;
+      animating = true;
+    });
+
+    rotateBtn.addEventListener('click', () => {
+      if (!controls) return;
+      controls.autoRotate = !controls.autoRotate;
+      updateRotateButton();
+    });
+
+    resetViewBtn.addEventListener('click', () => {
+      if (!camera || !controls) return;
+      camera.position.set(7.5, 5.5, 10);
+      controls.target.set(0, 0, 0);
+      controls.update();
+    });
+
+    wireframeBtn.addEventListener('click', () => {
+      wireframe = !wireframe;
+      regionGroup?.traverse((child) => {
+        if (child.isMesh && child.material?.userData?.kind === 'region') {
+          child.material.wireframe = wireframe;
+        }
+        if (child.isLineSegments && child.userData.kind === 'edge') {
+          child.visible = !wireframe;
+        }
+      });
+    });
+
+    window.addEventListener('resize', resize);
+    window.addEventListener('themechange', () => {
+      if (!result) return;
+      buildScene();
+    });
+
+    result = loadResult();
+    if (!result) {
+      showEmpty();
+    } else {
+      threePanel.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      updateReadout();
+      buildScene();
+    }
+
+    window.addEventListener('beforeunload', () => {
+      cancelAnimationFrame(animationFrame);
+      renderer?.dispose();
+    });
+  </script>
+</Layout>

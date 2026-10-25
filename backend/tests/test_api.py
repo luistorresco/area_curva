@@ -1,0 +1,127 @@
+from __future__ import annotations
+
+import math
+import unittest
+
+from fastapi import HTTPException
+
+import main
+from schemas import (
+    AreaBetweenRequest,
+    AreaBetweenResponse,
+    CalculationResult,
+    CurveRequest,
+    DrawingValidation,
+    FunctionRequest,
+    RecognitionResponse,
+)
+
+
+def line_points(start=-2, end=2, intervals=80):
+    return [
+        {"x": start + (end - start) * i / intervals, "y": 2 * (start + (end - start) * i / intervals) + 1}
+        for i in range(intervals + 1)
+    ]
+
+
+class ApiContractTests(unittest.TestCase):
+    def test_health(self):
+        self.assertEqual(main.health(), {"status": "ok"})
+
+    def test_validate_drawing_contract(self):
+        response = main.validate_drawing(CurveRequest(points=line_points()))
+        validated = DrawingValidation(**response)
+        self.assertEqual(validated.status, "valid")
+        self.assertTrue(validated.is_function)
+
+    def test_calculate_contract(self):
+        response = main.calculate_area(CurveRequest(points=line_points(0, 1)))
+        result = CalculationResult(**response)
+        self.assertTrue(result.has_valid_result)
+        self.assertGreater(result.total_geometric_area, 0)
+
+    def test_calculate_invalid_input_returns_400(self):
+        with self.assertRaises(HTTPException) as context:
+            main.calculate_area(
+                CurveRequest(points=[{"x": 1, "y": 0}, {"x": 1, "y": 1}])
+            )
+        self.assertEqual(context.exception.status_code, 400)
+
+    def test_evaluate_function_contract(self):
+        response = main.evaluate_function(
+            FunctionRequest(expression="sin(x)", start=0, end=math.pi, samples=40)
+        )
+        self.assertEqual(len(response["points"]), 41)
+        self.assertAlmostEqual(response["points"][-1]["y"], 0.0, places=10)
+
+    def test_evaluate_function_rejects_bad_expression(self):
+        with self.assertRaises(HTTPException) as context:
+            main.evaluate_function(
+                FunctionRequest(expression="__import__('os')", start=0, end=1, samples=10)
+            )
+        self.assertEqual(context.exception.status_code, 400)
+
+    def test_evaluate_function_reports_domain_error(self):
+        with self.assertRaises(HTTPException) as context:
+            main.evaluate_function(
+                FunctionRequest(expression="sqrt(x)", start=-1, end=1, samples=10)
+            )
+        self.assertEqual(context.exception.status_code, 400)
+        self.assertIn("x =", context.exception.detail)
+
+    def test_evaluate_function_rejects_bad_interval(self):
+        with self.assertRaises(HTTPException) as context:
+            main.evaluate_function(
+                FunctionRequest(expression="x", start=1, end=0, samples=10)
+            )
+        self.assertEqual(context.exception.status_code, 400)
+
+    def test_recognize_contract(self):
+        response = main.recognize(CurveRequest(points=line_points()))
+        result = RecognitionResponse(**response)
+        self.assertTrue(result.recognized)
+        self.assertEqual(result.validation.status, "valid")
+
+    def test_area_between_contract(self):
+        response = main.area_between(
+            AreaBetweenRequest(
+                f_expression="x",
+                g_expression="x**2",
+                start=0,
+                end=1,
+                samples=500,
+            )
+        )
+        result = AreaBetweenResponse(**response)
+        self.assertAlmostEqual(result.total_area, 1 / 6, delta=1e-3)
+        self.assertGreater(len(result.f_points), 2)
+
+    def test_area_between_rejects_domain_error(self):
+        with self.assertRaises(HTTPException) as context:
+            main.area_between(
+                AreaBetweenRequest(
+                    f_expression="sqrt(x)",
+                    g_expression="0",
+                    start=-1,
+                    end=1,
+                    samples=100,
+                )
+            )
+        self.assertEqual(context.exception.status_code, 400)
+
+    def test_area_between_rejects_bad_expression(self):
+        with self.assertRaises(HTTPException) as context:
+            main.area_between(
+                AreaBetweenRequest(
+                    f_expression="x.real",
+                    g_expression="0",
+                    start=0,
+                    end=1,
+                    samples=100,
+                )
+            )
+        self.assertEqual(context.exception.status_code, 400)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,648 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Área entre curvas — CalculusWeb">
+  <div class="container">
+    <header class="page-head">
+      <div>
+        <h1 class="page-title">El espacio entre dos curvas</h1>
+        <p class="page-lede mt-3">
+          Introduce dos funciones, elige el intervalo y calcula el área de cada región.
+          La integración detecta los cruces, separa los intervalos y distingue qué curva
+          queda por encima en cada tramo.
+        </p>
+      </div>
+    </header>
+
+    <div id="errorMessage" class="hidden my-4"></div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="section-title">Funciones e intervalo</h2>
+        <div class="badge"><span class="dot"></span><span id="domainBadge">x ∈ [−5, 5]</span></div>
+      </div>
+      <div class="panel-body">
+        <div class="curves-grid">
+          <div class="curve-card">
+            <div class="curve-card-head">
+              <span class="curve-card-title"><span class="curve-dot"></span> Curva f(x)</span>
+            </div>
+            <div class="func-input-row">
+              <span class="func-prefix mono">f(x) =</span>
+              <input id="fInput" class="func-input mono" type="text" value="x**2 - 2" spellcheck="false" autocomplete="off" autocapitalize="off" />
+            </div>
+          </div>
+          <div class="curve-card g">
+            <div class="curve-card-head">
+              <span class="curve-card-title"><span class="curve-dot"></span> Curva g(x)</span>
+            </div>
+            <div class="func-input-row">
+              <span class="func-prefix mono">g(x) =</span>
+              <input id="gInput" class="func-input mono" type="text" value="sin(x)" spellcheck="false" autocomplete="off" autocapitalize="off" />
+            </div>
+          </div>
+        </div>
+
+        <div class="func-range-row mt-4">
+          <div class="func-field">
+            <label class="field-label" for="curveStart">Intervalo desde</label>
+            <input id="curveStart" class="func-input mono" type="number" step="any" value="-5" />
+          </div>
+          <div class="func-field">
+            <label class="field-label" for="curveEnd">hasta</label>
+            <input id="curveEnd" class="func-input mono" type="number" step="any" value="5" />
+          </div>
+          <div class="func-field func-samples">
+            <label class="field-label" for="curveSamples">Muestras</label>
+            <input id="curveSamples" class="func-input mono" type="number" min="20" max="5000" step="20" value="1000" />
+          </div>
+          <button id="curveCalculateBtn" class="btn btn-primary" type="button">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            Calcular área
+          </button>
+          <button id="curveSwapBtn" class="btn btn-ghost" type="button">Intercambiar f/g</button>
+        </div>
+
+        <div class="func-hints mt-4">
+          <span class="hint-label">Ejemplos:</span>
+          <button class="hint-chip mono" type="button" data-f="x**2 - 2" data-g="sin(x)">x²−2 / sin(x)</button>
+          <button class="hint-chip mono" type="button" data-f="sin(x)" data-g="cos(x)">sin(x) / cos(x)</button>
+          <button class="hint-chip mono" type="button" data-f="x" data-g="x**2">x / x²</button>
+          <button class="hint-chip mono" type="button" data-f="exp(-x**2)" data-g="0.3">gauss / 0.3</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel mt-6">
+      <div class="panel-header">
+        <h2 class="section-title">Región entre las curvas</h2>
+        <span id="curveStatusBadge" class="badge">Sin calcular</span>
+      </div>
+      <div class="panel-body flush">
+        <div class="canvas-frame">
+          <canvas id="curvesCanvas" class="curves-canvas" aria-label="Gráfica del área entre dos curvas"></canvas>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="curve-legend">
+          <span class="legend-item"><span class="legend-swatch"></span> f(x)</span>
+          <span class="legend-item"><span class="legend-swatch g"></span> g(x)</span>
+          <span class="legend-item"><span class="legend-swatch region"></span> región sombreada</span>
+        </div>
+
+        <div id="curveSummary" class="readout mt-4 hidden" role="region" aria-label="Resultados del área entre curvas">
+          <div class="readout-cell total">
+            <div class="readout-bar"></div>
+            <div class="readout-label">Área total</div>
+            <div class="readout-value" id="curveTotalArea">0.0000</div>
+          </div>
+          <div class="readout-cell">
+            <div class="readout-bar"></div>
+            <div class="readout-label">Integral firmada</div>
+            <div class="readout-value" id="curveSignedArea">0.0000</div>
+          </div>
+          <div class="readout-cell positive">
+            <div class="readout-bar"></div>
+            <div class="readout-label">Intersecciones</div>
+            <div class="readout-value" id="curveIntersections">0</div>
+          </div>
+          <div class="readout-cell">
+            <div class="readout-bar"></div>
+            <div class="readout-label">Intervalos</div>
+            <div class="readout-value" id="curveIntervals">0</div>
+          </div>
+        </div>
+
+        <p id="curveMethodNote" class="curve-note"></p>
+
+        <div id="curveIntervalsBox" class="hidden">
+          <h3 class="section-title text-lg mt-4">Desglose por intervalo</h3>
+          <div id="curveIntervalList" class="interval-list"></div>
+        </div>
+
+        <div id="curveWarnings" class="curve-note hidden"></div>
+
+        <div class="mt-5 flex flex-wrap gap-3">
+          <a href="/curvas3d/" class="btn btn-ghost">Ver la región en 3D</a>
+          <button id="curveClearBtn" class="btn btn-ghost" type="button">Limpiar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-strip">
+      <p>
+        El área total suma el valor absoluto de cada tramo. La integral firmada conserva
+        el signo de f(x) − g(x), así que los tramos donde g queda por encima restan.
+        Los cruces se buscan por cambio de signo y se refinan por bisección.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('curvesCanvas');
+    const ctx = canvas.getContext('2d');
+    const errorMessage = document.getElementById('errorMessage');
+    const domainBadge = document.getElementById('domainBadge');
+    const statusBadge = document.getElementById('curveStatusBadge');
+    const fInput = document.getElementById('fInput');
+    const gInput = document.getElementById('gInput');
+    const startInput = document.getElementById('curveStart');
+    const endInput = document.getElementById('curveEnd');
+    const samplesInput = document.getElementById('curveSamples');
+    const calculateBtn = document.getElementById('curveCalculateBtn');
+    const swapBtn = document.getElementById('curveSwapBtn');
+    const clearBtn = document.getElementById('curveClearBtn');
+    const summary = document.getElementById('curveSummary');
+    const totalAreaEl = document.getElementById('curveTotalArea');
+    const signedAreaEl = document.getElementById('curveSignedArea');
+    const intersectionsEl = document.getElementById('curveIntersections');
+    const intervalsEl = document.getElementById('curveIntervals');
+    const methodNote = document.getElementById('curveMethodNote');
+    const intervalsBox = document.getElementById('curveIntervalsBox');
+    const intervalList = document.getElementById('curveIntervalList');
+    const warningsBox = document.getElementById('curveWarnings');
+    const exampleButtons = document.querySelectorAll('[data-f][data-g]');
+
+    const PAD = 46;
+    const state = { result: null };
+    const view = { width: 0, height: 0, dpr: 1 };
+
+    function cssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function showError(message) {
+      errorMessage.style.display = 'flex';
+      errorMessage.innerHTML = `
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span></span>
+      `;
+      errorMessage.querySelector('span').textContent = message;
+    }
+
+    function hideError() {
+      errorMessage.style.display = 'none';
+    }
+
+    function setStatus(label, tone = '') {
+      statusBadge.textContent = label;
+      statusBadge.className = `badge${tone ? ` ${tone}` : ''}`;
+    }
+
+    function formatNumber(value) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+      const magnitude = Math.abs(value);
+      if (magnitude !== 0 && (magnitude < 1e-4 || magnitude >= 1e6)) {
+        return value.toExponential(3);
+      }
+      return value.toFixed(4).replace(/\.?0+$/, '') || '0';
+    }
+
+    function formatTick(value) {
+      return Number(value.toPrecision(5)).toString();
+    }
+
+    function messageFrom(data, fallback) {
+      if (typeof data?.detail === 'string') return data.detail;
+      if (Array.isArray(data?.detail)) {
+        return data.detail.map((item) => item.msg || '').filter(Boolean).join(' · ') || fallback;
+      }
+      return fallback;
+    }
+
+    function intervalText() {
+      const start = parseFloat(startInput.value);
+      const end = parseFloat(endInput.value);
+      if (!Number.isFinite(start) || !Number.isFinite(end) || start >= end) {
+        return 'x ∈ [—]';
+      }
+      return `x ∈ [${formatTick(start)}, ${formatTick(end)}]`;
+    }
+
+    function updateDomainBadge() {
+      domainBadge.textContent = intervalText();
+    }
+
+    function saveInputs() {
+      sessionStorage.setItem('curvesInput', JSON.stringify({
+        f: fInput.value,
+        g: gInput.value,
+        start: startInput.value,
+        end: endInput.value,
+        samples: samplesInput.value
+      }));
+    }
+
+    function restoreInputs() {
+      const raw = sessionStorage.getItem('curvesInput');
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        if (typeof saved.f === 'string') fInput.value = saved.f;
+        if (typeof saved.g === 'string') gInput.value = saved.g;
+        if (saved.start !== undefined) startInput.value = saved.start;
+        if (saved.end !== undefined) endInput.value = saved.end;
+        if (saved.samples !== undefined) samplesInput.value = saved.samples;
+      } catch (e) { /* ignore */ }
+    }
+
+    function niceStep(span, target) {
+      if (!Number.isFinite(span) || span <= 0) return 1;
+      const raw = span / Math.max(target, 1);
+      const magnitude = 10 ** Math.floor(Math.log10(raw));
+      const normalized = raw / magnitude;
+      const step = normalized >= 5 ? 10 : normalized >= 2 ? 5 : normalized >= 1 ? 2 : 1;
+      return step * magnitude;
+    }
+
+    function yRange(result) {
+      const values = [];
+      for (const point of [...(result.f_points || []), ...(result.g_points || [])]) {
+        if (Number.isFinite(point.y)) values.push(point.y);
+      }
+      if (!values.length) return { min: -1, max: 1 };
+      let min = Math.min(...values);
+      let max = Math.max(...values);
+      if (min === max) {
+        min -= 1;
+        max += 1;
+      }
+      const padding = (max - min) * 0.14;
+      return { min: min - padding, max: max + padding };
+    }
+
+    function boundsFor(result) {
+      if (!result) {
+        return { xMin: -5, xMax: 5, yMin: -5, yMax: 5 };
+      }
+      const range = yRange(result);
+      return {
+        xMin: result.start,
+        xMax: result.end,
+        yMin: range.min,
+        yMax: range.max
+      };
+    }
+
+    let bounds = boundsFor(null);
+
+    function screenX(x) {
+      const plotWidth = Math.max(view.width - PAD * 2, 10);
+      return PAD + ((x - bounds.xMin) / (bounds.xMax - bounds.xMin)) * plotWidth;
+    }
+
+    function screenY(y) {
+      const plotHeight = Math.max(view.height - PAD * 2, 10);
+      return view.height - PAD - ((y - bounds.yMin) / (bounds.yMax - bounds.yMin)) * plotHeight;
+    }
+
+    function drawGrid() {
+      const grid = cssVar('--canvas-grid');
+      const axis = cssVar('--canvas-axis');
+      const label = cssVar('--canvas-label');
+      const mono = cssVar('--font-mono') || 'monospace';
+      const xStep = niceStep(bounds.xMax - bounds.xMin, 9);
+      const yStep = niceStep(bounds.yMax - bounds.yMin, 7);
+
+      ctx.save();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = grid;
+      ctx.beginPath();
+      for (let x = Math.ceil(bounds.xMin / xStep) * xStep; x <= bounds.xMax + 1e-9; x += xStep) {
+        const px = screenX(x);
+        ctx.moveTo(px, PAD);
+        ctx.lineTo(px, view.height - PAD);
+      }
+      for (let y = Math.ceil(bounds.yMin / yStep) * yStep; y <= bounds.yMax + 1e-9; y += yStep) {
+        const py = screenY(y);
+        ctx.moveTo(PAD, py);
+        ctx.lineTo(view.width - PAD, py);
+      }
+      ctx.stroke();
+
+      ctx.strokeStyle = axis;
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      if (bounds.xMin <= 0 && bounds.xMax >= 0) {
+        const px = screenX(0);
+        ctx.moveTo(px, PAD);
+        ctx.lineTo(px, view.height - PAD);
+      }
+      if (bounds.yMin <= 0 && bounds.yMax >= 0) {
+        const py = screenY(0);
+        ctx.moveTo(PAD, py);
+        ctx.lineTo(view.width - PAD, py);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = label;
+      ctx.font = `11px ${mono}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      for (let x = Math.ceil(bounds.xMin / xStep) * xStep; x <= bounds.xMax + 1e-9; x += xStep) {
+        if (Math.abs(x) < xStep * 1e-6) continue;
+        ctx.fillText(formatTick(x), screenX(x), view.height - PAD + 8);
+      }
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      for (let y = Math.ceil(bounds.yMin / yStep) * yStep; y <= bounds.yMax + 1e-9; y += yStep) {
+        if (Math.abs(y) < yStep * 1e-6) continue;
+        ctx.fillText(formatTick(y), PAD - 8, screenY(y));
+      }
+      ctx.restore();
+    }
+
+    function strokeCurve(points, color) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.4;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      let started = false;
+      for (const point of points) {
+        if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) {
+          started = false;
+          continue;
+        }
+        const px = screenX(point.x);
+        const py = screenY(point.y);
+        if (!started) {
+          ctx.moveTo(px, py);
+          started = true;
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawRegion(result) {
+      const fPoints = result.f_points || [];
+      const gPoints = result.g_points || [];
+      const regionF = cssVar('--canvas-region-f');
+      const regionG = cssVar('--canvas-region-g');
+
+      for (let i = 0; i < Math.min(fPoints.length, gPoints.length) - 1; i += 1) {
+        const f1 = fPoints[i];
+        const f2 = fPoints[i + 1];
+        const g1 = gPoints[i];
+        const g2 = gPoints[i + 1];
+        if (![f1, f2, g1, g2].every((point) => Number.isFinite(point.x) && Number.isFinite(point.y))) {
+          continue;
+        }
+        const above = (f1.y + f2.y) >= (g1.y + g2.y);
+        ctx.beginPath();
+        ctx.moveTo(screenX(f1.x), screenY(f1.y));
+        ctx.lineTo(screenX(f2.x), screenY(f2.y));
+        ctx.lineTo(screenX(g2.x), screenY(g2.y));
+        ctx.lineTo(screenX(g1.x), screenY(g1.y));
+        ctx.closePath();
+        ctx.fillStyle = above ? regionF : regionG;
+        ctx.fill();
+      }
+    }
+
+    function drawIntersections(result) {
+      const color = cssVar('--fg');
+      const background = cssVar('--bg');
+      for (const point of result.intersections || []) {
+        if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) continue;
+        ctx.beginPath();
+        ctx.arc(screenX(point.x), screenY(point.y), 4, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = background;
+        ctx.stroke();
+      }
+    }
+
+    function drawPlaceholder() {
+      const muted = cssVar('--muted');
+      const ui = cssVar('--font-ui') || 'sans-serif';
+      ctx.save();
+      ctx.fillStyle = muted;
+      ctx.font = `13px ${ui}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Calcula un área para ver la región entre las curvas.', view.width / 2, view.height / 2);
+      ctx.restore();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, view.width, view.height);
+      bounds = boundsFor(state.result);
+      drawGrid();
+      if (!state.result) {
+        drawPlaceholder();
+        return;
+      }
+      drawRegion(state.result);
+      strokeCurve(state.result.g_points || [], cssVar('--canvas-curve-2'));
+      strokeCurve(state.result.f_points || [], cssVar('--canvas-curve'));
+      drawIntersections(state.result);
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      view.width = Math.max(rect.width, 320);
+      view.height = Math.max(rect.height, 240);
+      view.dpr = dpr;
+      canvas.width = Math.round(view.width * dpr);
+      canvas.height = Math.round(view.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    }
+
+    function renderWarnings(warnings) {
+      warningsBox.replaceChildren();
+      if (!Array.isArray(warnings) || !warnings.length) {
+        warningsBox.classList.add('hidden');
+        return;
+      }
+      warningsBox.classList.remove('hidden');
+      for (const warning of warnings) {
+        const item = document.createElement('p');
+        item.textContent = warning;
+        warningsBox.appendChild(item);
+      }
+    }
+
+    function renderIntervals(result) {
+      intervalList.replaceChildren();
+      const intervals = Array.isArray(result.intervals) ? result.intervals : [];
+      intervalsEl.textContent = String(intervals.length);
+      if (!intervals.length) {
+        intervalsBox.classList.add('hidden');
+        return;
+      }
+      intervalsBox.classList.remove('hidden');
+      for (const interval of intervals) {
+        const row = document.createElement('div');
+        row.className = 'interval-row';
+
+        const range = document.createElement('strong');
+        range.textContent = `[${formatTick(interval.start)}, ${formatTick(interval.end)}]`;
+
+        const above = document.createElement('span');
+        above.textContent = interval.above === 'f'
+          ? 'f(x) por encima'
+          : interval.above === 'g'
+            ? 'g(x) por encima'
+            : 'curvas coincidentes';
+
+        const area = document.createElement('span');
+        area.className = 'mono';
+        area.textContent = `${formatNumber(interval.area)} u²`;
+
+        row.append(range, above, area);
+        intervalList.appendChild(row);
+      }
+    }
+
+    function renderResult(result, persist = true) {
+      state.result = result;
+      if (persist) {
+        sessionStorage.setItem('areaBetweenResult', JSON.stringify(result));
+      }
+      setStatus('Calculado', 'badge-valid');
+      summary.classList.remove('hidden');
+
+      totalAreaEl.textContent = formatNumber(result.total_area);
+      signedAreaEl.textContent = formatNumber(result.signed_integral);
+      intersectionsEl.textContent = String((result.intersections || []).length);
+      methodNote.textContent = `Método: ${result.method || 'trapecio'} · ${result.samples_used || 0} muestras · ${result.evaluations || 0} evaluaciones.`;
+
+      renderIntervals(result);
+      renderWarnings(result.warnings);
+      updateDomainBadge();
+      draw();
+    }
+
+    function clearResult() {
+      state.result = null;
+      sessionStorage.removeItem('areaBetweenResult');
+      summary.classList.add('hidden');
+      intervalsBox.classList.add('hidden');
+      intervalList.replaceChildren();
+      warningsBox.classList.add('hidden');
+      methodNote.textContent = '';
+      setStatus('Sin calcular');
+      draw();
+    }
+
+    async function calculateArea() {
+      const fExpression = fInput.value.trim();
+      const gExpression = gInput.value.trim();
+      const start = parseFloat(startInput.value);
+      const end = parseFloat(endInput.value);
+      const samples = Math.min(5000, Math.max(20, parseInt(samplesInput.value, 10) || 1000));
+      samplesInput.value = String(samples);
+
+      if (!fExpression || !gExpression) {
+        showError('Introduce las dos funciones antes de calcular.');
+        return;
+      }
+      if (!Number.isFinite(start) || !Number.isFinite(end) || start >= end) {
+        showError('El inicio del intervalo debe ser un número finito menor que el fin.');
+        return;
+      }
+
+      hideError();
+      calculateBtn.disabled = true;
+      setStatus('Calculando…', 'badge-pending');
+      saveInputs();
+
+      try {
+        const response = await fetch('/api/area-between-curves', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            f_expression: fExpression,
+            g_expression: gExpression,
+            start,
+            end,
+            samples
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(messageFrom(data, 'No se pudo calcular el área entre las curvas.'));
+        }
+        renderResult(data);
+      } catch (error) {
+        setStatus('Error', 'badge-invalid');
+        showError(error.message);
+      } finally {
+        calculateBtn.disabled = false;
+      }
+    }
+
+    swapBtn.addEventListener('click', () => {
+      const f = fInput.value;
+      fInput.value = gInput.value;
+      gInput.value = f;
+      saveInputs();
+      calculateArea();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      clearResult();
+      hideError();
+    });
+
+    calculateBtn.addEventListener('click', calculateArea);
+
+    for (const button of exampleButtons) {
+      button.addEventListener('click', () => {
+        fInput.value = button.dataset.f || '';
+        gInput.value = button.dataset.g || '';
+        saveInputs();
+        calculateArea();
+      });
+    }
+
+    for (const input of [fInput, gInput, startInput, endInput, samplesInput]) {
+      input.addEventListener('input', () => {
+        saveInputs();
+        updateDomainBadge();
+        if (state.result) setStatus('Cambios sin calcular', 'badge-uncertain');
+      });
+    }
+
+    for (const input of [startInput, endInput]) {
+      input.addEventListener('change', () => {
+        saveInputs();
+        updateDomainBadge();
+      });
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('themechange', draw);
+
+    restoreInputs();
+    updateDomainBadge();
+    resizeCanvas();
+
+    const savedResult = sessionStorage.getItem('areaBetweenResult');
+    if (savedResult) {
+      try {
+        const result = JSON.parse(savedResult);
+        if (result && Array.isArray(result.f_points) && Array.isArray(result.g_points)) {
+          renderResult(result, false);
+        }
+      } catch (e) { /* ignore */ }
+    }
+  </script>
+</Layout>

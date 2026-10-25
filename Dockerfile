@@ -25,7 +25,7 @@ RUN apt-get update \
 
 COPY --from=backend-build /opt/venv /opt/venv
 COPY --from=frontend-build /app/dist /usr/share/nginx/html
-COPY backend/main.py /app/main.py
+COPY backend/*.py /app/
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
