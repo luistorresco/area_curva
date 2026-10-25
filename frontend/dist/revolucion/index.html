@@ -20,7 +20,7 @@ Dibuja una curva en 2D y gírala alrededor de un eje para generar un volumen.
           Cada punto se convierte en una circunferencia; el trazo entero forma un sólido.
 </p> </div> </header> <div class="panel" style="margin-bottom: 16px;" data-astro-cid-qhiawbtr> <div class="canvas-frame" data-astro-cid-qhiawbtr> <canvas id="canvas2d" style="display: block; width: 100%; touch-action: none;" data-astro-cid-qhiawbtr></canvas> </div> </div> <div class="toolbar" role="toolbar" data-astro-cid-qhiawbtr> <button id="clearBtn" class="btn btn-ghost" disabled data-astro-cid-qhiawbtr>Limpiar</button> <button id="generateBtn" class="btn btn-primary" disabled data-astro-cid-qhiawbtr>
 Generar sólido 3D
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-qhiawbtr><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" data-astro-cid-qhiawbtr></polyline></svg> </button> </div> <div class="panel" style="margin-top: 18px;" data-astro-cid-qhiawbtr> <div class="panel-header" data-astro-cid-qhiawbtr> <h2 class="section-title" data-astro-cid-qhiawbtr>Controles de revolución</h2> </div> <div class="panel-body" data-astro-cid-qhiawbtr> <div class="rev-controls" data-astro-cid-qhiawbtr> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="axisSelect" data-astro-cid-qhiawbtr>Eje de rotación</label> <select id="axisSelect" class="func-input" data-astro-cid-qhiawbtr> <option value="y" data-astro-cid-qhiawbtr>Eje Y (vertical)</option> <option value="x" data-astro-cid-qhiawbtr>Eje X (horizontal)</option> <option value="z" data-astro-cid-qhiawbtr>Eje Z (profundidad)</option> </select> </div> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="segmentsRange" data-astro-cid-qhiawbtr>Segmentos: <span id="segVal" data-astro-cid-qhiawbtr>32</span></label> <input id="segmentsRange" type="range" min="8" max="64" step="1" value="32" data-astro-cid-qhiawbtr> </div> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="angleRange" data-astro-cid-qhiawbtr>Ángulo: <span id="angleVal" data-astro-cid-qhiawbtr>360°</span></label> <input id="angleRange" type="range" min="30" max="360" step="5" value="360" data-astro-cid-qhiawbtr> </div> </div> </div> </div> <div id="threeContainer" class="three-container" style="margin-top: 18px;" data-astro-cid-qhiawbtr></div> <div class="toolbar" style="margin-top: 12px;" data-astro-cid-qhiawbtr> <button id="resetViewBtn" class="btn btn-ghost" data-astro-cid-qhiawbtr>Restablecer vista</button> </div> </div>  <script type="importmap">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-qhiawbtr><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" data-astro-cid-qhiawbtr></polyline></svg> </button> </div> <div class="panel" style="margin-top: 18px;" data-astro-cid-qhiawbtr> <div class="panel-header" data-astro-cid-qhiawbtr> <h2 class="section-title" data-astro-cid-qhiawbtr>Controles de revolución</h2> </div> <div class="panel-body" data-astro-cid-qhiawbtr> <div class="rev-controls" data-astro-cid-qhiawbtr> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="axisSelect" data-astro-cid-qhiawbtr>Eje de rotación</label> <select id="axisSelect" class="func-input" data-astro-cid-qhiawbtr> <option value="y" data-astro-cid-qhiawbtr>Eje Y (vertical)</option> <option value="x" data-astro-cid-qhiawbtr>Eje X (horizontal)</option> <option value="z" data-astro-cid-qhiawbtr>Eje Z (profundidad)</option> <option value="xy" data-astro-cid-qhiawbtr>Combinado X+Y (diagonal)</option> <option value="xz" data-astro-cid-qhiawbtr>Combinado X+Z (diagonal)</option> <option value="yz" data-astro-cid-qhiawbtr>Combinado Y+Z (diagonal)</option> <option value="xyz" data-astro-cid-qhiawbtr>Combinado X+Y+Z (diagonal)</option> </select> </div> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="segmentsRange" data-astro-cid-qhiawbtr>Segmentos: <span id="segVal" data-astro-cid-qhiawbtr>32</span></label> <input id="segmentsRange" type="range" min="8" max="64" step="1" value="32" data-astro-cid-qhiawbtr> </div> <div class="rev-field" data-astro-cid-qhiawbtr> <label class="field-label" for="angleRange" data-astro-cid-qhiawbtr>Ángulo: <span id="angleVal" data-astro-cid-qhiawbtr>360°</span></label> <input id="angleRange" type="range" min="30" max="360" step="5" value="360" data-astro-cid-qhiawbtr> </div> </div> </div> </div> <div id="threeContainer" class="three-container" style="margin-top: 18px;" data-astro-cid-qhiawbtr></div> <div class="toolbar" style="margin-top: 12px;" data-astro-cid-qhiawbtr> <button id="resetViewBtn" class="btn btn-ghost" data-astro-cid-qhiawbtr>Restablecer vista</button> </div> </div>  <script type="importmap">
     {"imports": {"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
   </script> <script type="module">
     import * as THREE from 'three';
@@ -196,8 +196,20 @@ Generar sólido 3D
       );
       mesh.add(wire);
 
-      if (axis === 'x') { mesh.rotation.z = -Math.PI / 2; }
-      else if (axis === 'z') { mesh.rotation.x = Math.PI / 2; }
+      // Orient the lathe (revolved around local Y) toward the chosen axis
+      const axisVectors = {
+        x:   new THREE.Vector3(1, 0, 0),
+        y:   new THREE.Vector3(0, 1, 0),
+        z:   new THREE.Vector3(0, 0, 1),
+        xy:  new THREE.Vector3(1, 1, 0),
+        xz:  new THREE.Vector3(1, 0, 1),
+        yz:  new THREE.Vector3(0, 1, 1),
+        xyz: new THREE.Vector3(1, 1, 1),
+      };
+      const target = axisVectors[axis].normalize();
+      const up = new THREE.Vector3(0, 1, 0);
+      const q = new THREE.Quaternion().setFromUnitVectors(up, target);
+      mesh.quaternion.copy(q);
 
       scene.add(mesh);
     }

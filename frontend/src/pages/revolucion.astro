@@ -39,6 +39,10 @@ import Layout from '../layouts/Layout.astro';
               <option value="y">Eje Y (vertical)</option>
               <option value="x">Eje X (horizontal)</option>
               <option value="z">Eje Z (profundidad)</option>
+              <option value="xy">Combinado X+Y (diagonal)</option>
+              <option value="xz">Combinado X+Z (diagonal)</option>
+              <option value="yz">Combinado Y+Z (diagonal)</option>
+              <option value="xyz">Combinado X+Y+Z (diagonal)</option>
             </select>
           </div>
           <div class="rev-field">
@@ -262,8 +266,20 @@ import Layout from '../layouts/Layout.astro';
       );
       mesh.add(wire);
 
-      if (axis === 'x') { mesh.rotation.z = -Math.PI / 2; }
-      else if (axis === 'z') { mesh.rotation.x = Math.PI / 2; }
+      // Orient the lathe (revolved around local Y) toward the chosen axis
+      const axisVectors = {
+        x:   new THREE.Vector3(1, 0, 0),
+        y:   new THREE.Vector3(0, 1, 0),
+        z:   new THREE.Vector3(0, 0, 1),
+        xy:  new THREE.Vector3(1, 1, 0),
+        xz:  new THREE.Vector3(1, 0, 1),
+        yz:  new THREE.Vector3(0, 1, 1),
+        xyz: new THREE.Vector3(1, 1, 1),
+      };
+      const target = axisVectors[axis].normalize();
+      const up = new THREE.Vector3(0, 1, 0);
+      const q = new THREE.Quaternion().setFromUnitVectors(up, target);
+      mesh.quaternion.copy(q);
 
       scene.add(mesh);
     }
