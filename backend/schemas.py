@@ -122,6 +122,28 @@ class VolumeRequest(BaseModel):
     samples: int = 2000
 
 
+class VolumeProfileRequest(BaseModel):
+    """Volume calculation from an imported stroke/function.
+
+    ``points`` is the Cartesian curve drawn or plotted by the user.  The
+    backend uses the actual points as the boundary of the region, so the
+    method and the revolution axis can be changed without reinterpreting an
+    algebraic expression in the wrong variable.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    method: Literal["discos", "arandelas", "capas"]
+    axis: Literal["x", "y"]
+    points: List[Point] = Field(..., min_length=2, max_length=5000)
+    g_expression: str = "0"
+    start: Optional[float] = None
+    end: Optional[float] = None
+    samples: int = 2000
+    f_expression: Optional[str] = None
+    source: Optional[str] = None
+
+
 class VolumeStep(BaseModel):
     title: str
     text: str
@@ -148,3 +170,7 @@ class VolumeResponse(BaseModel):
     g_points: List[Point]
     warnings: List[str] = Field(default_factory=list)
     has_valid_result: bool
+    profile: bool = False
+    profile_points: List[Point] = Field(default_factory=list)
+    f_expression: Optional[str] = None
+    g_expression: Optional[str] = None

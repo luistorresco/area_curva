@@ -14,6 +14,7 @@ from schemas import (
     DrawingValidation,
     FunctionRequest,
     RecognitionResponse,
+    VolumeProfileRequest,
     VolumeRequest,
     VolumeResponse,
 )
@@ -182,6 +183,40 @@ class ApiContractTests(unittest.TestCase):
                     g_expression="2",
                     start=0,
                     end=1,
+                    samples=100,
+                )
+            )
+        self.assertEqual(context.exception.status_code, 400)
+
+    def test_volume_profile_contract(self):
+        points = [
+            {"x": 2 * index / 100, "y": 2 * index / 100}
+            for index in range(101)
+        ]
+        response = main.volume_profile(
+            VolumeProfileRequest(
+                method="capas",
+                axis="y",
+                points=points,
+                samples=400,
+                f_expression="x",
+                source="draw",
+            )
+        )
+        result = VolumeResponse(**response)
+        self.assertTrue(result.profile)
+        self.assertAlmostEqual(result.volume, 16 * math.pi / 3, delta=1e-1)
+        self.assertEqual(result.variable, "x")
+        self.assertTrue(result.profile_points)
+        self.assertTrue(result.steps)
+
+    def test_volume_profile_rejects_degenerate_stroke(self):
+        with self.assertRaises(HTTPException) as context:
+            main.volume_profile(
+                VolumeProfileRequest(
+                    method="discos",
+                    axis="x",
+                    points=[{"x": 0, "y": 0}, {"x": 0, "y": 1}],
                     samples=100,
                 )
             )

@@ -38,10 +38,11 @@ from schemas import (
     FunctionRequest,
     RecognitionResponse,
     Point,
+    VolumeProfileRequest,
     VolumeRequest,
     VolumeResponse,
 )
-from volume_math import volume_solid
+from volume_math import volume_from_profile, volume_solid
 
 MAX_EVALUATION_SAMPLES = 2000
 MAX_RECOGNITION_POINTS = 5000
@@ -206,6 +207,42 @@ def volume(request: VolumeRequest) -> dict:
             start=request.start,
             end=request.end,
             samples=request.samples,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/api/volume-profile", response_model=VolumeResponse)
+def volume_profile(request: VolumeProfileRequest) -> dict:
+    """Volume from the user's imported stroke/function.
+
+    The actual points are used as the region boundary, so changing the
+    method or the revolution axis keeps the user's drawing instead of
+    reinterpreting an expression in the wrong variable.
+    """
+
+    if len(request.points) > MAX_RECOGNITION_POINTS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"El trazo admite como máximo {MAX_RECOGNITION_POINTS} puntos.",
+        )
+    if len(request.g_expression or "") > MAX_EXPRESSION_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=f"La expresión de g admite como máximo {MAX_EXPRESSION_LENGTH} caracteres.",
+        )
+
+    try:
+        return volume_from_profile(
+            method=request.method,
+            axis=request.axis,
+            points=_points(request.points),
+            g_expression=request.g_expression,
+            start=request.start,
+            end=request.end,
+            samples=request.samples,
+            f_expression=request.f_expression,
+            source=request.source,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

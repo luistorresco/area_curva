@@ -906,6 +906,10 @@ import Layout from '../layouts/Layout.astro';
       const view = { width: 0, height: 0 };
       let bounds = { xMin: -1, xMax: 1, yMin: -1, yMax: 1 };
       let currentVariable = null;
+      let activeProfile = null;
+      let profileNote = '';
+      let methodAxisTouched = false;
+      let volumeRequestId = 0;
 
       const EXAMPLES = [
         { label: 'Discos · eje X', method: 'discos', axis: 'x', f: 'sqrt(x)', g: '0', start: 0, end: 4 },
@@ -980,6 +984,44 @@ import Layout from '../layouts/Layout.astro';
         const variable = integrationVariable(method, axis);
         const axisLabel = axis === 'x' ? 'eje X (y = 0)' : 'eje Y (x = 0)';
 
+        if (activeProfile) {
+          currentVariable = variable;
+          fRow.style.display = 'flex';
+          gRow.style.display = method === 'discos' ? 'none' : 'flex';
+          fPrefix.textContent = 'f(x) =';
+          gPrefix.textContent = 'g(x) =';
+          fInput.readOnly = true;
+          gInput.readOnly = true;
+          startInput.readOnly = true;
+          endInput.readOnly = true;
+
+          const startValue = parseFloat(startInput.value);
+          const endValue = parseFloat(endInput.value);
+          const intervalText =
+            Number.isFinite(startValue) && Number.isFinite(endValue)
+              ? ` entre ${formatNumber(startValue)} y ${formatNumber(endValue)}`
+              : '';
+
+          if (method === 'discos') {
+            hint.textContent = axis === 'x'
+              ? `Trazo importado: discos perpendiculares al eje X. R(x) se toma de la curva f(x)${intervalText}.`
+              : `Trazo importado: discos perpendiculares al eje Y. R(y) es la distancia máxima del trazo al eje Y en cada altura${intervalText}.`;
+          } else if (method === 'arandelas') {
+            hint.textContent = `Trazo importado: arandelas alrededor del eje ${axis === 'x' ? 'X' : 'Y'}. R y r se obtienen del borde exterior e interior del trazo en cada corte${intervalText}.`;
+          } else {
+            hint.textContent = axis === 'y'
+              ? `Trazo importado: capas alrededor del eje Y. ρ=x y h(x) es la altura del trazo en cada x${intervalText}.`
+              : `Trazo importado: capas alrededor del eje X. ρ=|y| y h(y) es el ancho horizontal del trazo en cada altura${intervalText}.`;
+          }
+          hint.textContent += ' Pulsa "Limpiar resultado" para editar las funciones manualmente.';
+          return;
+        }
+
+        fInput.readOnly = false;
+        gInput.readOnly = false;
+        startInput.readOnly = false;
+        endInput.readOnly = false;
+
         if (currentVariable && currentVariable !== variable) {
           fInput.value = swapVariable(fInput.value, currentVariable, variable);
           gInput.value = swapVariable(gInput.value, currentVariable, variable);
@@ -1019,10 +1061,10 @@ import Layout from '../layouts/Layout.astro';
 
       function markStale() {
         if (state.result) {
-          clearRenderedResult();
+          clearRenderedResult({ keepNote: Boolean(activeProfile) });
           setStatus('Cambios sin calcular', 'badge-uncertain');
         }
-        showSyncNote('');
+        if (!activeProfile) showSyncNote('');
       }
 
       function showSyncNote(message) {
@@ -1097,11 +1139,20 @@ import Layout from '../layouts/Layout.astro';
           const variable = data.variable;
           const fExpr = data.f_expression || '—';
           const gExpr = data.g_expression || '0';
-          inputsUsedEl.textContent =
-            `f(${variable}) = ${fExpr}; g(${variable}) = ${gExpr}; ` +
-            `intervalo [${formatNumber(data.start)}, ${formatNumber(data.end)}]; ` +
-            `${String(data.method_label || '').toLowerCase()} alrededor del ` +
-            `${data.axis === 'x' ? 'eje X' : 'eje Y'}.`;
+          if (data.profile) {
+            inputsUsedEl.textContent =
+              `Trazo/función importada: f(x) = ${fExpr}; g(x) = ${gExpr}; ` +
+              `intervalo de integración en ${variable}: ` +
+              `[${formatNumber(data.start)}, ${formatNumber(data.end)}]; ` +
+              `${String(data.method_label || '').toLowerCase()} alrededor del ` +
+              `${data.axis === 'x' ? 'eje X' : 'eje Y'}.`;
+          } else {
+            inputsUsedEl.textContent =
+              `f(${variable}) = ${fExpr}; g(${variable}) = ${gExpr}; ` +
+              `intervalo [${formatNumber(data.start)}, ${formatNumber(data.end)}]; ` +
+              `${String(data.method_label || '').toLowerCase()} alrededor del ` +
+              `${data.axis === 'x' ? 'eje X' : 'eje Y'}.`;
+          }
         }
 
         renderWarnings(data.warnings);
@@ -1114,7 +1165,7 @@ import Layout from '../layouts/Layout.astro';
         }
       }
 
-      function clearRenderedResult() {
+      function clearRenderedResult({ keepNote = false } = {}) {
         state.result = null;
         readout.classList.add('hidden');
         stepsBox.replaceChildren();
@@ -1125,26 +1176,75 @@ import Layout from '../layouts/Layout.astro';
         drawPlaceholder();
         window.clearVolume3D?.();
         window.__volume3dPending = null;
-        showSyncNote('');
+        if (!keepNote) showSyncNote('');
       }
 
       function clearVolume() {
+        activeProfile = null;
+        profileNote = '';
+        currentVariable = null;
+        fInput.readOnly = false;
+        gInput.readOnly = false;
+        startInput.readOnly = false;
+        endInput.readOnly = false;
         clearRenderedResult();
         setStatus('Sin calcular');
         hideError();
+        updateLabels();
       }
 
       async function calculateVolume() {
         const method = methodSelect.value;
         const axis = axisSelect.value;
-        const f = fInput.value.trim();
-        const g = method === 'discos' ? '0' : (gInput.value.trim() || '0');
-        const start = parseFloat(startInput.value);
-        const end = parseFloat(endInput.value);
         let samples = parseInt(samplesInput.value, 10);
         if (!Number.isFinite(samples)) samples = 2000;
         samples = Math.max(20, Math.min(5000, samples));
         samplesInput.value = String(samples);
+
+        const requestId = ++volumeRequestId;
+
+        if (activeProfile) {
+          hideError();
+          calcBtn.disabled = true;
+          setStatus('Calculando…', 'badge-pending');
+          try {
+            const response = await fetch('/api/volume-profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                method,
+                axis,
+                points: activeProfile.points,
+                g_expression: method === 'discos' ? '0' : (gInput.value.trim() || '0'),
+                samples,
+                f_expression: activeProfile.expression || 'trazo del usuario',
+                source: activeProfile.source
+              })
+            });
+            const data = await response.json();
+            if (requestId !== volumeRequestId) return;
+            if (!response.ok) {
+              throw new Error(messageFrom(data, 'No se pudo calcular el volumen.'));
+            }
+            startInput.value = String(Number(data.start.toPrecision(8)));
+            endInput.value = String(Number(data.end.toPrecision(8)));
+            renderResult(data);
+            showSyncNote(profileNote);
+          } catch (error) {
+            if (requestId !== volumeRequestId) return;
+            clearRenderedResult({ keepNote: true });
+            setStatus('Error', 'badge-invalid');
+            showError(error.message);
+          } finally {
+            if (requestId === volumeRequestId) calcBtn.disabled = false;
+          }
+          return;
+        }
+
+        const f = fInput.value.trim();
+        const g = method === 'discos' ? '0' : (gInput.value.trim() || '0');
+        const start = parseFloat(startInput.value);
+        const end = parseFloat(endInput.value);
 
         if (!f) {
           clearRenderedResult();
@@ -1184,16 +1284,18 @@ import Layout from '../layouts/Layout.astro';
             })
           });
           const data = await response.json();
+          if (requestId !== volumeRequestId) return;
           if (!response.ok) {
             throw new Error(messageFrom(data, 'No se pudo calcular el volumen.'));
           }
           renderResult({ ...data, f_expression: f, g_expression: g });
         } catch (error) {
+          if (requestId !== volumeRequestId) return;
           clearRenderedResult();
           setStatus('Error', 'badge-invalid');
           showError(error.message);
         } finally {
-          calcBtn.disabled = false;
+          if (requestId === volumeRequestId) calcBtn.disabled = false;
         }
       }
 
@@ -1236,11 +1338,26 @@ import Layout from '../layouts/Layout.astro';
           return;
         }
 
-        const start = Number(profile.start);
-        const end = Number(profile.end);
-        if (!Number.isFinite(start) || !Number.isFinite(end) || start >= end) {
+        const points = profile.points
+          .map((point) => ({ x: Number(point.x), y: Number(point.y) }))
+          .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y));
+        if (points.length < 2) {
           setStatus('Error', 'badge-invalid');
-          showError('El trazo o la función de arriba no tiene un intervalo válido.');
+          showError('El trazo de arriba no tiene suficientes puntos válidos.');
+          return;
+        }
+
+        const xs = points.map((point) => point.x);
+        const ys = points.map((point) => point.y);
+        const ranges = {
+          xMin: Math.min(...xs),
+          xMax: Math.max(...xs),
+          yMin: Math.min(...ys),
+          yMax: Math.max(...ys)
+        };
+        if (!(ranges.xMax > ranges.xMin)) {
+          setStatus('Error', 'badge-invalid');
+          showError('El trazo de arriba no tiene un intervalo horizontal válido.');
           return;
         }
 
@@ -1250,52 +1367,67 @@ import Layout from '../layouts/Layout.astro';
         setStatus(profile.expression ? 'Importando…' : 'Reconociendo…', 'badge-pending');
 
         try {
-          const { expression, recognized } = await expressionFromProfile(profile);
-          let note = recognized
-            ? `Se reconoció la función ${expression} a partir del trazo de arriba.`
-            : 'Se importó la función del sólido de arriba.';
-
-          let volumeStart = start;
-          let volumeEnd = end;
-          let volumeExpression = expression;
-          if (profileAxis === 'y') {
-            // Las capas alrededor de Y se integran sobre x >= 0. Si el trazo
-            // cruza el eje, la parte negativa genera el mismo sólido.
-            if (end <= 0) {
-              throw new Error(
-                'Para girar alrededor de Y se necesita una parte del trazo con x ≥ 0. ' +
-                'Dibuja o grafica la función en el lado positivo o escríbela manualmente.'
-              );
+          // The expression is only informative: the profile endpoint uses the
+          // actual points.  If recognition fails, the stroke still works.
+          let expression = profile.expression || null;
+          let recognized = false;
+          if (!expression) {
+            try {
+              const result = await expressionFromProfile({ ...profile, points });
+              expression = result.expression;
+              recognized = result.recognized;
+            } catch (error) {
+              expression = null;
             }
-            if (start < 0) {
-              note += ' Se usó la parte x ≥ 0, porque la parte negativa genera el mismo sólido al girar alrededor de Y.';
-            }
-            const ys = profile.points
-              .map((point) => Number(point.y))
-              .filter(Number.isFinite);
-            if (ys.some((value) => value < 0)) {
-              volumeExpression = `abs(${expression})`;
-              note += ' Se usó |f(x)| como altura, porque la altura es una distancia.';
-            }
-            volumeStart = Math.max(0, start);
-            volumeEnd = end;
-            methodSelect.value = 'capas';
-            gInput.value = '0';
-          } else {
-            methodSelect.value = 'discos';
-            gInput.value = '0';
           }
-          note += profileAxis === 'y'
-            ? ' Se usó el eje Y con capas cilíndricas.'
-            : ' Se usó el eje X con discos.';
 
-          axisSelect.value = profileAxis;
-          fInput.value = volumeExpression;
-          startInput.value = String(volumeStart);
-          endInput.value = String(volumeEnd);
-          currentVariable = null;
+          activeProfile = {
+            points,
+            expression,
+            source: profile.expression ? 'function' : 'draw',
+            ranges
+          };
+
+          // Preserve the method/axis the user already chose.  The natural
+          // default is only applied on the first import.
+          if (!methodAxisTouched) {
+            axisSelect.value = profileAxis;
+            methodSelect.value = profileAxis === 'y' ? 'capas' : 'discos';
+          }
+
+          gInput.value = '0';
+          fInput.value = expression || 'trazo del usuario';
+
+          const variable = integrationVariable(methodSelect.value, axisSelect.value);
+          if (variable === 'x') {
+            startInput.value = String(Number(ranges.xMin.toPrecision(8)));
+            endInput.value = String(Number(ranges.xMax.toPrecision(8)));
+          } else if (methodSelect.value === 'capas' && axisSelect.value === 'x') {
+            startInput.value = '0';
+            endInput.value = String(
+              Number(Math.max(Math.abs(ranges.yMin), Math.abs(ranges.yMax)).toPrecision(8))
+            );
+          } else {
+            startInput.value = String(Number(Math.min(0, ranges.yMin).toPrecision(8)));
+            endInput.value = String(Number(Math.max(0, ranges.yMax).toPrecision(8)));
+          }
+          currentVariable = variable;
           updateLabels();
-          showSyncNote(note);
+
+          const pieces = [];
+          if (recognized) {
+            pieces.push(`Se reconoció f(x) = ${expression} a partir del trazo de arriba.`);
+          } else if (expression) {
+            pieces.push(`Se importó f(x) = ${expression} del sólido de arriba.`);
+          } else {
+            pieces.push('Se importó el trazo dibujado; el cálculo usa sus puntos directamente.');
+          }
+          pieces.push(
+            'El método y el eje se conservan al cambiarlos: el trazo se vuelve a proyectar sobre el nuevo eje.'
+          );
+          profileNote = pieces.join(' ');
+          showSyncNote(profileNote);
+
           await calculateVolume();
           if (state.result) {
             resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1311,13 +1443,21 @@ import Layout from '../layouts/Layout.astro';
       }
 
       function applyExample(example) {
+        activeProfile = null;
+        profileNote = '';
+        methodAxisTouched = false;
+        currentVariable = null;
+        fInput.readOnly = false;
+        gInput.readOnly = false;
+        startInput.readOnly = false;
+        endInput.readOnly = false;
         methodSelect.value = example.method;
         axisSelect.value = example.axis;
-        currentVariable = null;
         fInput.value = example.f;
         gInput.value = example.g;
         startInput.value = String(example.start);
         endInput.value = String(example.end);
+        showSyncNote('');
         updateLabels();
         calculateVolume();
       }
@@ -1337,7 +1477,11 @@ import Layout from '../layouts/Layout.astro';
       }
 
       function previewBounds(result) {
-        const points = [...(result.f_points || []), ...(result.g_points || [])];
+        const points = [
+          ...(result.f_points || []),
+          ...(result.g_points || []),
+          ...(result.profile_points || [])
+        ];
         const xs = points.map((p) => p.x).filter(Number.isFinite);
         const ys = points.map((p) => p.y).filter(Number.isFinite);
         if (!xs.length || !ys.length) return { xMin: -1, xMax: 1, yMin: -1, yMax: 1 };
@@ -1416,6 +1560,26 @@ import Layout from '../layouts/Layout.astro';
         ctx.lineCap = 'round';
         ctx.shadowColor = color;
         ctx.shadowBlur = 8;
+        ctx.beginPath();
+        points.forEach((point, index) => {
+          if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
+          const px = screenX(point.x);
+          const py = screenY(point.y);
+          if (index === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawReferenceProfile(points) {
+        if (!points || points.length < 2) return;
+        ctx.save();
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = cssVar('--subtle');
+        ctx.globalAlpha = 0.7;
+        ctx.lineWidth = 1.5;
+        ctx.lineJoin = 'round';
         ctx.beginPath();
         points.forEach((point, index) => {
           if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
@@ -1563,6 +1727,7 @@ import Layout from '../layouts/Layout.astro';
         ctx.clearRect(0, 0, view.width, view.height);
         bounds = previewBounds(result);
         drawGrid();
+        drawReferenceProfile(result.profile_points);
 
         const fPoints = result.f_points || [];
         const gPoints = result.g_points || [];
@@ -1571,6 +1736,16 @@ import Layout from '../layouts/Layout.astro';
         strokeCurve(fPoints, cssVar('--canvas-curve'));
         drawRevolutionAxis(result);
         drawSlice(result, fPoints, gPoints);
+
+        if (result.profile && Array.isArray(result.profile_points) && result.profile_points.length > 1) {
+          ctx.save();
+          ctx.fillStyle = cssVar('--subtle');
+          ctx.font = `10.5px ${cssVar('--font-mono') || 'monospace'}`;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText('trazo original (---)', PAD, 8);
+          ctx.restore();
+        }
       }
 
       function resizeVolumeCanvas() {
@@ -1590,12 +1765,24 @@ import Layout from '../layouts/Layout.astro';
       // -----------------------------------------------------------------
 
       methodSelect.addEventListener('change', () => {
+        methodAxisTouched = true;
         updateLabels();
-        markStale();
+        if (activeProfile) {
+          // Keep the imported stroke/function and recalculate immediately with
+          // the new method instead of resetting to the default.
+          calculateVolume();
+        } else {
+          markStale();
+        }
       });
       axisSelect.addEventListener('change', () => {
+        methodAxisTouched = true;
         updateLabels();
-        markStale();
+        if (activeProfile) {
+          calculateVolume();
+        } else {
+          markStale();
+        }
       });
       for (const input of [fInput, gInput, startInput, endInput, samplesInput]) {
         input.addEventListener('input', markStale);

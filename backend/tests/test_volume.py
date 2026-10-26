@@ -8,7 +8,7 @@ from math_engine import (
     ExpressionSyntaxError,
     compile_expression,
 )
-from volume_math import integration_variable, volume_solid
+from volume_math import integration_variable, volume_from_profile, volume_solid
 
 
 class VolumeMethodTests(unittest.TestCase):
@@ -122,6 +122,105 @@ class VolumeMethodTests(unittest.TestCase):
     def test_reports_domain_error(self):
         with self.assertRaises(ExpressionEvaluationError):
             self._volume("discos", "x", "sqrt(x)", "0", -1, 1)
+
+
+class ProfileVolumeTests(unittest.TestCase):
+    @staticmethod
+    def _line_points(start=0.0, end=2.0, count=200):
+        return [
+            {
+                "x": start + (end - start) * index / count,
+                "y": start + (end - start) * index / count,
+            }
+            for index in range(count + 1)
+        ]
+
+    def _volume(self, method, axis, points=None, samples=800):
+        return volume_from_profile(
+            method=method,
+            axis=axis,
+            points=points or self._line_points(),
+            samples=samples,
+            f_expression="x",
+            source="function",
+        )
+
+    def test_profile_discs_around_x(self):
+        result = self._volume("discos", "x")
+        self.assertAlmostEqual(result["volume"], 8 * math.pi / 3, delta=1e-2)
+        self.assertEqual(result["variable"], "x")
+        self.assertTrue(result["profile"])
+        self.assertTrue(result["profile_points"])
+        self.assertTrue(result["steps"])
+
+    def test_profile_washers_around_x_matches_discs(self):
+        discs = self._volume("discos", "x")
+        washers = self._volume("arandelas", "x")
+        self.assertAlmostEqual(discs["volume"], washers["volume"], delta=1e-6)
+
+    def test_profile_shells_around_y(self):
+        result = self._volume("capas", "y")
+        self.assertAlmostEqual(result["volume"], 16 * math.pi / 3, delta=1e-2)
+        self.assertEqual(result["variable"], "x")
+        self.assertEqual(result["start"], 0.0)
+        self.assertEqual(result["end"], 2.0)
+
+    def test_profile_washers_around_y_matches_shells(self):
+        shells = self._volume("capas", "y")
+        washers = self._volume("arandelas", "y")
+        self.assertAlmostEqual(shells["volume"], washers["volume"], delta=1e-2)
+        self.assertEqual(washers["variable"], "y")
+
+    def test_profile_shells_around_x_matches_discs(self):
+        discs = self._volume("discos", "x")
+        shells = self._volume("capas", "x")
+        self.assertAlmostEqual(discs["volume"], shells["volume"], delta=1e-2)
+        self.assertEqual(shells["variable"], "y")
+
+    def test_profile_discs_around_y_uses_outer_envelope(self):
+        result = self._volume("discos", "y")
+        self.assertAlmostEqual(result["volume"], 8 * math.pi, delta=1e-2)
+        self.assertEqual(result["variable"], "y")
+        self.assertTrue(result["warnings"])
+
+    def test_profile_axes_give_different_volumes(self):
+        about_x = self._volume("discos", "x")
+        about_y = self._volume("capas", "y")
+        self.assertNotAlmostEqual(about_x["volume"], about_y["volume"], places=2)
+
+    def test_profile_keeps_stroke_when_method_changes(self):
+        # y = x is deliberately not symmetric: a naive x/y swap would use
+        # the wrong height for the shells around Y.
+        discs = self._volume("discos", "x")
+        shells = self._volume("capas", "y")
+        self.assertAlmostEqual(discs["volume"], 8 * math.pi / 3, delta=1e-2)
+        self.assertAlmostEqual(shells["volume"], 16 * math.pi / 3, delta=1e-2)
+
+    def test_profile_shells_reflect_negative_stroke(self):
+        points = self._line_points(-2.0, 0.0)
+        result = self._volume("capas", "y", points=points)
+        self.assertAlmostEqual(result["volume"], 16 * math.pi / 3, delta=1e-2)
+        self.assertTrue(any("reflej" in warning for warning in result["warnings"]))
+
+    def test_profile_rejects_flat_or_empty_curve(self):
+        with self.assertRaises(ValueError):
+            volume_from_profile(
+                "discos",
+                "x",
+                points=[{"x": 0, "y": 0}, {"x": 0, "y": 1}],
+            )
+        with self.assertRaises(ValueError):
+            volume_from_profile("discos", "x", points=[{"x": 0, "y": 0}])
+
+    def test_profile_rejects_interval_outside_stroke(self):
+        with self.assertRaises(ValueError):
+            volume_from_profile(
+                "discos",
+                "x",
+                points=self._line_points(),
+                start=0,
+                end=3,
+            )
 
 
 class VariableExpressionTests(unittest.TestCase):
