@@ -56,7 +56,7 @@ calculus-web/
 6. **Reconocimiento de funciones**: analiza un trazo dibujado y sugiere la función matemática que mejor se ajusta (polinómica, trigonométrica, exponencial, logarítmica, radical, etc.)
 7. **Visualización 3D**: curva y trapecios en volumen con animaciones progresivas (Three.js)
 8. **Sólido de revolución**: dibuja una curva o escribe f(x), gírala alrededor de un eje (X, Y, Z o combinaciones) para generar un volumen 3D
-9. **Cálculo de volumen por revolución**: discos, arandelas y capas cilíndricas alrededor de X o Y, con fórmula, integral planteada, validaciones y explicación paso a paso. La gráfica 2D, los discos/arandelas/cilindros 3D, el resultado y los pasos usan exactamente las funciones e intervalo ingresados. El botón «Usar trazo/función de arriba» importa el perfil actual del sólido y, al cambiar el método o el eje, conserva el trazo y recalcula el nuevo sólido en lugar de volver a discos/X.
+9. **Cálculo de volumen por revolución**: discos, arandelas y capas cilíndricas alrededor de X o Y, con fórmula, integral planteada, validaciones y explicación paso a paso. El botón «Calcular volumen» toma automáticamente la curva dibujada o escrita en el visor superior: si la función no está graficada o cambió la expresión/intervalo, se grafica antes de calcular. Cambiar el método o el eje recalcula el nuevo sólido con esa misma curva y conserva la selección.
 10. **Pantalla de resultados**: fórmulas, explicación educativa y desglose de trapecios
 11. **Pantalla de fórmulas**: proceso paso a paso con cada fórmula y su justificación
 12. **Validación de dibujo**: detecta si el trazo representa una función válida (rechaza círculos, parábolas horizontales, trazos verticales)
@@ -140,7 +140,7 @@ entorno `PORT` define el puerto de escucha de nginx (por defecto 80).
   - `method`: `discos`, `arandelas` o `capas`; `axis`: `x` o `y`
   - Response: `{ volume, integral, factor, variable, method_label, axis_label, formula, setup, steps, f_points, g_points, warnings, ... }`
 
-- `POST /api/volume-profile` — Calcula el volumen directamente desde el trazo o la función importada
+- `POST /api/volume-profile` — Calcula el volumen directamente desde el trazo dibujado o la función escrita en el visor
   - Body: `{ "method": "capas", "axis": "y", "points": [{ "x": 0, "y": 0 }, { "x": 1, "y": 1 }, ...], "g_expression": "0", "samples": 2000, "f_expression": "x", "source": "draw" }`
   - `start` y `end` son opcionales: si no se envían, el backend deriva el intervalo correcto para la variable de integración.
   - La curva `points` es la frontera real de la región. El backend obtiene los radios (discos/arandelas) o las alturas (capas) de cada corte, incluso cuando el método integra en `y`.
@@ -184,21 +184,22 @@ El cálculo se hace numéricamente con la regla compuesta de Simpson y valida lo
 
 Al girar alrededor de **X**, la coordenada axial es $x$ y el radio es $|y|$. Al girar alrededor de **Y**, la coordenada axial es $y$ y el radio es $|x|$. Por eso el mismo perfil produce sólidos distintos según el eje.
 
-### Modo trazo/función importada
+### Cálculo desde la curva dibujada o escrita
 
-El botón «Usar trazo/función de arriba» guarda los puntos reales de la curva y activa un modo de cálculo basado en el perfil:
+El botón «Calcular volumen» lee el perfil actual del sólido de arriba (el trazo dibujado o la función escrita) y usa sus puntos reales como frontera de la región:
 
+- Si el visor está en modo Función y la expresión escrita todavía no se ha graficado, o si cambió la expresión o el intervalo desde la última gráfica, se pulsa «Graficar» automáticamente y se espera a que el perfil esté disponible antes de calcular.
 - El intervalo natural se deriva de la región para cada combinación método/eje:
   - discos y arandelas alrededor de **X** integran en $x$;
   - capas alrededor de **Y** integran en $x$ (usando la parte $x \ge 0$ o reflejando un trazo negativo);
   - discos y arandelas alrededor de **Y** integran en $y$ con cortes horizontales;
   - capas alrededor de **X** integran en $y$ con el ancho horizontal del trazo para cada radio.
-- Cambiar el método o el eje **no reinicia** la selección ni borra el trazo: se recalcula el nuevo sólido con la misma curva. Solo la primera importación aplica el método natural (discos para eje X, capas para eje Y); después se respeta la elección del usuario.
+- Cambiar el método o el eje después de calcular **no reinicia** la selección ni borra la curva: se recalcula automáticamente el nuevo sólido con la misma curva. Si todavía no hay un resultado, el cambio solo actualiza la vista previa y se aplica al pulsar «Calcular volumen».
 - La gráfica 2D dibuja el trazo original con línea discontinua y la región derivada para el método elegido. La vista 3D usa los radios/alturas calculados del trazo.
 - Si el trazo tiene un hueco interior y se elige discos, se emite una advertencia y se sugiere arandelas. Si hay varios tramos horizontales en un corte, se usa el radio exterior máximo y el interior mínimo.
-- El resultado se calcula con los puntos muestreados, por lo que puede diferir ligeramente del valor exacto de la expresión reconocida. Aumentar «muestras» reduce esa diferencia.
+- El resultado se calcula con los puntos muestreados, por lo que puede diferir ligeramente del valor exacto de la expresión escrita. Aumentar «muestras» reduce esa diferencia.
 
-Al editar manualmente las funciones se sale del modo trazo; «Limpiar resultado» también desactiva el modo y vuelve a habilitar los campos.
+Los campos f(x), g(x) e intervalo del panel son de **solo lectura**: muestran la referencia usada en el último cálculo. Para cambiar la curva, edítala en el visor superior y vuelve a pulsar «Calcular volumen». Con una sola curva, $g(x)=0$; en arandelas alrededor de X el resultado coincide con discos, mientras que alrededor de Y los cortes horizontales pueden producir un hueco interior.
 
 ## Reconocimiento de funciones
 

@@ -581,10 +581,10 @@ def volume_from_profile(
     ):
         warnings.append(
             "Con g(x) = 0 el radio interior es 0; las arandelas coinciden con "
-            "los discos. Para un hueco, define una segunda curva en el modo manual."
+            "los discos. Con una sola curva no se forma un hueco."
         )
     profile_points = _profile_display_points(xs, ys)
-    f_label = (f_expression or "trazo del usuario").strip() or "trazo del usuario"
+    f_label = (f_expression or "trazo dibujado").strip() or "trazo dibujado"
 
     if variable == "x":
         if method == "capas":
@@ -923,17 +923,20 @@ def _build_profile_steps(
     axis_label = AXIS_LABELS[axis]
     a, b = _fmt(start), _fmt(end)
     source_text = (
-        "la función importada"
+        "la función escrita arriba"
         if (source or "").lower() in ("function", "funcion", "función")
-        else "el trazo importado"
+        else "el trazo dibujado arriba"
     )
-    has_expression = bool(f_expression) and f_expression != "trazo del usuario"
+    has_expression = bool(f_expression) and f_expression not in (
+        "trazo del usuario",
+        "trazo dibujado",
+    )
     if has_expression:
         curve_text = f"La curva es f(x) = {f_expression}."
         curve_formula = f"f(x) = {f_expression}"
     else:
         curve_text = "La curva es el trazo dibujado por el usuario."
-        curve_formula = "f(x): trazo del usuario"
+        curve_formula = "f(x): trazo dibujado"
     steps: list[dict] = [
         {
             "title": "Curva y región",

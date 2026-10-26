@@ -210,6 +210,30 @@ class ApiContractTests(unittest.TestCase):
         self.assertTrue(result.profile_points)
         self.assertTrue(result.steps)
 
+    def test_volume_profile_without_expression_uses_drawn_curve(self):
+        points = [
+            {"x": -1 + 2 * index / 20, "y": 1 + index / 20}
+            for index in range(21)
+        ]
+        response = main.volume_profile(
+            VolumeProfileRequest(
+                method="discos",
+                axis="x",
+                points=points,
+                samples=200,
+                f_expression=None,
+                source="draw",
+            )
+        )
+        result = VolumeResponse(**response)
+        self.assertEqual(result.f_expression, "trazo dibujado")
+        self.assertTrue(
+            any("trazo dibujado arriba" in step.text for step in result.steps)
+        )
+        self.assertFalse(
+            any("modo manual" in step.text for step in result.steps)
+        )
+
     def test_volume_profile_rejects_degenerate_stroke(self):
         with self.assertRaises(HTTPException) as context:
             main.volume_profile(
