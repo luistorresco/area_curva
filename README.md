@@ -1,6 +1,6 @@
 # CalculusWeb — Cálculo bajo la curva
 
-Aplicación web educativa para dibujar curvas, calcular el área bajo la curva mediante integración numérica (regla del trapecio), reconocer funciones matemáticas y visualizar sólidos de revolución en 3D.
+Aplicación web educativa para dibujar curvas, calcular el área bajo la curva mediante integración numérica (regla del trapecio), reconocer funciones matemáticas, visualizar sólidos de revolución en 3D y calcular volúmenes por discos, arandelas o capas cilíndricas.
 
 ## Arquitectura
 
@@ -16,6 +16,7 @@ calculus-web/
 ├── backend/
 │   ├── main.py            # FastAPI — endpoints REST
 │   ├── curve_math.py      # Geometría numérica (validación, integración, intersecciones)
+│   ├── volume_math.py     # Volúmenes de revolución (discos, arandelas, capas)
 │   ├── math_engine.py     # Evaluador seguro de expresiones (AST whitelist)
 │   ├── recognition.py     # Reconocimiento de funciones matemáticas
 │   ├── schemas.py         # Contratos Pydantic
@@ -55,9 +56,10 @@ calculus-web/
 6. **Reconocimiento de funciones**: analiza un trazo dibujado y sugiere la función matemática que mejor se ajusta (polinómica, trigonométrica, exponencial, logarítmica, radical, etc.)
 7. **Visualización 3D**: curva y trapecios en volumen con animaciones progresivas (Three.js)
 8. **Sólido de revolución**: dibuja una curva o escribe f(x), gírala alrededor de un eje (X, Y, Z o combinaciones) para generar un volumen 3D
-9. **Pantalla de resultados**: fórmulas, explicación educativa y desglose de trapecios
-10. **Pantalla de fórmulas**: proceso paso a paso con cada fórmula y su justificación
-11. **Validación de dibujo**: detecta si el trazo representa una función válida (rechaza círculos, parábolas horizontales, trazos verticales)
+9. **Cálculo de volumen por revolución**: discos, arandelas y capas cilíndricas alrededor de X o Y, con fórmula, integral planteada, validaciones y explicación paso a paso. La gráfica 2D, los discos/arandelas/cilindros 3D, el resultado y los pasos usan exactamente las funciones e intervalo ingresados; el botón «Usar trazo/función de arriba» importa el perfil actual del sólido (reconociendo el trazo si es necesario).
+10. **Pantalla de resultados**: fórmulas, explicación educativa y desglose de trapecios
+11. **Pantalla de fórmulas**: proceso paso a paso con cada fórmula y su justificación
+12. **Validación de dibujo**: detecta si el trazo representa una función válida (rechaza círculos, parábolas horizontales, trazos verticales)
 
 ## Cómo ejecutar
 
@@ -133,6 +135,11 @@ entorno `PORT` define el puerto de escucha de nginx (por defecto 80).
 - `POST /api/area-between-curves` — Calcula el área entre dos curvas
   - Body: `{ "f_expression": "x**2", "f_start": 0, "f_end": 2, "g_expression": "x", "g_start": 0, "g_end": 2 }`
 
+- `POST /api/volume` — Calcula el volumen de un sólido de revolución
+  - Body: `{ "method": "discos", "axis": "x", "f_expression": "sqrt(x)", "g_expression": "0", "start": 0, "end": 4, "samples": 2000 }`
+  - `method`: `discos`, `arandelas` o `capas`; `axis`: `x` o `y`
+  - Response: `{ volume, integral, factor, variable, method_label, axis_label, formula, setup, steps, f_points, g_points, warnings, ... }`
+
 - `GET /api/health` — Health check
 
 ## Algoritmo de integración (regla del trapecio)
@@ -159,6 +166,18 @@ $$\int f(x)\,dx \approx \sum A_i$$
 | Área negativa | $\sum \min(A_i, 0)$ |
 | Intersección con eje X | $x_{int} = x_i - y_i \times \frac{x_{i+1} - x_i}{y_{i+1} - y_i}$ |
 
+## Volúmenes de revolución
+
+El cálculo se hace numéricamente con la regla compuesta de Simpson y valida los casos en que la región cruza el eje de giro (arandelas y capas).
+
+| Método | Fórmula | Variable de integración |
+|--------|---------|-------------------------|
+| Discos | $V = \pi \int [R(t)]^2\,dt$ | El eje de giro |
+| Arandelas | $V = \pi \int ([R(t)]^2 - [r(t)]^2)\,dt$ | El eje de giro |
+| Capas cilíndricas | $V = 2\pi \int \rho(t)h(t)\,dt$ | Perpendicular al eje de giro |
+
+Al girar alrededor de **X**, la coordenada axial es $x$ y el radio es $|y|$. Al girar alrededor de **Y**, la coordenada axial es $y$ y el radio es $|x|$. Por eso el mismo perfil produce sólidos distintos según el eje.
+
 ## Reconocimiento de funciones
 
 El módulo `recognition.py` ajusta los puntos a modelos matemáticos usando NumPy:
@@ -182,6 +201,7 @@ El módulo `math_engine.py` usa un parser AST (no `eval`/`exec`) con whitelist e
 - **Operadores**: `+ - * / ** ^` (y unario `+ -`)
 - **Funciones**: `sin cos tan asin acos atan atan2 sqrt cbrt abs exp log log2 log10 sinh cosh tanh floor ceil factorial radians degrees pow hypot`
 - **Constantes**: `pi e tau`
+- **Variables**: `x` (por defecto) o `y` en expresiones de volumen
 - **Límites**: longitud máxima 200 caracteres, máx. 300 nodos AST, potencias acotadas a |base| ≤ 512, factorial acotado a n ≤ 170
 - Rechaza: `__import__`, `open`, comprehensions, lambdas, ternarios, llamadas a métodos, nombres desconocidos
 

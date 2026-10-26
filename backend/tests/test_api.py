@@ -14,6 +14,8 @@ from schemas import (
     DrawingValidation,
     FunctionRequest,
     RecognitionResponse,
+    VolumeRequest,
+    VolumeResponse,
 )
 
 
@@ -115,6 +117,69 @@ class ApiContractTests(unittest.TestCase):
                 AreaBetweenRequest(
                     f_expression="x.real",
                     g_expression="0",
+                    start=0,
+                    end=1,
+                    samples=100,
+                )
+            )
+        self.assertEqual(context.exception.status_code, 400)
+
+    def test_volume_contract(self):
+        response = main.volume(
+            VolumeRequest(
+                method="discos",
+                axis="x",
+                f_expression="x",
+                g_expression="0",
+                start=0,
+                end=2,
+                samples=500,
+            )
+        )
+        result = VolumeResponse(**response)
+        self.assertTrue(result.has_valid_result)
+        self.assertAlmostEqual(result.volume, 8 * math.pi / 3, delta=1e-7)
+        self.assertEqual(result.variable, "x")
+        self.assertTrue(result.steps)
+
+    def test_volume_shells_around_y_contract(self):
+        response = main.volume(
+            VolumeRequest(
+                method="capas",
+                axis="y",
+                f_expression="x**2",
+                g_expression="0",
+                start=0,
+                end=1,
+                samples=500,
+            )
+        )
+        result = VolumeResponse(**response)
+        self.assertAlmostEqual(result.volume, math.pi / 2, delta=1e-7)
+        self.assertEqual(result.variable, "x")
+
+    def test_volume_rejects_bad_expression(self):
+        with self.assertRaises(HTTPException) as context:
+            main.volume(
+                VolumeRequest(
+                    method="discos",
+                    axis="x",
+                    f_expression="x.real",
+                    start=0,
+                    end=1,
+                    samples=100,
+                )
+            )
+        self.assertEqual(context.exception.status_code, 400)
+
+    def test_volume_rejects_reversed_radii(self):
+        with self.assertRaises(HTTPException) as context:
+            main.volume(
+                VolumeRequest(
+                    method="arandelas",
+                    axis="x",
+                    f_expression="x",
+                    g_expression="2",
                     start=0,
                     end=1,
                     samples=100,

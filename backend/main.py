@@ -38,7 +38,10 @@ from schemas import (
     FunctionRequest,
     RecognitionResponse,
     Point,
+    VolumeRequest,
+    VolumeResponse,
 )
+from volume_math import volume_solid
 
 MAX_EVALUATION_SAMPLES = 2000
 MAX_RECOGNITION_POINTS = 5000
@@ -177,6 +180,35 @@ def area_between(request: AreaBetweenRequest) -> dict:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return result
+
+
+@app.post("/api/volume", response_model=VolumeResponse)
+def volume(request: VolumeRequest) -> dict:
+    """Volume of a solid of revolution (discs, washers or shells)."""
+
+    _check_interval(request.start, request.end)
+    if len(request.f_expression or "") > MAX_EXPRESSION_LENGTH or len(
+        request.g_expression or ""
+    ) > MAX_EXPRESSION_LENGTH:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cada expresión admite como máximo {MAX_EXPRESSION_LENGTH} caracteres.",
+        )
+    if not request.f_expression.strip():
+        raise HTTPException(status_code=400, detail="La expresión de la función está vacía.")
+
+    try:
+        return volume_solid(
+            method=request.method,
+            axis=request.axis,
+            f_expression=request.f_expression,
+            g_expression=request.g_expression,
+            start=request.start,
+            end=request.end,
+            samples=request.samples,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 if __name__ == "__main__":

@@ -123,29 +123,29 @@ def _as_float(value: float | int) -> float:
     return result
 
 
-def _validate_node(node: ast.AST, count: list[int]) -> None:
+def _validate_node(node: ast.AST, count: list[int], variable: str = "x") -> None:
     count[0] += 1
     if count[0] > MAX_AST_NODES:
         raise ExpressionSyntaxError("La expresión es demasiado compleja.")
 
     if isinstance(node, ast.Expression):
-        _validate_node(node.body, count)
+        _validate_node(node.body, count, variable)
     elif isinstance(node, ast.Constant):
         if type(node.value) not in (int, float):
             raise ExpressionSyntaxError("Solo se permiten números reales.")
     elif isinstance(node, ast.Name):
         name = node.id.lower()
-        if name != "x" and name not in ALLOWED_CONSTANTS:
+        if name != variable and name not in ALLOWED_CONSTANTS:
             raise ExpressionSyntaxError(f"Nombre no permitido: '{node.id}'.")
     elif isinstance(node, ast.BinOp):
         if type(node.op) not in AST_BINARY_OPERATORS:
             raise ExpressionSyntaxError("Operador no permitido.")
-        _validate_node(node.left, count)
-        _validate_node(node.right, count)
+        _validate_node(node.left, count, variable)
+        _validate_node(node.right, count, variable)
     elif isinstance(node, ast.UnaryOp):
         if type(node.op) not in AST_UNARY_OPERATORS:
             raise ExpressionSyntaxError("Operador unario no permitido.")
-        _validate_node(node.operand, count)
+        _validate_node(node.operand, count, variable)
     elif isinstance(node, ast.Call):
         if not isinstance(node.func, ast.Name) or node.keywords:
             raise ExpressionSyntaxError("Solo se permiten llamadas directas a funciones.")
@@ -156,30 +156,34 @@ def _validate_node(node: ast.AST, count: list[int]) -> None:
         if len(node.args) != expected:
             raise ExpressionSyntaxError(f"'{node.func.id}' recibe {expected} argumento(s).")
         for arg in node.args:
-            _validate_node(arg, count)
+            _validate_node(arg, count, variable)
     else:
         raise ExpressionSyntaxError(f"Expresión no válida: '{type(node).__name__}'.")
 
 
-def _eval_node(node: ast.AST, x: float) -> float:
+def _eval_node(node: ast.AST, value: float, variable: str = "x") -> float:
     if isinstance(node, ast.Expression):
-        return _eval_node(node.body, x)
+        return _eval_node(node.body, value, variable)
     if isinstance(node, ast.Constant):
         return float(node.value)
     if isinstance(node, ast.Name):
         name = node.id.lower()
-        if name == "x":
-            return x
+        if name == variable:
+            return value
         return ALLOWED_CONSTANTS[name]
     if isinstance(node, ast.BinOp):
-        left = _eval_node(node.left, x)
-        right = _eval_node(node.right, x)
+        left = _eval_node(node.left, value, variable)
+        right = _eval_node(node.right, value, variable)
         return _as_float(AST_BINARY_OPERATORS[type(node.op)](left, right))
     if isinstance(node, ast.UnaryOp):
-        return _as_float(AST_UNARY_OPERATORS[type(node.op)](_eval_node(node.operand, x)))
+        return _as_float(
+            AST_UNARY_OPERATORS[type(node.op)](
+                _eval_node(node.operand, value, variable)
+            )
+        )
     if isinstance(node, ast.Call):
         name = node.func.id.lower()
-        args = [_eval_node(arg, x) for arg in node.args]
+        args = [_eval_node(arg, value, variable) for arg in node.args]
         return _as_float(ALLOWED_FUNCTIONS[name](*args))
     raise ExpressionError("Expresión no válida.")
 
@@ -188,20 +192,29 @@ def _eval_node(node: ast.AST, x: float) -> float:
 class CompiledExpression:
     source: str
     tree: ast.Expression
+    variable: str = "x"
 
-    def evaluate(self, x: float) -> float:
-        if not math.isfinite(x):
-            raise ExpressionEvaluationError("El valor de x debe ser finito.", x=x)
+    def evaluate(self, value: float) -> float:
+        if not math.isfinite(value):
+            raise ExpressionEvaluationError(
+                f"El valor de {self.variable} debe ser finito.", x=value
+            )
         try:
-            return _eval_node(self.tree, float(x))
+            return _eval_node(self.tree, float(value), self.variable)
         except ExpressionError:
             raise
         except (ZeroDivisionError, OverflowError, ValueError, TypeError) as exc:
-            raise ExpressionEvaluationError(str(exc), x=x) from exc
+            raise ExpressionEvaluationError(str(exc), x=value) from exc
 
 
-def compile_expression(expression: str) -> CompiledExpression:
-    """Parse and validate an expression, returning an evaluable object."""
+def compile_expression(
+    expression: str, variable: str = "x"
+) -> CompiledExpression:
+    """Parse and validate an expression, returning an evaluable object.
+
+    ``variable`` selects the free variable (``x`` by default).  Volume
+    calculations that integrate along the Y axis use ``variable="y"``.
+    """
 
     source = (expression or "").strip()
     if not source:
@@ -211,14 +224,22 @@ def compile_expression(expression: str) -> CompiledExpression:
             f"La expresión es demasiado larga (máximo {MAX_EXPRESSION_LENGTH} caracteres)."
         )
 
+    variable = (variable or "x").strip().lower()
+    if (
+        not variable.isidentifier()
+        or variable in ALLOWED_CONSTANTS
+        or variable in ALLOWED_FUNCTIONS
+    ):
+        raise ExpressionSyntaxError(f"Variable no permitida: '{variable}'.")
+
     cleaned = source.replace("^", "**")
     try:
         tree = ast.parse(cleaned, mode="eval")
     except SyntaxError as exc:
         raise ExpressionSyntaxError("La sintaxis de la función no es válida.") from exc
 
-    _validate_node(tree, [0])
-    return CompiledExpression(source=source, tree=tree)
+    _validate_node(tree, [0], variable)
+    return CompiledExpression(source=source, tree=tree, variable=variable)
 
 
 def evaluate_expression(expression: str, x: float) -> float:

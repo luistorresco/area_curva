@@ -108,3 +108,43 @@ class AreaBetweenResponse(BaseModel):
     f_points: List[Point]
     g_points: List[Point]
     warnings: List[str] = Field(default_factory=list)
+
+
+class VolumeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    method: Literal["discos", "arandelas", "capas"]
+    axis: Literal["x", "y"]
+    f_expression: str
+    g_expression: str = "0"
+    start: float
+    end: float
+    samples: int = 2000
+
+
+class VolumeStep(BaseModel):
+    title: str
+    text: str
+    formula: Optional[str] = None
+
+
+class VolumeResponse(BaseModel):
+    method: Literal["discos", "arandelas", "capas"]
+    axis: Literal["x", "y"]
+    variable: Literal["x", "y"]
+    start: float
+    end: float
+    volume: float
+    integral: float
+    factor: float
+    samples_used: int
+    evaluations: int
+    method_label: str
+    axis_label: str
+    formula: str
+    setup: str
+    steps: List[VolumeStep]
+    f_points: List[Point]
+    g_points: List[Point]
+    warnings: List[str] = Field(default_factory=list)
+    has_valid_result: bool

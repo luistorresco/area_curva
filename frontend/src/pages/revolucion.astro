@@ -107,6 +107,178 @@ import Layout from '../layouts/Layout.astro';
             <input id="angleRange" type="range" min="30" max="360" step="5" value="360" />
           </div>
         </div>
+        <p class="func-note" style="margin-top: 14px; margin-bottom: 0;">
+          En los ejes principales el perfil se reinterpreta: sobre X, la coordenada x recorre
+          el eje y |y| es el radio; sobre Y, la coordenada y recorre el eje y |x| es el radio.
+          Por eso el sólido cambia de forma, no solo de orientación. Para calcular su volumen,
+          usa «Usar trazo/función de arriba» en la sección de cálculo.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel" id="volumePanel" style="margin-top: 18px;">
+      <div class="panel-header">
+        <h2 class="section-title">Cálculo de volumen por revolución</h2>
+        <span id="volumeStatusBadge" class="badge">Sin calcular</span>
+      </div>
+      <div class="panel-body">
+        <p class="func-note" style="margin-bottom: 18px;">
+          Elige el método y el eje de giro. El método decide cómo se descompone el sólido;
+          el eje decide la distancia de cada punto al giro y, por tanto, el volumen.
+        </p>
+
+        <div class="volume-grid">
+          <div class="rev-field">
+            <label class="field-label" for="volumeMethod">Método</label>
+            <select id="volumeMethod" class="func-input">
+              <option value="discos">Discos</option>
+              <option value="arandelas">Arandelas</option>
+              <option value="capas">Capas cilíndricas</option>
+            </select>
+          </div>
+          <div class="rev-field">
+            <label class="field-label" for="volumeAxis">Eje de revolución</label>
+            <select id="volumeAxis" class="func-input">
+              <option value="x">Eje X — y = 0</option>
+              <option value="y">Eje Y — x = 0</option>
+            </select>
+          </div>
+          <div class="rev-field">
+            <label class="field-label" for="volumeStart">Intervalo desde</label>
+            <input id="volumeStart" class="func-input mono" type="number" step="any" value="0" />
+          </div>
+          <div class="rev-field">
+            <label class="field-label" for="volumeEnd">hasta</label>
+            <input id="volumeEnd" class="func-input mono" type="number" step="any" value="4" />
+          </div>
+          <div class="rev-field">
+            <label class="field-label" for="volumeSamples">Muestras</label>
+            <input id="volumeSamples" class="func-input mono" type="number" min="20" max="5000" step="2" value="2000" />
+          </div>
+        </div>
+
+        <div class="volume-functions">
+          <div class="func-input-row" id="volumeFRow">
+            <span class="func-prefix mono" id="volumeFPrefix">R(x) =</span>
+            <input id="volumeF" class="func-input mono" type="text" value="sqrt(x)" spellcheck="false" autocomplete="off" autocapitalize="off" />
+          </div>
+          <div class="func-input-row" id="volumeGRow" style="display: none;">
+            <span class="func-prefix mono" id="volumeGPrefix">r(x) =</span>
+            <input id="volumeG" class="func-input mono" type="text" value="0" spellcheck="false" autocomplete="off" autocapitalize="off" />
+          </div>
+        </div>
+
+        <p id="volumeHint" class="func-note" style="margin-bottom: 14px;"></p>
+
+        <div class="func-range-row" style="margin-bottom: 8px;">
+          <button id="volumeCalcBtn" class="btn btn-primary" type="button">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.2-8.6"></path><path d="M21 3v6h-6"></path></svg>
+            Calcular volumen
+          </button>
+          <button id="volumeUseAboveBtn" class="btn btn-ghost" type="button">
+            Usar trazo/función de arriba
+          </button>
+          <button id="volumeClearBtn" class="btn btn-ghost" type="button">Limpiar resultado</button>
+        </div>
+        <p id="volumeSyncNote" class="func-note hidden" style="margin: 0 0 14px;"></p>
+
+        <div class="func-hints">
+          <span class="hint-label">Ejemplos:</span>
+          <span id="volumeExamples" style="display: inline-flex; flex-wrap: wrap; gap: 8px;"></span>
+        </div>
+
+        <div id="volumeError" class="analysis-result invalid hidden" role="alert" style="margin-top: 14px;">
+          <div class="analysis-message" id="volumeErrorText"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="volumeResultPanel" style="margin-top: 18px;">
+      <div class="panel-header">
+        <h2 class="section-title">Resultado y paso a paso</h2>
+        <div class="badge"><span class="dot"></span><span id="volumeSummaryBadge">Sin calcular</span></div>
+      </div>
+      <div class="panel-body">
+        <div class="volume-visuals">
+          <div class="volume-canvas-frame">
+            <canvas id="volumeCanvas" aria-label="Región que gira y eje de revolución"></canvas>
+            <p class="func-note" style="margin: 8px 2px 0;">
+              La región sombreada es la que gira. La línea punteada es el eje de revolución.
+            </p>
+          </div>
+          <div class="volume-three-frame">
+            <div class="volume-three-container" id="volumeThreeContainer">
+              <div class="volume-three-placeholder" id="volumeThreePlaceholder">
+                Calcula un volumen para ver los discos, arandelas o cilindros en 3D.
+              </div>
+              <div class="volume-three-overlay hidden" id="volumeThreeOverlay"></div>
+            </div>
+            <p class="volume-three-legend" id="volumeThreeLegend">
+              La vista 3D muestra la descomposición del volumen según el método elegido.
+            </p>
+          </div>
+        </div>
+
+        <div id="volumeReadout" class="hidden">
+          <div class="readout">
+            <div class="readout-cell total">
+              <div class="readout-bar"></div>
+              <div class="readout-label">Volumen</div>
+              <div class="readout-value" id="volumeValue">—</div>
+            </div>
+            <div class="readout-cell">
+              <div class="readout-bar"></div>
+              <div class="readout-label">Integral (sin factor)</div>
+              <div class="readout-value" id="volumeIntegral">—</div>
+            </div>
+            <div class="readout-cell positive">
+              <div class="readout-bar"></div>
+              <div class="readout-label">Método</div>
+              <div class="readout-value" id="volumeMethodValue" style="font-size: 18px;">—</div>
+            </div>
+            <div class="readout-cell">
+              <div class="readout-bar"></div>
+              <div class="readout-label">Eje de giro</div>
+              <div class="readout-value" id="volumeAxisValue" style="font-size: 18px;">—</div>
+            </div>
+          </div>
+
+          <div class="detail-rows" style="margin-top: 16px;">
+            <div class="detail-row">
+              <span class="detail-label">Variable de integración</span>
+              <span class="detail-value mono" id="volumeVariableValue">—</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Muestras usadas</span>
+              <span class="detail-value mono" id="volumeSamplesValue">—</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Evaluaciones de funciones</span>
+              <span class="detail-value mono" id="volumeEvalsValue">—</span>
+            </div>
+          </div>
+
+          <div class="formula-block" style="margin-top: 18px;">
+            <div class="formula-title">Funciones e intervalo usados</div>
+            <div class="formula-expression" id="volumeInputsUsed" style="overflow-wrap: anywhere;"></div>
+          </div>
+
+          <div class="formula-block accent-curve" style="margin-top: 18px;">
+            <div class="formula-title">Fórmula del método</div>
+            <div class="formula-expression" id="volumeFormula"></div>
+          </div>
+          <div class="formula-block">
+            <div class="formula-title">Integral planteada</div>
+            <div class="formula-expression" id="volumeSetup"></div>
+          </div>
+
+          <div id="volumeWarnings" class="curve-note hidden"></div>
+
+          <h3 class="section-title" style="font-size: 18px; margin-top: 24px; margin-bottom: 14px;">
+            Explicación paso a paso
+          </h3>
+          <div id="volumeSteps" class="steps-timeline"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -227,6 +399,88 @@ import Layout from '../layouts/Layout.astro';
       line-height: 1.7;
       margin: 0;
     }
+    .volume-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .volume-functions {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .volume-canvas-frame {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface-raised);
+      padding: 10px;
+    }
+    #volumeCanvas {
+      display: block;
+      width: 100%;
+      height: 280px;
+      border-radius: var(--radius-md);
+      background: var(--bg);
+    }
+    #volumeExamples .hint-chip { margin: 0; }
+    .volume-visuals {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .volume-canvas-frame, .volume-three-frame {
+      margin: 0;
+      min-width: 0;
+    }
+    .volume-three-container {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background:
+        radial-gradient(120% 90% at 50% 0%, rgba(27, 37, 71, 0.35) 0%, transparent 55%),
+        var(--ink-950);
+    }
+    .volume-three-container canvas { display: block; }
+    .volume-three-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--text-3);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .volume-three-overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      max-width: calc(100% - 20px);
+      padding: 5px 9px;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      background: rgba(6, 9, 19, 0.68);
+      color: var(--text-2);
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      line-height: 1.5;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .volume-three-overlay.hidden, .volume-three-placeholder.hidden { display: none; }
+    .volume-three-legend {
+      margin: 8px 2px 0;
+      font-size: 11.5px;
+      color: var(--text-3);
+      line-height: 1.7;
+    }
     .rev-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -261,6 +515,9 @@ import Layout from '../layouts/Layout.astro';
     @media (max-width: 900px) {
       .rev-layout { grid-template-columns: 1fr; }
       .three-container { height: 360px; }
+      .volume-visuals { grid-template-columns: 1fr; }
+      #volumeCanvas { height: 240px; }
+      .volume-three-container { height: 240px; }
     }
     @media (max-width: 768px) {
       .page-head { padding: 36px 0 24px; }
@@ -297,6 +554,7 @@ import Layout from '../layouts/Layout.astro';
     let coordinateSystem = null;
     let scene, camera, renderer, controls, mesh, profileLine;
     let inputMode = 'draw';
+    let profileExpression = null;
 
     function resizeCanvas() {
       const rect = canvas.parentElement.getBoundingClientRect();
@@ -378,13 +636,16 @@ import Layout from '../layouts/Layout.astro';
       clearBtn.disabled = points.length === 0;
     }
     function clearCurve() {
-      points = []; updateUI(); draw2d();
+      points = []; profileExpression = null; updateUI(); draw2d();
       if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); mesh = null; }
       if (profileLine) { scene.remove(profileLine); profileLine.geometry.dispose(); profileLine.material.dispose(); profileLine = null; }
       renderer.render(scene, camera);
     }
 
     function setMode(mode) {
+      if (inputMode !== mode && points.length) {
+        clearCurve();
+      }
       inputMode = mode;
       const isFunc = mode === 'function';
       modeDraw.classList.toggle('active', !isFunc);
@@ -419,6 +680,7 @@ import Layout from '../layouts/Layout.astro';
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || 'Error');
         points = data.points;
+        profileExpression = expression;
         updateUI();
         draw2d();
         if (points.length >= 2) generateSolid();
@@ -438,10 +700,18 @@ import Layout from '../layouts/Layout.astro';
     canvas.addEventListener('touchend', stopDrawing);
     clearBtn.addEventListener('click', clearCurve);
 
-    segmentsRange.addEventListener('input', () => { segVal.textContent = segmentsRange.value; if (points.length >= 2) generateSolid(); });
-    angleRange.addEventListener('input', () => { angleVal.textContent = angleRange.value + '°'; if (points.length >= 2) generateSolid(); });
+    segmentsRange.addEventListener('input', () => { segVal.textContent = segmentsRange.value; if (points.length >= 2) generateSolid({ frame: false }); });
+    angleRange.addEventListener('input', () => { angleVal.textContent = angleRange.value + '°'; if (points.length >= 2) generateSolid({ frame: false }); });
     axisSelect.addEventListener('change', () => { if (points.length >= 2) generateSolid(); });
-    resetViewBtn.addEventListener('click', () => { camera.position.set(8, 6, 12); camera.lookAt(0, 0, 0); controls.reset(); });
+    resetViewBtn.addEventListener('click', () => {
+      if (mesh) {
+        frameRevolution(mesh, axisSelect.value);
+      } else {
+        camera.position.set(8, 6, 12);
+        controls.target.set(0, 0, 0);
+        controls.update();
+      }
+    });
 
     function init3d() {
       const w = container.clientWidth;
@@ -469,7 +739,7 @@ import Layout from '../layouts/Layout.astro';
       animate();
     }
 
-    function generateSolid() {
+    function generateSolid({ frame = true } = {}) {
       if (points.length < 2) return;
       if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); mesh = null; }
       if (profileLine) { scene.remove(profileLine); profileLine.geometry.dispose(); profileLine.material.dispose(); profileLine = null; }
@@ -478,8 +748,14 @@ import Layout from '../layouts/Layout.astro';
       const phi = (angleDeg / 360) * Math.PI * 2;
       const axis = axisSelect.value;
 
-      const profile = points.map(p => new THREE.Vector2(Math.max(1e-6, Math.abs(p.x)), p.y));
-      profile.sort((a, b) => a.x - b.x);
+      // LatheGeometry siempre gira alrededor de su eje Y local: el primer
+      // componente del perfil es el radio y el segundo la coordenada axial.
+      // Al girar sobre X, la coordenada axial es x y el radio es |y|; al girar
+      // sobre Y (y sobre los ejes combinados), la axial es y y el radio es |x|.
+      const ordered = points.slice().sort((a, b) => a.x - b.x);
+      const profile = axis === 'x'
+        ? ordered.map(p => new THREE.Vector2(Math.max(1e-6, Math.abs(p.y)), p.x))
+        : ordered.map(p => new THREE.Vector2(Math.max(1e-6, Math.abs(p.x)), p.y));
 
       const geo = new THREE.LatheGeometry(profile, segs, 0, phi);
       const mat = new THREE.MeshStandardMaterial({
@@ -500,18 +776,70 @@ import Layout from '../layouts/Layout.astro';
       };
       const target = axisVectors[axis].normalize();
       const up = new THREE.Vector3(0, 1, 0);
-      const q = new THREE.Quaternion().setFromUnitVectors(up, target);
+      let q;
+      if (axis === 'x') {
+        // Giro de 180° alrededor de (1,1,0): lleva el eje local Y al eje X
+        // global sin invertir el perfil generador.
+        q = new THREE.Quaternion().setFromAxisAngle(
+          new THREE.Vector3(1, 1, 0).normalize(), Math.PI
+        );
+      } else {
+        q = new THREE.Quaternion().setFromUnitVectors(up, target);
+      }
       mesh.quaternion.copy(q);
 
-      // Reference profile line
-      const linePts = points.map(p => new THREE.Vector3(p.x, p.y, 0));
+      // Reference profile line. For X and Y the drawing already lies in the
+      // plane of revolution, so it stays exactly where the user drew it. For
+      // the remaining axes we show the rotated generating profile.
+      const linePts = (axis === 'x' || axis === 'y')
+        ? ordered.map(p => new THREE.Vector3(p.x, p.y, 0))
+        : profile.map(v => new THREE.Vector3(v.x, v.y, 0));
       const lineGeo = new THREE.BufferGeometry().setFromPoints(linePts);
       profileLine = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x2dd4ee, linewidth: 2 }));
-      profileLine.quaternion.copy(q);
+      if (axis !== 'x' && axis !== 'y') profileLine.quaternion.copy(q);
       scene.add(profileLine);
 
       scene.add(mesh);
+      if (frame) frameRevolution(mesh, axis);
     }
+
+    function frameRevolution(object, axis) {
+      if (!object) return;
+      const box = new THREE.Box3().setFromObject(object);
+      if (box.isEmpty()) return;
+      const center = box.getCenter(new THREE.Vector3());
+      const sphere = box.getBoundingSphere(new THREE.Sphere());
+      const radius = Math.max(sphere.radius, 0.5);
+      const verticalFov = (camera.fov * Math.PI) / 180;
+      const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+      const fitFov = Math.min(verticalFov, horizontalFov);
+      const distance = (radius / Math.max(Math.sin(fitFov / 2), 0.1)) * 1.15;
+      const direction = axis === 'x'
+        ? new THREE.Vector3(0.32, 0.55, 0.77).normalize()
+        : axis === 'y'
+          ? new THREE.Vector3(0.65, 0.35, 0.68).normalize()
+          : new THREE.Vector3(0.55, 0.42, 0.72).normalize();
+      camera.position.copy(center).addScaledVector(direction, distance);
+      camera.near = Math.max(0.01, radius * 0.001);
+      camera.far = Math.max(200, distance * 12);
+      camera.updateProjectionMatrix();
+      controls.target.copy(center);
+      controls.minDistance = Math.max(0.1, radius * 0.2);
+      controls.maxDistance = Math.max(20, radius * 12);
+      controls.update();
+    }
+
+    window.getRevolutionProfile = () => {
+      const xs = points.map((point) => point.x).filter(Number.isFinite);
+      return {
+        mode: inputMode,
+        points: points.map((point) => ({ x: point.x, y: point.y })),
+        expression: profileExpression,
+        start: xs.length ? Math.min(...xs) : null,
+        end: xs.length ? Math.max(...xs) : null,
+        axis: axisSelect.value,
+      };
+    };
 
     function animate() {
       requestAnimationFrame(animate);
@@ -529,5 +857,1286 @@ import Layout from '../layouts/Layout.astro';
 
     resizeCanvas();
     init3d();
+  </script>
+
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+
+      const methodSelect = $('volumeMethod');
+      const axisSelect = $('volumeAxis');
+      const startInput = $('volumeStart');
+      const endInput = $('volumeEnd');
+      const samplesInput = $('volumeSamples');
+      const fInput = $('volumeF');
+      const gInput = $('volumeG');
+      const fRow = $('volumeFRow');
+      const gRow = $('volumeGRow');
+      const fPrefix = $('volumeFPrefix');
+      const gPrefix = $('volumeGPrefix');
+      const hint = $('volumeHint');
+      const calcBtn = $('volumeCalcBtn');
+      const useAboveBtn = $('volumeUseAboveBtn');
+      const clearBtn = $('volumeClearBtn');
+      const syncNote = $('volumeSyncNote');
+      const resultPanel = $('volumeResultPanel');
+      const examplesBox = $('volumeExamples');
+      const errorBox = $('volumeError');
+      const errorText = $('volumeErrorText');
+      const statusBadge = $('volumeStatusBadge');
+      const summaryBadge = $('volumeSummaryBadge');
+      const readout = $('volumeReadout');
+      const volumeValue = $('volumeValue');
+      const integralValue = $('volumeIntegral');
+      const methodValue = $('volumeMethodValue');
+      const axisValue = $('volumeAxisValue');
+      const variableValue = $('volumeVariableValue');
+      const samplesValue = $('volumeSamplesValue');
+      const evalsValue = $('volumeEvalsValue');
+      const formulaEl = $('volumeFormula');
+      const setupEl = $('volumeSetup');
+      const inputsUsedEl = $('volumeInputsUsed');
+      const warningsBox = $('volumeWarnings');
+      const stepsBox = $('volumeSteps');
+      const canvas = $('volumeCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const PAD = 38;
+      const state = { result: null };
+      const view = { width: 0, height: 0 };
+      let bounds = { xMin: -1, xMax: 1, yMin: -1, yMax: 1 };
+      let currentVariable = null;
+
+      const EXAMPLES = [
+        { label: 'Discos · eje X', method: 'discos', axis: 'x', f: 'sqrt(x)', g: '0', start: 0, end: 4 },
+        { label: 'Discos · eje Y', method: 'discos', axis: 'y', f: 'y**2', g: '0', start: 0, end: 2 },
+        { label: 'Arandelas · eje X', method: 'arandelas', axis: 'x', f: '2', g: 'x', start: 0, end: 1 },
+        { label: 'Arandelas · eje Y', method: 'arandelas', axis: 'y', f: '2', g: 'y', start: 0, end: 1 },
+        { label: 'Capas · eje Y', method: 'capas', axis: 'y', f: 'x**2', g: '0', start: 0, end: 1 },
+        { label: 'Capas · eje X', method: 'capas', axis: 'x', f: '1', g: 'sqrt(y)', start: 0, end: 1 }
+      ];
+
+      function integrationVariable(method, axis) {
+        if (method === 'discos' || method === 'arandelas') return axis;
+        return axis === 'y' ? 'x' : 'y';
+      }
+
+      function swapVariable(expression, from, to) {
+        if (!expression) return expression;
+        return expression.replace(new RegExp(`\\b${from}\\b`, 'g'), to);
+      }
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function formatNumber(value) {
+        if (typeof value !== 'number' || !Number.isFinite(value)) return '—';
+        const magnitude = Math.abs(value);
+        if (magnitude < 1e-12) return '0';
+        if (magnitude < 1e-4 || magnitude >= 1e6) return value.toExponential(3);
+        return value.toFixed(4).replace(/\.?0+$/, '') || '0';
+      }
+
+      function formatTick(value) {
+        return Number(value.toPrecision(4)).toString();
+      }
+
+      function niceStep(span, target) {
+        if (!Number.isFinite(span) || span <= 0) return 1;
+        const raw = span / Math.max(target, 1);
+        const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+        const normalized = raw / magnitude;
+        const step = normalized >= 5 ? 10 : normalized >= 2 ? 5 : normalized >= 1 ? 2 : 1;
+        return step * magnitude;
+      }
+
+      function setStatus(text, tone = '') {
+        statusBadge.textContent = text;
+        statusBadge.className = `badge${tone ? ` ${tone}` : ''}`;
+        summaryBadge.textContent = text;
+      }
+
+      function showError(message) {
+        errorText.textContent = message;
+        errorBox.classList.remove('hidden');
+      }
+
+      function hideError() {
+        errorBox.classList.add('hidden');
+      }
+
+      function messageFrom(data, fallback) {
+        if (typeof data?.detail === 'string') return data.detail;
+        if (Array.isArray(data?.detail)) {
+          return data.detail.map((item) => item.msg || '').filter(Boolean).join(' · ') || fallback;
+        }
+        return fallback;
+      }
+
+      function updateLabels() {
+        const method = methodSelect.value;
+        const axis = axisSelect.value;
+        const variable = integrationVariable(method, axis);
+        const axisLabel = axis === 'x' ? 'eje X (y = 0)' : 'eje Y (x = 0)';
+
+        if (currentVariable && currentVariable !== variable) {
+          fInput.value = swapVariable(fInput.value, currentVariable, variable);
+          gInput.value = swapVariable(gInput.value, currentVariable, variable);
+        }
+        currentVariable = variable;
+
+        fRow.style.display = 'flex';
+
+        if (method === 'discos') {
+          gRow.style.display = 'none';
+          fPrefix.textContent = `R(${variable}) =`;
+          fInput.placeholder = variable === 'x' ? 'sqrt(x)' : 'y';
+          gInput.placeholder = '0';
+          hint.textContent = `Discos alrededor del ${axisLabel}. Integramos respecto a ${variable}: cada corte perpendicular al eje es un disco de radio R(${variable}).`;
+        } else if (method === 'arandelas') {
+          gRow.style.display = 'flex';
+          fPrefix.textContent = `R(${variable}) =`;
+          gPrefix.textContent = `r(${variable}) =`;
+          fInput.placeholder = '2';
+          gInput.placeholder = variable === 'x' ? 'x' : 'y';
+          hint.textContent = `Arandelas alrededor del ${axisLabel}. R es el radio exterior y r el interior; se integra π(R² − r²) respecto a ${variable}.`;
+        } else {
+          gRow.style.display = 'flex';
+          fPrefix.textContent = `f(${variable}) =`;
+          gPrefix.textContent = `g(${variable}) =`;
+          if (axis === 'y') {
+            fInput.placeholder = 'x**2';
+            gInput.placeholder = '0';
+            hint.textContent = 'Capas alrededor del eje Y. Integramos respecto a x: radio ρ(x) = x y altura h(x) = f(x) − g(x).';
+          } else {
+            fInput.placeholder = '1';
+            gInput.placeholder = 'sqrt(y)';
+            hint.textContent = 'Capas alrededor del eje X. Integramos respecto a y: radio ρ(y) = y y altura h(y) = f(y) − g(y).';
+          }
+        }
+      }
+
+      function markStale() {
+        if (state.result) {
+          clearRenderedResult();
+          setStatus('Cambios sin calcular', 'badge-uncertain');
+        }
+        showSyncNote('');
+      }
+
+      function showSyncNote(message) {
+        if (!syncNote) return;
+        if (message) {
+          syncNote.textContent = message;
+          syncNote.classList.remove('hidden');
+        } else {
+          syncNote.textContent = '';
+          syncNote.classList.add('hidden');
+        }
+      }
+
+      function renderWarnings(warnings) {
+        warningsBox.replaceChildren();
+        if (!Array.isArray(warnings) || !warnings.length) {
+          warningsBox.classList.add('hidden');
+          return;
+        }
+        warningsBox.classList.remove('hidden');
+        for (const warning of warnings) {
+          const item = document.createElement('p');
+          item.textContent = warning;
+          warningsBox.appendChild(item);
+        }
+      }
+
+      function renderSteps(steps) {
+        stepsBox.replaceChildren();
+        (steps || []).forEach((step, index) => {
+          const article = document.createElement('div');
+          article.className = 'step';
+
+          const number = document.createElement('div');
+          number.className = 'step-index';
+          number.textContent = String(index + 1);
+
+          const title = document.createElement('div');
+          title.className = 'step-title';
+          title.textContent = step.title || '';
+
+          const text = document.createElement('p');
+          text.className = 'step-text';
+          text.textContent = step.text || '';
+
+          article.append(number, title, text);
+          if (step.formula) {
+            const formula = document.createElement('div');
+            formula.className = 'formula-expression';
+            formula.textContent = step.formula;
+            article.appendChild(formula);
+          }
+          stepsBox.appendChild(article);
+        });
+      }
+
+      function renderResult(data) {
+        state.result = data;
+        readout.classList.remove('hidden');
+        setStatus('Calculado', 'badge-valid');
+
+        volumeValue.textContent = `${formatNumber(data.volume)} u³`;
+        integralValue.textContent = formatNumber(data.integral);
+        methodValue.textContent = data.method_label;
+        axisValue.textContent = data.axis === 'x' ? 'Eje X' : 'Eje Y';
+        variableValue.textContent = data.variable;
+        samplesValue.textContent = String(data.samples_used);
+        evalsValue.textContent = String(data.evaluations);
+        formulaEl.textContent = data.formula;
+        setupEl.textContent = data.setup;
+        if (inputsUsedEl) {
+          const variable = data.variable;
+          const fExpr = data.f_expression || '—';
+          const gExpr = data.g_expression || '0';
+          inputsUsedEl.textContent =
+            `f(${variable}) = ${fExpr}; g(${variable}) = ${gExpr}; ` +
+            `intervalo [${formatNumber(data.start)}, ${formatNumber(data.end)}]; ` +
+            `${String(data.method_label || '').toLowerCase()} alrededor del ` +
+            `${data.axis === 'x' ? 'eje X' : 'eje Y'}.`;
+        }
+
+        renderWarnings(data.warnings);
+        renderSteps(data.steps);
+        drawPreview(data);
+        if (typeof window.renderVolume3D === 'function') {
+          window.renderVolume3D(data);
+        } else {
+          window.__volume3dPending = data;
+        }
+      }
+
+      function clearRenderedResult() {
+        state.result = null;
+        readout.classList.add('hidden');
+        stepsBox.replaceChildren();
+        warningsBox.classList.add('hidden');
+        formulaEl.textContent = '';
+        setupEl.textContent = '';
+        if (inputsUsedEl) inputsUsedEl.textContent = '';
+        drawPlaceholder();
+        window.clearVolume3D?.();
+        window.__volume3dPending = null;
+        showSyncNote('');
+      }
+
+      function clearVolume() {
+        clearRenderedResult();
+        setStatus('Sin calcular');
+        hideError();
+      }
+
+      async function calculateVolume() {
+        const method = methodSelect.value;
+        const axis = axisSelect.value;
+        const f = fInput.value.trim();
+        const g = method === 'discos' ? '0' : (gInput.value.trim() || '0');
+        const start = parseFloat(startInput.value);
+        const end = parseFloat(endInput.value);
+        let samples = parseInt(samplesInput.value, 10);
+        if (!Number.isFinite(samples)) samples = 2000;
+        samples = Math.max(20, Math.min(5000, samples));
+        samplesInput.value = String(samples);
+
+        if (!f) {
+          clearRenderedResult();
+          setStatus('Error', 'badge-invalid');
+          showError('Escribe la función que define el radio, la altura o la curva.');
+          return;
+        }
+        if (!Number.isFinite(start) || !Number.isFinite(end) || start >= end) {
+          clearRenderedResult();
+          setStatus('Error', 'badge-invalid');
+          showError('El intervalo debe tener inicio y fin finitos, con inicio menor que fin.');
+          return;
+        }
+        if (method === 'capas' && start < 0) {
+          clearRenderedResult();
+          setStatus('Error', 'badge-invalid');
+          showError('Para el método de capas el intervalo debe empezar en 0 o en un valor positivo.');
+          return;
+        }
+
+        hideError();
+        calcBtn.disabled = true;
+        setStatus('Calculando…', 'badge-pending');
+
+        try {
+          const response = await fetch('/api/volume', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              method,
+              axis,
+              f_expression: f,
+              g_expression: g,
+              start,
+              end,
+              samples
+            })
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(messageFrom(data, 'No se pudo calcular el volumen.'));
+          }
+          renderResult({ ...data, f_expression: f, g_expression: g });
+        } catch (error) {
+          clearRenderedResult();
+          setStatus('Error', 'badge-invalid');
+          showError(error.message);
+        } finally {
+          calcBtn.disabled = false;
+        }
+      }
+
+      async function expressionFromProfile(profile) {
+        if (profile.expression) {
+          return { expression: profile.expression, recognized: false };
+        }
+        const response = await fetch('/api/recognize-function', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ points: profile.points })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(messageFrom(data, 'No se pudo reconocer el trazo.'));
+        }
+        if (!data.recognized || !data.expression) {
+          throw new Error(
+            'No se pudo reconocer una función del trazo. Usa el modo Función ' +
+            'o escribe la función manualmente.'
+          );
+        }
+        return { expression: data.expression, recognized: true };
+      }
+
+      async function useProfileAbove() {
+        const profile = typeof window.getRevolutionProfile === 'function'
+          ? window.getRevolutionProfile()
+          : null;
+        if (!profile || !Array.isArray(profile.points) || profile.points.length < 2) {
+          setStatus('Error', 'badge-invalid');
+          showError('Primero dibuja una curva o grafica una función en el sólido de revolución de arriba.');
+          return;
+        }
+
+        const profileAxis = profile.axis;
+        if (profileAxis !== 'x' && profileAxis !== 'y') {
+          setStatus('Error', 'badge-invalid');
+          showError('El cálculo de volumen solo admite los ejes X e Y. Cambia el eje del sólido de arriba.');
+          return;
+        }
+
+        const start = Number(profile.start);
+        const end = Number(profile.end);
+        if (!Number.isFinite(start) || !Number.isFinite(end) || start >= end) {
+          setStatus('Error', 'badge-invalid');
+          showError('El trazo o la función de arriba no tiene un intervalo válido.');
+          return;
+        }
+
+        hideError();
+        useAboveBtn.disabled = true;
+        calcBtn.disabled = true;
+        setStatus(profile.expression ? 'Importando…' : 'Reconociendo…', 'badge-pending');
+
+        try {
+          const { expression, recognized } = await expressionFromProfile(profile);
+          let note = recognized
+            ? `Se reconoció la función ${expression} a partir del trazo de arriba.`
+            : 'Se importó la función del sólido de arriba.';
+
+          let volumeStart = start;
+          let volumeEnd = end;
+          let volumeExpression = expression;
+          if (profileAxis === 'y') {
+            // Las capas alrededor de Y se integran sobre x >= 0. Si el trazo
+            // cruza el eje, la parte negativa genera el mismo sólido.
+            if (end <= 0) {
+              throw new Error(
+                'Para girar alrededor de Y se necesita una parte del trazo con x ≥ 0. ' +
+                'Dibuja o grafica la función en el lado positivo o escríbela manualmente.'
+              );
+            }
+            if (start < 0) {
+              note += ' Se usó la parte x ≥ 0, porque la parte negativa genera el mismo sólido al girar alrededor de Y.';
+            }
+            const ys = profile.points
+              .map((point) => Number(point.y))
+              .filter(Number.isFinite);
+            if (ys.some((value) => value < 0)) {
+              volumeExpression = `abs(${expression})`;
+              note += ' Se usó |f(x)| como altura, porque la altura es una distancia.';
+            }
+            volumeStart = Math.max(0, start);
+            volumeEnd = end;
+            methodSelect.value = 'capas';
+            gInput.value = '0';
+          } else {
+            methodSelect.value = 'discos';
+            gInput.value = '0';
+          }
+          note += profileAxis === 'y'
+            ? ' Se usó el eje Y con capas cilíndricas.'
+            : ' Se usó el eje X con discos.';
+
+          axisSelect.value = profileAxis;
+          fInput.value = volumeExpression;
+          startInput.value = String(volumeStart);
+          endInput.value = String(volumeEnd);
+          currentVariable = null;
+          updateLabels();
+          showSyncNote(note);
+          await calculateVolume();
+          if (state.result) {
+            resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } catch (error) {
+          clearRenderedResult();
+          setStatus('Error', 'badge-invalid');
+          showError(error.message);
+        } finally {
+          useAboveBtn.disabled = false;
+          calcBtn.disabled = false;
+        }
+      }
+
+      function applyExample(example) {
+        methodSelect.value = example.method;
+        axisSelect.value = example.axis;
+        currentVariable = null;
+        fInput.value = example.f;
+        gInput.value = example.g;
+        startInput.value = String(example.start);
+        endInput.value = String(example.end);
+        updateLabels();
+        calculateVolume();
+      }
+
+      // -----------------------------------------------------------------
+      // Canvas preview
+      // -----------------------------------------------------------------
+
+      function screenX(x) {
+        const plotWidth = Math.max(view.width - PAD * 2, 10);
+        return PAD + ((x - bounds.xMin) / (bounds.xMax - bounds.xMin)) * plotWidth;
+      }
+
+      function screenY(y) {
+        const plotHeight = Math.max(view.height - PAD * 2, 10);
+        return view.height - PAD - ((y - bounds.yMin) / (bounds.yMax - bounds.yMin)) * plotHeight;
+      }
+
+      function previewBounds(result) {
+        const points = [...(result.f_points || []), ...(result.g_points || [])];
+        const xs = points.map((p) => p.x).filter(Number.isFinite);
+        const ys = points.map((p) => p.y).filter(Number.isFinite);
+        if (!xs.length || !ys.length) return { xMin: -1, xMax: 1, yMin: -1, yMax: 1 };
+
+        let xMin = Math.min(...xs, 0);
+        let xMax = Math.max(...xs, 0);
+        let yMin = Math.min(...ys, 0);
+        let yMax = Math.max(...ys, 0);
+        if (xMin === xMax) { xMin -= 1; xMax += 1; }
+        if (yMin === yMax) { yMin -= 1; yMax += 1; }
+
+        const padX = (xMax - xMin) * 0.1;
+        const padY = (yMax - yMin) * 0.14;
+        return {
+          xMin: xMin - padX,
+          xMax: xMax + padX,
+          yMin: yMin - padY,
+          yMax: yMax + padY
+        };
+      }
+
+      function drawGrid() {
+        const xStep = niceStep(bounds.xMax - bounds.xMin, 8);
+        const yStep = niceStep(bounds.yMax - bounds.yMin, 6);
+
+        ctx.save();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = cssVar('--canvas-grid');
+        ctx.beginPath();
+        for (let x = Math.ceil(bounds.xMin / xStep) * xStep; x <= bounds.xMax + 1e-9; x += xStep) {
+          ctx.moveTo(screenX(x), screenY(bounds.yMin));
+          ctx.lineTo(screenX(x), screenY(bounds.yMax));
+        }
+        for (let y = Math.ceil(bounds.yMin / yStep) * yStep; y <= bounds.yMax + 1e-9; y += yStep) {
+          ctx.moveTo(screenX(bounds.xMin), screenY(y));
+          ctx.lineTo(screenX(bounds.xMax), screenY(y));
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = cssVar('--canvas-axis');
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        if (bounds.xMin <= 0 && bounds.xMax >= 0) {
+          ctx.moveTo(screenX(0), screenY(bounds.yMin));
+          ctx.lineTo(screenX(0), screenY(bounds.yMax));
+        }
+        if (bounds.yMin <= 0 && bounds.yMax >= 0) {
+          ctx.moveTo(screenX(bounds.xMin), screenY(0));
+          ctx.lineTo(screenX(bounds.xMax), screenY(0));
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = cssVar('--canvas-label');
+        ctx.font = `10.5px ${cssVar('--font-mono') || 'monospace'}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        for (let x = Math.ceil(bounds.xMin / xStep) * xStep; x <= bounds.xMax + 1e-9; x += xStep) {
+          if (Math.abs(x) < xStep * 1e-6) continue;
+          ctx.fillText(formatTick(x), screenX(x), view.height - PAD + 7);
+        }
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        for (let y = Math.ceil(bounds.yMin / yStep) * yStep; y <= bounds.yMax + 1e-9; y += yStep) {
+          if (Math.abs(y) < yStep * 1e-6) continue;
+          ctx.fillText(formatTick(y), PAD - 7, screenY(y));
+        }
+        ctx.restore();
+      }
+
+      function strokeCurve(points, color) {
+        if (!points || points.length < 2) return;
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.4;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        points.forEach((point, index) => {
+          if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
+          const px = screenX(point.x);
+          const py = screenY(point.y);
+          if (index === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        });
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function shadeRegion(fPoints, gPoints) {
+        const lower = gPoints && gPoints.length ? gPoints : null;
+        ctx.save();
+        ctx.fillStyle = cssVar('--canvas-region-f');
+        for (let i = 0; i < fPoints.length - 1; i += 1) {
+          const f1 = fPoints[i];
+          const f2 = fPoints[i + 1];
+          const g1 = lower ? lower[i] : { x: f1.x, y: 0 };
+          const g2 = lower ? lower[i + 1] : { x: f2.x, y: 0 };
+          if (![f1, f2, g1, g2].every((p) => Number.isFinite(p.x) && Number.isFinite(p.y))) continue;
+          ctx.beginPath();
+          ctx.moveTo(screenX(f1.x), screenY(f1.y));
+          ctx.lineTo(screenX(f2.x), screenY(f2.y));
+          ctx.lineTo(screenX(g2.x), screenY(g2.y));
+          ctx.lineTo(screenX(g1.x), screenY(g1.y));
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawRevolutionAxis(result) {
+        ctx.save();
+        ctx.setLineDash([7, 6]);
+        ctx.strokeStyle = cssVar('--accent');
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (result.axis === 'x') {
+          const y = screenY(0);
+          ctx.moveTo(PAD, y);
+          ctx.lineTo(view.width - PAD, y);
+        } else {
+          const x = screenX(0);
+          ctx.moveTo(x, PAD);
+          ctx.lineTo(x, view.height - PAD);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawSlice(result, fPoints, gPoints) {
+        if (!fPoints.length) return;
+        const middle = (result.start + result.end) / 2;
+        let midpoint = 0;
+        let best = Infinity;
+        fPoints.forEach((point, index) => {
+          const t = result.variable === 'x' ? point.x : point.y;
+          const distance = Math.abs(t - middle);
+          if (distance < best) {
+            best = distance;
+            midpoint = index;
+          }
+        });
+
+        const fPoint = fPoints[midpoint];
+        const gPoint = gPoints && gPoints[midpoint]
+          ? gPoints[midpoint]
+          : (result.variable === 'x' ? { x: fPoint.x, y: 0 } : { x: 0, y: fPoint.y });
+
+        ctx.save();
+        if (result.method === 'capas') {
+          ctx.fillStyle = cssVar('--canvas-curve-2');
+          ctx.globalAlpha = 0.45;
+          ctx.strokeStyle = cssVar('--canvas-curve-2');
+          ctx.lineWidth = 1.5;
+          if (result.axis === 'y') {
+            const width = Math.max(3, (bounds.xMax - bounds.xMin) * 0.012);
+            const x = screenX(fPoint.x) - width / 2;
+            const yTop = screenY(fPoint.y);
+            const yBottom = screenY(gPoint.y);
+            ctx.fillRect(x, yTop, width, yBottom - yTop);
+            ctx.strokeRect(x, yTop, width, yBottom - yTop);
+          } else {
+            const height = Math.max(3, (bounds.yMax - bounds.yMin) * 0.012);
+            const y = screenY(fPoint.y) - height / 2;
+            const xLeft = screenX(gPoint.x);
+            const xRight = screenX(fPoint.x);
+            ctx.fillRect(xLeft, y, xRight - xLeft, height);
+            ctx.strokeRect(xLeft, y, xRight - xLeft, height);
+          }
+        } else {
+          ctx.strokeStyle = cssVar('--accent');
+          ctx.lineWidth = 4;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(screenX(gPoint.x), screenY(gPoint.y));
+          ctx.lineTo(screenX(fPoint.x), screenY(fPoint.y));
+          ctx.stroke();
+
+          ctx.fillStyle = cssVar('--accent');
+          for (const point of [gPoint, fPoint]) {
+            ctx.beginPath();
+            ctx.arc(screenX(point.x), screenY(point.y), 3.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.font = `12px ${cssVar('--font-mono') || 'monospace'}`;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(
+            result.method === 'arandelas' ? 'R − r' : 'R',
+            (screenX(gPoint.x) + screenX(fPoint.x)) / 2 + 7,
+            (screenY(gPoint.y) + screenY(fPoint.y)) / 2 - 7
+          );
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = cssVar('--subtle');
+        ctx.font = `11px ${cssVar('--font-ui') || 'sans-serif'}`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(
+          result.axis === 'x' ? 'giro alrededor del eje X' : 'giro alrededor del eje Y',
+          view.width - 8,
+          view.height - 6
+        );
+        ctx.restore();
+      }
+
+      function drawPlaceholder() {
+        ctx.clearRect(0, 0, view.width, view.height);
+        ctx.save();
+        ctx.fillStyle = cssVar('--subtle');
+        ctx.font = `13px ${cssVar('--font-ui') || 'sans-serif'}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Calcula un volumen para ver la región y el eje de giro.', view.width / 2, view.height / 2);
+        ctx.restore();
+      }
+
+      function drawPreview(result) {
+        if (!view.width || !view.height) return;
+        ctx.clearRect(0, 0, view.width, view.height);
+        bounds = previewBounds(result);
+        drawGrid();
+
+        const fPoints = result.f_points || [];
+        const gPoints = result.g_points || [];
+        shadeRegion(fPoints, gPoints);
+        if (gPoints.length) strokeCurve(gPoints, cssVar('--canvas-curve-2'));
+        strokeCurve(fPoints, cssVar('--canvas-curve'));
+        drawRevolutionAxis(result);
+        drawSlice(result, fPoints, gPoints);
+      }
+
+      function resizeVolumeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        view.width = Math.max(rect.width, 300);
+        view.height = Math.max(rect.height, 220);
+        canvas.width = Math.round(view.width * dpr);
+        canvas.height = Math.round(view.height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (state.result) drawPreview(state.result);
+        else drawPlaceholder();
+      }
+
+      // -----------------------------------------------------------------
+      // Events
+      // -----------------------------------------------------------------
+
+      methodSelect.addEventListener('change', () => {
+        updateLabels();
+        markStale();
+      });
+      axisSelect.addEventListener('change', () => {
+        updateLabels();
+        markStale();
+      });
+      for (const input of [fInput, gInput, startInput, endInput, samplesInput]) {
+        input.addEventListener('input', markStale);
+      }
+      for (const input of [fInput, gInput]) {
+        input.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            calculateVolume();
+          }
+        });
+      }
+      calcBtn.addEventListener('click', calculateVolume);
+      useAboveBtn.addEventListener('click', useProfileAbove);
+      clearBtn.addEventListener('click', clearVolume);
+      window.addEventListener('resize', resizeVolumeCanvas);
+      window.addEventListener('themechange', () => {
+        if (state.result) drawPreview(state.result);
+        else drawPlaceholder();
+      });
+
+      for (const example of EXAMPLES) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'hint-chip mono';
+        button.textContent = example.label;
+        button.addEventListener('click', () => applyExample(example));
+        examplesBox.appendChild(button);
+      }
+
+      updateLabels();
+      resizeVolumeCanvas();
+    })();
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+    const container = document.getElementById('volumeThreeContainer');
+    const placeholder = document.getElementById('volumeThreePlaceholder');
+    const overlay = document.getElementById('volumeThreeOverlay');
+    const legend = document.getElementById('volumeThreeLegend');
+
+    const COLORS = {
+      f: 0x2dd4ee,
+      g: 0x9d7bff,
+      axis: 0xffb454,
+      disc: 0x9d7bff,
+      shell: 0x2dd4ee,
+    };
+    const CSS_COLORS = {
+      f: '#2dd4ee',
+      g: '#9d7bff',
+      axis: '#ffb454',
+    };
+
+    let renderer;
+    let scene;
+    let camera;
+    let controls;
+    let content;
+    let grid;
+    let ready = false;
+    let pending = null;
+
+    function init() {
+      const width = container.clientWidth || 420;
+      const height = container.clientHeight || 280;
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(width, height);
+      renderer.setClearColor(0x060913, 1);
+      container.appendChild(renderer.domElement);
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x060913);
+      scene.fog = new THREE.Fog(0x060913, 18, 55);
+
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 500);
+      camera.position.set(8, 6, 12);
+      camera.lookAt(0, 0, 0);
+
+      scene.add(new THREE.AmbientLight(0x8fa3d9, 0.7));
+      const keyLight = new THREE.DirectionalLight(0xffffff, 0.95);
+      keyLight.position.set(9, 14, 10);
+      scene.add(keyLight);
+      const rimLight = new THREE.DirectionalLight(0x6e8cff, 0.5);
+      rimLight.position.set(-8, -5, -7);
+      scene.add(rimLight);
+
+      grid = new THREE.GridHelper(20, 20, 0x2b3a66, 0x141d3a);
+      grid.material.transparent = true;
+      grid.material.opacity = 0.35;
+      scene.add(grid);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.target.set(0, 0, 0);
+
+      content = new THREE.Group();
+      scene.add(content);
+
+      window.addEventListener('resize', resize);
+      ready = true;
+      animate();
+      if (pending) renderScene(pending);
+    }
+
+    function resize() {
+      if (!renderer) return;
+      const width = container.clientWidth || 420;
+      const height = container.clientHeight || 280;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    function disposeObject(object) {
+      object.traverse((child) => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          const materials = Array.isArray(child.material) ? child.material : [child.material];
+          materials.forEach((material) => {
+            if (material.map) material.map.dispose();
+            material.dispose();
+          });
+        }
+      });
+    }
+
+    function clearContent() {
+      if (!content) return;
+      for (const child of [...content.children]) {
+        content.remove(child);
+        disposeObject(child);
+      }
+    }
+
+    function lineFromPoints(points, color, opacity = 1) {
+      const vectors = (points || [])
+        .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+        .map((point) => new THREE.Vector3(point.x, point.y, 0));
+      if (vectors.length < 2) return null;
+      const geometry = new THREE.BufferGeometry().setFromPoints(vectors);
+      const material = new THREE.LineBasicMaterial({
+        color,
+        transparent: opacity < 1,
+        opacity,
+      });
+      return new THREE.Line(geometry, material);
+    }
+
+    function interpolateAt(points, t, key) {
+      if (!Array.isArray(points) || points.length === 0) return null;
+      let data = points;
+      if (data.length === 1) return { ...data[0] };
+      if (data[data.length - 1][key] < data[0][key]) {
+        data = data.slice().reverse();
+      }
+      if (t <= data[0][key]) return { ...data[0] };
+      if (t >= data[data.length - 1][key]) return { ...data[data.length - 1] };
+
+      let low = 0;
+      let high = data.length - 1;
+      while (high - low > 1) {
+        const mid = (low + high) >> 1;
+        if (data[mid][key] <= t) low = mid;
+        else high = mid;
+      }
+      const p0 = data[low];
+      const p1 = data[high];
+      const span = p1[key] - p0[key];
+      const ratio = span === 0 ? 0 : (t - p0[key]) / span;
+      const other = key === 'x' ? 'y' : 'x';
+      return {
+        [key]: t,
+        [other]: p0[other] + (p1[other] - p0[other]) * ratio,
+      };
+    }
+
+    function annulusGeometry(inner, outer, depth, segments = 48) {
+      const shape = new THREE.Shape();
+      shape.absarc(0, 0, Math.max(outer, 1e-6), 0, Math.PI * 2, false);
+      const safeInner = Math.min(Math.max(inner, 0), outer - 1e-6);
+      if (safeInner > 1e-6) {
+        const hole = new THREE.Path();
+        hole.absarc(0, 0, safeInner, 0, Math.PI * 2, true);
+        shape.holes.push(hole);
+      }
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth,
+        bevelEnabled: false,
+        curveSegments: segments,
+        steps: 1,
+      });
+      geometry.translate(0, 0, -depth / 2);
+      return geometry;
+    }
+
+    function addSlice(axis, t, outer, inner, thickness) {
+      const geometry = annulusGeometry(inner, outer, thickness);
+      const material = new THREE.MeshStandardMaterial({
+        color: COLORS.disc,
+        transparent: true,
+        opacity: 0.46,
+        side: THREE.DoubleSide,
+        roughness: 0.35,
+        metalness: 0.1,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      if (axis === 'x') {
+        mesh.rotation.y = Math.PI / 2;
+        mesh.position.set(t, 0, 0);
+      } else {
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(0, t, 0);
+      }
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(geometry, 30),
+        new THREE.LineBasicMaterial({ color: COLORS.f, transparent: true, opacity: 0.35 })
+      );
+      mesh.add(edges);
+      content.add(mesh);
+    }
+
+    function addShell(axis, t, fValue, gValue) {
+      const radius = Math.abs(t);
+      const height = Math.abs(fValue - gValue);
+      if (radius < 1e-6 || height < 1e-6) return;
+
+      const geometry = new THREE.CylinderGeometry(radius, radius, height, 40, 1, true);
+      const material = new THREE.MeshStandardMaterial({
+        color: COLORS.shell,
+        transparent: true,
+        opacity: 0.14,
+        side: THREE.DoubleSide,
+        roughness: 0.4,
+        metalness: 0.1,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      if (axis === 'y') {
+        mesh.position.set(0, (fValue + gValue) / 2, 0);
+      } else {
+        mesh.rotation.z = -Math.PI / 2;
+        mesh.position.set((fValue + gValue) / 2, 0, 0);
+      }
+      const wire = new THREE.LineSegments(
+        new THREE.WireframeGeometry(geometry),
+        new THREE.LineBasicMaterial({ color: COLORS.shell, transparent: true, opacity: 0.2 })
+      );
+      mesh.add(wire);
+      content.add(mesh);
+    }
+
+    function makeTextSprite(text, color, scale) {
+      const canvas = document.createElement('canvas');
+      const ratio = 2;
+      canvas.width = 256 * ratio;
+      canvas.height = 96 * ratio;
+      const context = canvas.getContext('2d');
+      context.scale(ratio, ratio);
+      context.font = '600 42px monospace';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.lineWidth = 8;
+      context.strokeStyle = 'rgba(6, 9, 19, 0.92)';
+      context.strokeText(text, 128, 48);
+      context.fillStyle = color;
+      context.fillText(text, 128, 48);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+      });
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(2.55 * scale, 0.96 * scale, 1);
+      sprite.renderOrder = 20;
+      return sprite;
+    }
+
+    function addSegment(a, b, color, opacity = 0.95, dashed = false) {
+      const geometry = new THREE.BufferGeometry().setFromPoints([a, b]);
+      const length = a.distanceTo(b);
+      const material = dashed
+        ? new THREE.LineDashedMaterial({
+            color,
+            transparent: opacity < 1,
+            opacity,
+            dashSize: Math.max(length * 0.12, 1e-6),
+            gapSize: Math.max(length * 0.08, 6e-7),
+          })
+        : new THREE.LineBasicMaterial({
+            color,
+            transparent: opacity < 1,
+            opacity,
+          });
+      const line = new THREE.Line(geometry, material);
+      if (dashed) line.computeLineDistances();
+      content.add(line);
+      return line;
+    }
+
+    function addAnnotations(data, fPoints, gPoints, labelScale) {
+      const { method, axis, variable, start, end } = data;
+      const span = end - start;
+      const t = start + span * 0.5;
+      const fPoint = interpolateAt(fPoints, t, variable);
+      if (!fPoint) return;
+      const gPoint = gPoints.length ? interpolateAt(gPoints, t, variable) : null;
+      const offset = labelScale * 0.65;
+
+      if (method === 'capas') {
+        if (!gPoint) return;
+        const radius = Math.abs(t);
+        const fValue = axis === 'y' ? fPoint.y : fPoint.x;
+        const gValue = axis === 'y' ? gPoint.y : gPoint.x;
+        const mid = (fValue + gValue) / 2;
+
+        if (axis === 'y') {
+          addSegment(new THREE.Vector3(0, mid, 0), new THREE.Vector3(radius, mid, 0), COLORS.f);
+          const rhoLabel = makeTextSprite(`ρ(${variable})`, CSS_COLORS.f, labelScale);
+          rhoLabel.position.set(radius * 0.5, mid + offset, 0);
+          content.add(rhoLabel);
+
+          addSegment(new THREE.Vector3(radius, gValue, 0), new THREE.Vector3(radius, fValue, 0), COLORS.axis);
+          const hLabel = makeTextSprite(`h(${variable})`, CSS_COLORS.axis, labelScale);
+          hLabel.position.set(radius + offset, mid, 0);
+          content.add(hLabel);
+        } else {
+          addSegment(new THREE.Vector3(mid, 0, 0), new THREE.Vector3(mid, radius, 0), COLORS.f);
+          const rhoLabel = makeTextSprite(`ρ(${variable})`, CSS_COLORS.f, labelScale);
+          rhoLabel.position.set(mid, radius * 0.5 + offset, 0);
+          content.add(rhoLabel);
+
+          addSegment(new THREE.Vector3(gValue, radius, 0), new THREE.Vector3(fValue, radius, 0), COLORS.axis);
+          const hLabel = makeTextSprite(`h(${variable})`, CSS_COLORS.axis, labelScale);
+          hLabel.position.set(mid, radius + offset, 0);
+          content.add(hLabel);
+        }
+        return;
+      }
+
+      const outer = axis === 'x' ? Math.abs(fPoint.y) : Math.abs(fPoint.x);
+      if (!Number.isFinite(outer) || outer < 1e-6) return;
+      const inner = method === 'arandelas' && gPoint
+        ? (axis === 'x' ? Math.abs(gPoint.y) : Math.abs(gPoint.x))
+        : 0;
+
+      if (axis === 'x') {
+        addSegment(new THREE.Vector3(t, 0, 0), new THREE.Vector3(t, outer, 0), COLORS.f);
+        const outerLabel = makeTextSprite(`R(${variable})`, CSS_COLORS.f, labelScale);
+        outerLabel.position.set(t, outer + offset, 0);
+        content.add(outerLabel);
+
+        if (inner > 1e-6) {
+          addSegment(new THREE.Vector3(t, 0, 0), new THREE.Vector3(t, -inner, 0), COLORS.g, 0.95, true);
+          const innerLabel = makeTextSprite(`r(${variable})`, CSS_COLORS.g, labelScale);
+          innerLabel.position.set(t, -inner - offset, 0);
+          content.add(innerLabel);
+        }
+      } else {
+        addSegment(new THREE.Vector3(0, t, 0), new THREE.Vector3(outer, t, 0), COLORS.f);
+        const outerLabel = makeTextSprite(`R(${variable})`, CSS_COLORS.f, labelScale);
+        outerLabel.position.set(outer + offset, t, 0);
+        content.add(outerLabel);
+
+        if (inner > 1e-6) {
+          addSegment(new THREE.Vector3(0, t, 0), new THREE.Vector3(-inner, t, 0), COLORS.g, 0.95, true);
+          const innerLabel = makeTextSprite(`r(${variable})`, CSS_COLORS.g, labelScale);
+          innerLabel.position.set(-inner - offset, t, 0);
+          content.add(innerLabel);
+        }
+      }
+    }
+
+    function renderScene(data) {
+      if (!ready) return;
+      clearContent();
+      placeholder.classList.add('hidden');
+      overlay.classList.remove('hidden');
+
+      const { method, axis, variable, start, end } = data;
+      const fPoints = Array.isArray(data.f_points) ? data.f_points : [];
+      const gPoints = Array.isArray(data.g_points) ? data.g_points : [];
+      const span = end - start;
+
+      overlay.textContent = `${data.method_label} · ${data.axis_label} · variable ${variable}`;
+
+      if (method === 'discos') {
+        legend.textContent = `Discos perpendiculares al eje ${axis.toUpperCase()}, con radio R(${variable}) = |f(${variable})|. La línea naranja punteada es el eje de giro.`;
+      } else if (method === 'arandelas') {
+        legend.textContent = `Arandelas perpendiculares al eje ${axis.toUpperCase()}: R(${variable}) es el radio exterior y r(${variable}) el interior. La línea naranja punteada es el eje de giro.`;
+      } else {
+        legend.textContent = `Cilindros concéntricos alrededor del eje ${axis.toUpperCase()}: radio ρ(${variable}) = |${variable}| y altura h(${variable}) = |f(${variable}) − g(${variable})|.`;
+      }
+
+      const fLine = lineFromPoints(fPoints, COLORS.f, 0.95);
+      if (fLine) content.add(fLine);
+      if (gPoints.length > 1) {
+        const gLine = lineFromPoints(gPoints, COLORS.g, 0.95);
+        if (gLine) content.add(gLine);
+      }
+
+      const axisPad = Math.max(span * 0.15, 1e-4);
+      const axisPoints = axis === 'x'
+        ? [new THREE.Vector3(start - axisPad, 0, 0), new THREE.Vector3(end + axisPad, 0, 0)]
+        : [new THREE.Vector3(0, start - axisPad, 0), new THREE.Vector3(0, end + axisPad, 0)];
+      const axisGeometry = new THREE.BufferGeometry().setFromPoints(axisPoints);
+      const axisMaterial = new THREE.LineDashedMaterial({
+        color: COLORS.axis,
+        dashSize: Math.max(span * 0.05, 1e-4),
+        gapSize: Math.max(span * 0.03, 6e-5),
+        transparent: true,
+        opacity: 0.95,
+      });
+      const axisLine = new THREE.Line(axisGeometry, axisMaterial);
+      axisLine.computeLineDistances();
+      content.add(axisLine);
+
+      const count = method === 'capas' ? 7 : 9;
+      const thickness = Math.max(span * 0.012, 1e-6);
+
+      let maxRadius = 0;
+      for (const point of [...fPoints, ...gPoints]) {
+        const radius = axis === 'x' ? Math.abs(point.y) : Math.abs(point.x);
+        if (Number.isFinite(radius)) maxRadius = Math.max(maxRadius, radius);
+      }
+      let sceneScale = Math.max(span, maxRadius, 1e-6);
+      if (method === 'capas') {
+        let maxHeight = 0;
+        for (let i = 0; i < fPoints.length; i += 1) {
+          const fp = fPoints[i];
+          const gp = gPoints[i] || gPoints[gPoints.length - 1];
+          if (!fp || !gp) continue;
+          const fv = axis === 'y' ? fp.y : fp.x;
+          const gv = axis === 'y' ? gp.y : gp.x;
+          maxHeight = Math.max(maxHeight, Math.abs(fv - gv));
+        }
+        sceneScale = Math.max(sceneScale, maxHeight);
+      }
+      const labelScale = Math.max(sceneScale * 0.13, 1e-4);
+
+      for (let i = 0; i < count; i += 1) {
+        const t = start + ((i + 0.5) / count) * span;
+        const fPoint = interpolateAt(fPoints, t, variable);
+        if (!fPoint) continue;
+        const gPoint = gPoints.length ? interpolateAt(gPoints, t, variable) : null;
+
+        if (method === 'capas') {
+          if (!gPoint) continue;
+          const fValue = axis === 'y' ? fPoint.y : fPoint.x;
+          const gValue = axis === 'y' ? gPoint.y : gPoint.x;
+          addShell(axis, t, fValue, gValue);
+        } else {
+          const outer = axis === 'x' ? Math.abs(fPoint.y) : Math.abs(fPoint.x);
+          const inner = method === 'arandelas' && gPoint
+            ? (axis === 'x' ? Math.abs(gPoint.y) : Math.abs(gPoint.x))
+            : 0;
+          if (!Number.isFinite(outer) || outer < 1e-6) continue;
+          addSlice(axis, t, outer, Math.min(inner, outer - 1e-6), thickness);
+        }
+      }
+
+      addAnnotations(
+        { method, axis, variable, start, end },
+        fPoints,
+        gPoints,
+        labelScale
+      );
+
+      const box = new THREE.Box3().setFromObject(content);
+      if (!box.isEmpty()) {
+        const center = box.getCenter(new THREE.Vector3());
+        const sphere = box.getBoundingSphere(new THREE.Sphere());
+        const verticalFov = (camera.fov * Math.PI) / 180;
+        const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+        const fitFov = Math.min(verticalFov, horizontalFov);
+        const distance = (sphere.radius / Math.max(Math.sin(fitFov / 2), 0.1)) * 1.08;
+        const direction = axis === 'x'
+          ? new THREE.Vector3(0.3, 0.55, 0.78).normalize()
+          : new THREE.Vector3(0.65, 0.35, 0.68).normalize();
+        camera.position.copy(center).addScaledVector(direction, distance);
+        camera.near = Math.max(0.01, sphere.radius * 0.001);
+        camera.far = Math.max(200, distance * 12);
+        camera.updateProjectionMatrix();
+        controls.target.copy(center);
+        controls.minDistance = Math.max(0.1, sphere.radius * 0.2);
+        controls.maxDistance = Math.max(10, sphere.radius * 12);
+        controls.update();
+
+        if (grid) {
+          grid.position.set(center.x, box.min.y - Math.max(sphere.radius * 0.02, 0.01), center.z);
+          grid.scale.setScalar(Math.max(1, (sphere.radius * 2.4) / 20));
+        }
+      }
+    }
+
+    window.renderVolume3D = (data) => {
+      pending = data;
+      if (ready) renderScene(data);
+    };
+
+    window.clearVolume3D = () => {
+      pending = null;
+      if (!ready) return;
+      clearContent();
+      placeholder.classList.remove('hidden');
+      overlay.classList.add('hidden');
+      legend.textContent = 'La vista 3D muestra la descomposición del volumen según el método elegido.';
+      camera.position.set(8, 6, 12);
+      camera.near = 0.1;
+      camera.far = 500;
+      camera.updateProjectionMatrix();
+      controls.target.set(0, 0, 0);
+      controls.update();
+      if (grid) {
+        grid.position.set(0, 0, 0);
+        grid.scale.setScalar(1);
+      }
+    };
+
+    if (window.__volume3dPending) {
+      pending = window.__volume3dPending;
+      window.__volume3dPending = null;
+    }
+    init();
   </script>
 </Layout>
